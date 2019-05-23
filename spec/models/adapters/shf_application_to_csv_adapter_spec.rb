@@ -7,7 +7,7 @@ RSpec.describe Adapters::ShfApplicationToCsvAdapter do
 
     shf_app = create(:shf_application)
 
-    time_packet_sent = Time.now
+    time_packet_sent = Time.zone.now
     shf_app.user.date_membership_packet_sent = time_packet_sent
 
     csv_row = described_class.new(shf_app).as_target

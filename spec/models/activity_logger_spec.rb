@@ -25,19 +25,19 @@ RSpec.describe ActivityLogger do
   describe 'log file' do
 
     before(:each) do
-      File.delete(filepath) if File.file?(filepath)
+      File.delete(logfilepath) if File.file?(logfilepath)
     end
 
     context 'open without a block' do
 
       it_behaves_like 'it creates an ActivityLogger log' do
-        let(:streamname) { filepath }
+        let(:streamname) { logfilepath }
         let(:activity_log) { log }
       end
 
       it 'records message to log file' do
         log.record('info', 'this is a test message')
-        expect(File.read(filepath))
+        expect(File.read(logfilepath))
             .to include '[TEST] [open] [info] this is a test message'
       end
 
@@ -48,19 +48,19 @@ RSpec.describe ActivityLogger do
     context 'open with a block' do
 
       it 'creates log file' do
-        ActivityLogger.open(filepath, 'TEST', 'open', false) do |_log|
-          expect(File).to exist(filepath)
+        ActivityLogger.open(logfilepath, 'TEST', 'open', false) do |_log|
+          expect(File).to exist(logfilepath)
         end
       end
       it 'returns instance of ActivityLogger' do
-        ActivityLogger.open(filepath, 'TEST', 'open', false) do |log|
+        ActivityLogger.open(logfilepath, 'TEST', 'open', false) do |log|
           expect(log).to be_an_instance_of(ActivityLogger)
         end
       end
       it 'records message to log file' do
-        ActivityLogger.open(filepath, 'TEST', 'open', false) do |log|
+        ActivityLogger.open(logfilepath, 'TEST', 'open', false) do |log|
           log.record('info', 'this is another test message')
-          expect(File.read(filepath))
+          expect(File.read(logfilepath))
               .to include '[TEST] [open] [info] this is another test message'
         end
       end

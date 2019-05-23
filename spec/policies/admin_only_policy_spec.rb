@@ -9,13 +9,13 @@ RSpec.describe AdminOnly::AdminOnlyPolicy do
 
   let(:simple_record) { create(:business_category) }
 
-  CRUD_ACTIONS = [:index, :show, :new, :create, :edit, :update, :destroy, :become]
+  ADMIN_CRUD_ACTIONS = [:index, :show, :new, :create, :edit, :update, :destroy, :become]  unless defined?(ADMIN_CRUD_ACTIONS)
 
 
   describe 'Admin is permitted everything' do
     subject { described_class.new(admin, simple_record) }
 
-    CRUD_ACTIONS.each do | action |
+    ADMIN_CRUD_ACTIONS.each do | action |
       it { is_expected.to permit_action action }
     end
 
@@ -25,7 +25,7 @@ RSpec.describe AdminOnly::AdminOnlyPolicy do
   describe 'Member is forbidden everything' do
     subject { described_class.new(member, simple_record) }
 
-    CRUD_ACTIONS.each do | action |
+    ADMIN_CRUD_ACTIONS.each do | action |
       it { is_expected.to forbid_action action }
     end
 
@@ -35,7 +35,7 @@ RSpec.describe AdminOnly::AdminOnlyPolicy do
   describe 'User (logged in) is forbidden everything' do
     subject { described_class.new(user_1, simple_record) }
 
-    CRUD_ACTIONS.each do | action |
+    ADMIN_CRUD_ACTIONS.each do | action |
       it { is_expected.to forbid_action action }
     end
 
@@ -45,7 +45,7 @@ RSpec.describe AdminOnly::AdminOnlyPolicy do
   describe 'Visitor (not logged in) is forbidden everything' do
     subject { described_class.new(visitor, simple_record) }
 
-    CRUD_ACTIONS.each do | action |
+    ADMIN_CRUD_ACTIONS.each do | action |
       it { is_expected.to forbid_action action }
     end
 

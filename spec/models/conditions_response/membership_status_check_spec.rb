@@ -1,7 +1,7 @@
 require 'rails_helper'
 require 'email_spec/rspec'
 
-require_relative File.join(__dir__, 'shared_examples','shared_condition_specs')
+require 'shared_examples/shared_condition_specs'
 
 require 'shared_context/activity_logger'
 require 'shared_context/users'
@@ -35,14 +35,14 @@ RSpec.describe MembershipStatusCheck, type: :model do
 
         msg = "User #{member_expired.id} (#{member_expired.email}) membership revoked."
 
-        expect(File.read(filepath)).to include msg
+        expect(File.read(logfilepath)).to include msg
       end
 
       it 'Does not write to log file for non-revoked members' do
         described_class.condition_response(condition, log)
 
-        expect(File.read(filepath)).not_to include "User #{user.id}"
-        expect(File.read(filepath)).not_to include "User #{member_paid_up.id}"
+        expect(File.read(logfilepath)).not_to include "User #{user.id}"
+        expect(File.read(logfilepath)).not_to include "User #{member_paid_up.id}"
       end
 
     end

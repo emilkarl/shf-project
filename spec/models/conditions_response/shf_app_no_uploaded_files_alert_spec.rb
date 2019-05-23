@@ -195,7 +195,7 @@ RSpec.describe ShfAppNoUploadedFilesAlert do
         applicant
         #  applicant.shf_application.file_delivery_method = create("file_delivery_#{delivery_method_name}".to_sym)
 
-        UPLOAD_FIXTURES_DIR = File.join(Rails.root, 'spec', 'fixtures','uploaded_files')
+        UPLOAD_FIXTURES_DIR = File.join(Rails.root, 'spec', 'fixtures','uploaded_files') unless defined?(UPLOAD_FIXTURES_DIR)
         fn1 = File.join(UPLOAD_FIXTURES_DIR, 'diploma.pdf')
         applicant.shf_application.uploaded_files.create(actual_file: File.open(fn1, 'r') )
 

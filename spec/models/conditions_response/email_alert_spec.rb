@@ -3,6 +3,7 @@ require 'email_spec/rspec'
 require 'timecop'
 
 require 'shared_context/activity_logger'
+require 'shared_context/stub_email_rendering'
 
 
 RSpec.describe EmailAlert, type: :model do
@@ -92,6 +93,7 @@ RSpec.describe EmailAlert, type: :model do
 
   end
 
+
   describe 'process_entities' do
 
     it 'loops through entities_to_check and calls take_action on each' do
@@ -125,14 +127,13 @@ RSpec.describe EmailAlert, type: :model do
       expect(subject).to receive(:send_alert_this_day?)
                                               .with(timing, config, anything)
                                               .once
-
       expect(subject).to receive(:send_email)
                                               .with(anything, log)
                                               .once
 
       # actual test:
       Timecop.freeze(dec_1) do
-       subject.take_action(entity, log)
+        subject.take_action(entity, log)
         log.close
       end
     end
@@ -178,6 +179,9 @@ RSpec.describe EmailAlert, type: :model do
 
 
   describe '.send_email' do
+
+    include_context 'stub email rendering'
+
 
     before(:all) do
 
@@ -339,14 +343,13 @@ RSpec.describe EmailAlert, type: :model do
 
         expect_any_instance_of(AlertLogger).to receive(:log_success)
 
-       subject.log_mail_response(log, mail_response_dbl, entity)
+        subject.log_mail_response(log, mail_response_dbl, entity)
 
       end
     end
 
 
     context 'with mail_response_errors (failure)' do
-
 
       before(:all) do
 

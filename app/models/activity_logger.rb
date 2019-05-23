@@ -42,6 +42,10 @@ class ActivityLogger
   # NOTE: this requires ActiveSupport.  It can only be run with Rails
 
 
+  # allow others to turn show on and off
+  attr_accessor :show
+
+
 
   def self.open(filename, facility, activity, show=true)
 
@@ -58,7 +62,8 @@ class ActivityLogger
     end
   end
 
-  private def initialize(filename, facility, activity, show)
+
+  def initialize(filename, facility, activity, show)
 
     @filename = filename
     @facility = facility
@@ -133,7 +138,7 @@ class ActivityLogger
       @log.send(log_level, message)
     end
 
-    puts @facility_and_action + "[#{log_level}] " + message if @show
+    puts @facility_and_action + "[#{log_level}] " + message if show
   end
 
   def close(duration: true)
@@ -142,13 +147,17 @@ class ActivityLogger
     record('info',
       "Duration: #{(finish_time - @start_time).round(2)} seconds.\n") if duration
     @log.close if @log.respond_to?(:close) && !@is_system_outstream
-    logged_to if @show
+    logged_to if show
   end
 
   def logged_to
     puts @facility_and_action + '[info] ' + "Information was logged to: #{@filename}"
   end
 
+
+  def show
+    @show ||= true
+  end
 
   # ===================================
 

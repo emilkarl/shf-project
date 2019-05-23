@@ -1,8 +1,13 @@
 require 'rails_helper'
 require 'email_spec/rspec'
+require 'shared_context/activity_logger'
+require 'shared_context/stub_email_rendering'
 
 
 RSpec.describe CompanyInfoIncompleteAlert do
+
+  include_context 'create logger'
+
 
   subject  { described_class.instance }
 
@@ -209,23 +214,13 @@ RSpec.describe CompanyInfoIncompleteAlert do
 
   describe 'delivers emails to all current company members' do
 
-    LOG_DIR      = 'tmp'
-    LOG_FILENAME = 'testlog.txt'
+    include_context 'stub email rendering'
 
 
     before(:each) do
-      tmpfile = File.join(Rails.root, LOG_DIR, LOG_FILENAME)
-      File.delete(tmpfile) if File.exist?(tmpfile)
       subject.create_alert_logger(log)
     end
 
-    after(:all) do
-      tmpfile = File.join(Rails.root, LOG_DIR, LOG_FILENAME)
-      File.delete(tmpfile) if File.exist?(tmpfile)
-    end
-
-    let(:filepath) { File.join(Rails.root, LOG_DIR, LOG_FILENAME) }
-    let(:log) { ActivityLogger.open(filepath, 'TEST', 'open', false) }
 
     let(:paid_member1) {
       member = create(:member_with_membership_app)
@@ -268,8 +263,8 @@ RSpec.describe CompanyInfoIncompleteAlert do
       end
 
       expect(ActionMailer::Base.deliveries.size).to eq 2
-      expect(File.read(filepath)).to include("[info] CompanyInfoIncompleteAlert email sent to user id: #{paid_member1.id} email: #{paid_member1.email} company id: #{incomplete_co.id} name: #{incomplete_co.name}.")
-      expect(File.read(filepath)).to include("[info] CompanyInfoIncompleteAlert email sent to user id: #{paid_member2.id} email: #{paid_member2.email} company id: #{incomplete_co.id} name: #{incomplete_co.name}.")
+      expect(File.read(logfilepath)).to include("[info] CompanyInfoIncompleteAlert email sent to user id: #{paid_member1.id} email: #{paid_member1.email} company id: #{incomplete_co.id} name: #{incomplete_co.name}.")
+      expect(File.read(logfilepath)).to include("[info] CompanyInfoIncompleteAlert email sent to user id: #{paid_member2.id} email: #{paid_member2.email} company id: #{incomplete_co.id} name: #{incomplete_co.name}.")
     end
 
   end

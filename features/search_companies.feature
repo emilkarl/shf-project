@@ -189,6 +189,7 @@ Scenario: Search by category and region
   Then I select "Sweden" in select list t("activerecord.attributes.company.region")
   And I click on t("search")
   And I should see "We Luv Dogs"
+  And I wait for all ajax requests to complete
 
 @selenium @time_adjust
 Scenario: Search by region

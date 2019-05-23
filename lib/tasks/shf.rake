@@ -303,7 +303,7 @@ namespace :shf do
   end
 
 
-  MEMBER_PAGES_PATH = File.join(Rails.root, 'app', 'views', 'pages')
+  MEMBER_PAGES_PATH = File.join(Rails.root, 'app', 'views', 'pages') unless defined?(MEMBER_PAGES_PATH)
 
 
   desc 'add member page arg=[filename]'

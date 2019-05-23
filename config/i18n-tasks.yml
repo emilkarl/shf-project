@@ -75,6 +75,7 @@ search:
     - app/assets/fonts
     - app/assets/videos
     - app/controllers/concerns/page_meta_tags_setter.rb
+    - features/support/webdrivers
 
 
   ## Alternatively, the only files or `File.fnmatch patterns` to search in `paths`:

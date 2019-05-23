@@ -151,7 +151,7 @@ RSpec.shared_context "rake" do
   subject         { rake[task_name] }
 
   # This is the same as Rails.root, but we cannot assume Rails is loaded
-  ROOT_DIR = File.join(__dir__, '..', '..')
+  ROOT_DIR = File.join(__dir__, '..', '..') unless defined?(ROOT_DIR)
 
   def loaded_files_excluding_current_rake_file
     $".reject {|file| file == File.join(ROOT_DIR,"#{task_path}.rake").to_s }

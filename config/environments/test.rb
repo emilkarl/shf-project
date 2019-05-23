@@ -32,6 +32,13 @@ Rails.application.configure do
   config.active_storage.service = :test
 
 
+  # Use sql schema to allow the use of functions, triggers and sequences
+  # This will dump and load the db/structure.rb file instead of db/schema.rb
+  # (Without this, the membership_number_seq Sequence is not reliably
+  # added to the db prior to testing.)
+  config.active_record.schema_format = :sql
+
+
   ###
   #
   # Mail

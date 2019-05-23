@@ -149,6 +149,9 @@ skinparam activity {
         'FontColor         navy
         FontSize          12
 
+        Header {
+            FontStyle     normal
+        }
     }
 
     Group {
@@ -307,6 +310,22 @@ skinparam Usecase {
     ArrowColor          DEFAULT_NOT_SO_DARK
     BackgroundColor     white
     BorderColor         DEFAULT_BORDER_COLOR
+}
+
+
+
+skinparam note {
+   TextAlignment  left
+   FontSize 12
+}
+
+
+
+skinparam Partition {
+  FontSize 14
+  FontColor MediumSlateBlue
+  BorderColor MediumSlateBlue
+  BorderThickness 1
 }
 
 

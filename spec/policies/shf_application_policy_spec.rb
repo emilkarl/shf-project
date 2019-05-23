@@ -3,9 +3,9 @@ require 'rails_helper'
 
 describe ShfApplicationPolicy do
 
-  CRUD_ACTIONS = [:new, :create, :show, :edit, :update,  :destroy].freeze
+  SHFAPP_CRUD_ACTIONS = [:new, :create, :show, :edit, :update,  :destroy].freeze unless defined?(SHFAPP_CRUD_ACTIONS)
 
-  APP_STATE_CHANGE_ACTIONS = [:accept, :reject, :need_info, :cancel_need_info, :start_review].freeze
+  APP_STATE_CHANGE_ACTIONS = [:accept, :reject, :need_info, :cancel_need_info, :start_review].freeze  unless defined?(APP_STATE_CHANGE_ACTIONS)
 
 
   let(:admin) { create(:user, email: 'admin@shf.se', admin: true) }
@@ -30,7 +30,7 @@ describe ShfApplicationPolicy do
     describe 'for a Visitor' do
       subject { described_class.new(visitor, application) }
 
-      CRUD_ACTIONS.each do |action|
+      SHFAPP_CRUD_ACTIONS.each do |action|
         it "forbids :state change for :#{action} action" do
           is_expected.to forbid_mass_assignment_of(:state).for_action(action)
         end
@@ -47,7 +47,7 @@ describe ShfApplicationPolicy do
 
           let(:app_being_checked) { user_applicant.shf_application }
 
-          CRUD_ACTIONS.each do |action|
+          SHFAPP_CRUD_ACTIONS.each do |action|
             it "forbids :state to be changed for :#{action} action" do
               expect(described_class.new(self.send(current_user), app_being_checked)).to forbid_mass_assignment_of(:state).for_action(action)
             end
@@ -66,7 +66,7 @@ describe ShfApplicationPolicy do
 
           let(:app_being_checked) { self.send(current_user).shf_application }
 
-          (CRUD_ACTIONS - [:destroy]).each do |action|
+          (SHFAPP_CRUD_ACTIONS - [:destroy]).each do |action|
             it "permits :state to be changed for :#{action} action" do
               expect(described_class.new(self.send(current_user), app_being_checked)).to permit_mass_assignment_of(:state).for_action(action)
             end
@@ -93,7 +93,7 @@ describe ShfApplicationPolicy do
         is_expected.to permit_mass_assignment_of(:state).for_action(:show)
       end
 
-      (CRUD_ACTIONS - [:show]).each do |action|
+      (SHFAPP_CRUD_ACTIONS - [:show]).each do |action|
         it "forbids :state to be changed for #{action}" do
           is_expected.to forbid_mass_assignment_of(:state).for_action(action)
         end
@@ -104,7 +104,7 @@ describe ShfApplicationPolicy do
     describe 'for Admins' do
       subject { described_class.new(admin, application) }
 
-      CRUD_ACTIONS.each do |action|
+      SHFAPP_CRUD_ACTIONS.each do |action|
         it "permits :state to be changed for :#{action} action" do
           is_expected.to permit_mass_assignment_of(:state).for_action(action)
         end
@@ -128,7 +128,7 @@ describe ShfApplicationPolicy do
       end
 
       it 'forbids all CRUD actions' do
-        is_expected.to forbid_actions(CRUD_ACTIONS)
+        is_expected.to forbid_actions(SHFAPP_CRUD_ACTIONS)
       end
 
       it 'forbids all application state change actions' do
@@ -161,7 +161,7 @@ describe ShfApplicationPolicy do
         end
 
         it 'forbids all other CRUD actions (that are not :new or :create)' do
-          expect(described_class.new(self.send(current_user), application)).to forbid_actions(CRUD_ACTIONS - [:new, :create])
+          expect(described_class.new(self.send(current_user), application)).to forbid_actions(SHFAPP_CRUD_ACTIONS - [:new, :create])
         end
 
         it 'permits :information' do
@@ -199,7 +199,7 @@ describe ShfApplicationPolicy do
         end
 
         it 'forbids all other CRUD actions (that are not :new or :create)' do
-          expect(described_class.new(self.send(current_user), application)).to forbid_actions(CRUD_ACTIONS - [:new, :create])
+          expect(described_class.new(self.send(current_user), application)).to forbid_actions(SHFAPP_CRUD_ACTIONS - [:new, :create])
         end
 
         it 'permits :information' do
@@ -371,7 +371,7 @@ describe ShfApplicationPolicy do
       end
 
       describe 'permits all CRUD actions except :new and :create' do
-        (CRUD_ACTIONS - [:new, :create]).each do |action|
+        (SHFAPP_CRUD_ACTIONS - [:new, :create]).each do |action|
           it "permits #{action}" do
             is_expected.to permit_action action
           end

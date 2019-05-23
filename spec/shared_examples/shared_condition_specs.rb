@@ -23,7 +23,7 @@ RSpec.shared_examples 'it validates timings in .condition_response' do | valid_t
       expect { described_class.condition_response(tested_condition, log) }
           .to raise_exception TimingNotValidError, err_str
 
-      expect(File.read(filepath)).to include err_str
+      expect(File.read(logfilepath)).to include err_str
     end
 
   end

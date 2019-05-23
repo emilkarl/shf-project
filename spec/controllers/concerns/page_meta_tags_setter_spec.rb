@@ -7,9 +7,9 @@ end
 
 RSpec.describe PageMetaTagsSetterTestController, type: :controller do
 
-  MOCK_BASE_URL   = 'http://test.host'
-  MOCK_REQ_PATH   = '/test-path'
-  MOCK_ASSET_PATH = '/assets'
+  MOCK_BASE_URL   = 'http://test.host' unless defined?(MOCK_BASE_URL)
+  MOCK_REQ_PATH   = '/test-path' unless defined?(MOCK_REQ_PATH)
+  MOCK_ASSET_PATH = '/assets' unless defined?(MOCK_ASSET_PATH)
 
   let(:expected_base_url) { "#{MOCK_BASE_URL}#{MOCK_ASSET_PATH}/" }
 

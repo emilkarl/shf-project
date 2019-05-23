@@ -43,6 +43,9 @@ swaks
 #Ignore test-uploaded-files
 spec/test_paperclip_files/
 
+# webdrivers are installed here:
+features/support/webdrivers
+
 # do not check in files that are uploaded or assets
 public/system/
 public/storage

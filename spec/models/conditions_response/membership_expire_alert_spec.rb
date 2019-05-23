@@ -1,8 +1,15 @@
 require 'rails_helper'
 require 'email_spec/rspec'
+require 'shared_context/activity_logger'
+require 'shared_context/stub_email_rendering'
 
 
 RSpec.describe MembershipExpireAlert do
+
+  include_context 'create logger'
+
+  subject  { described_class.instance }
+
 
   let(:jan_1) { Date.new(2018, 1, 1) }
   let(:dec_1) { Date.new(2018, 12, 1) }
@@ -156,16 +163,7 @@ RSpec.describe MembershipExpireAlert do
 
   describe 'delivers email to all members about their upcoming expiration date' do
 
-    LOG_DIR      = 'tmp'
-    LOG_FILENAME = 'testlog.txt'
-
-    after(:all) do
-      tmpfile = File.join(Rails.root, LOG_DIR, LOG_FILENAME)
-      File.delete(tmpfile) if File.exist?(tmpfile)
-    end
-
-    let(:filepath) { File.join(Rails.root, LOG_DIR, LOG_FILENAME) }
-    let(:log) { ActivityLogger.open(filepath, 'TEST', 'open', false) }
+    include_context 'stub email rendering'
 
 
     describe 'emails sent to all members and logged' do
@@ -188,7 +186,7 @@ RSpec.describe MembershipExpireAlert do
           described_class.instance.condition_response(condition, log)
           expect(ActionMailer::Base.deliveries.size).to eq 1
 
-          logfile_contents = File.read(filepath)
+          logfile_contents = File.read(logfilepath)
           expect(logfile_contents).to match(/\[info\] Started at #{nov_25_ts.to_s}(\s*)(.*)#{paid_expires_dec2_logmsg}/)
           expect(logfile_contents).not_to match(/#{paid_exp_dec30}/)
         end
@@ -208,7 +206,7 @@ RSpec.describe MembershipExpireAlert do
           described_class.instance.condition_response(condition, log)
           expect(ActionMailer::Base.deliveries.size).to eq 0
 
-          logfile_contents = File.read(filepath)
+          logfile_contents = File.read(logfilepath)
           expect(logfile_contents).not_to match(/#{paid_exp_dec30_logmsg}(\s*)(.*)#{paid_expires_dec2_logmsg}/)
         end
       end
@@ -227,7 +225,7 @@ RSpec.describe MembershipExpireAlert do
           described_class.instance.condition_response(condition, log)
           expect(ActionMailer::Base.deliveries.size).to eq 2
 
-          logfile_contents = File.read(filepath)
+          logfile_contents = File.read(logfilepath)
           expect(logfile_contents).to match(/\[info\] Started at #{dec_1_ts.to_s}(\s*)(.*)#{paid_exp_dec30_logmsg}(\s*)(.*)#{paid_expires_dec2_logmsg}/)
         end
       end
@@ -246,7 +244,7 @@ RSpec.describe MembershipExpireAlert do
           described_class.instance.condition_response(condition, log)
           expect(ActionMailer::Base.deliveries.size).to eq 1
 
-          logfile_contents = File.read(filepath)
+          logfile_contents = File.read(logfilepath)
           expect(logfile_contents).to match(/\[info\] Started at #{dec_30_ts.to_s}(\s*)(.*)#{paid_exp_dec30_logmsg}/)
           expect(logfile_contents).not_to match(/#{paid_expires_dec2_logmsg}/)
         end

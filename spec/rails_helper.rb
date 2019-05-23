@@ -80,6 +80,9 @@ RSpec.configure do |config|
   config.before(:each) do
     DatabaseCleaner.start
     create_user_membership_num_seq_if_needed
+
+    # shush the ActivityLogger: Don't have it show every message to STDOUT.
+    allow_any_instance_of(ActivityLogger).to receive(:show).and_return(false)
   end
 
   config.append_after(:each) do

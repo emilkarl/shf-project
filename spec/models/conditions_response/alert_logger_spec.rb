@@ -21,7 +21,7 @@ RSpec.describe AlertLogger do
       expect(subject).to receive(:msg_start).and_call_original
 
       subject.log_success('this is a')
-      expect(File.read(filepath)).to include("[info] MembershipExpireAlert")
+      expect(File.read(logfilepath)).to include("[info] MembershipExpireAlert")
     end
 
 
@@ -30,7 +30,7 @@ RSpec.describe AlertLogger do
       expect(alert).to receive(:success_str).with('this is a').and_return('success!')
 
       subject.log_success('this is a')
-      expect(File.read(filepath)).to include("[info] MembershipExpireAlert email sent success!")
+      expect(File.read(logfilepath)).to include("[info] MembershipExpireAlert email sent success!")
     end
 
 
@@ -48,7 +48,7 @@ RSpec.describe AlertLogger do
       expect(alert).to receive(:custom_success_str_method).with('framgångsrikt').and_call_original
 
       alert_logger_custom_str.log_success('framgångsrikt')
-      expect(File.read(filepath)).to include("[info] MembershipExpireAlert email sent Detta är framgångsrikt!")
+      expect(File.read(logfilepath)).to include("[info] MembershipExpireAlert email sent Detta är framgångsrikt!")
 
       # remove the method we added
       MembershipExpireAlert.undef_method(:custom_success_str_method)
@@ -71,7 +71,7 @@ RSpec.describe AlertLogger do
         expect(alert).to receive(:custom_success_str_method).with('really', 'big').and_call_original
 
         alert_logger_custom_str.log_success('really', 'big')
-        expect(File.read(filepath)).to include("[info] MembershipExpireAlert email sent Detta är really and big!.")
+        expect(File.read(logfilepath)).to include("[info] MembershipExpireAlert email sent Detta är really and big!.")
 
         # remove the method we added
         MembershipExpireAlert.undef_method(:custom_success_str_method)
@@ -94,7 +94,7 @@ RSpec.describe AlertLogger do
         expect(alert).to receive(:custom_success_str_method).with(five_args).and_call_original
 
         alert_logger_custom_str.log_success(five_args)
-        expect(File.read(filepath)).to include("[info] MembershipExpireAlert email sent Detta är 1, 2, 3, 4, 5.")
+        expect(File.read(logfilepath)).to include("[info] MembershipExpireAlert email sent Detta är 1, 2, 3, 4, 5.")
 
         # remove the method we added
         MembershipExpireAlert.undef_method(:custom_success_str_method)
@@ -115,7 +115,7 @@ RSpec.describe AlertLogger do
 
       subject.log_failure('this is a', error: Net::ProtocolError)
 
-      expect(File.read(filepath)).to include("[error] MembershipExpireAlert")
+      expect(File.read(logfilepath)).to include("[error] MembershipExpireAlert")
     end
 
 
@@ -124,7 +124,7 @@ RSpec.describe AlertLogger do
       expect(alert).to receive(:failure_str).with('this is a').and_return('big FAIL!')
 
       subject.log_failure('this is a')
-      expect(File.read(filepath)).to include("[error] MembershipExpireAlert email ATTEMPT FAILED big FAIL!.")
+      expect(File.read(logfilepath)).to include("[error] MembershipExpireAlert email ATTEMPT FAILED big FAIL!.")
     end
 
 
@@ -133,7 +133,7 @@ RSpec.describe AlertLogger do
       expect(alert).to receive(:failure_str).with('this is a').and_return('big FAIL!')
 
       subject.log_failure('this is a', error: Net::ProtocolError)
-      expect(File.read(filepath)).to include("[error] MembershipExpireAlert email ATTEMPT FAILED big FAIL!. #{Net::ProtocolError}")
+      expect(File.read(logfilepath)).to include("[error] MembershipExpireAlert email ATTEMPT FAILED big FAIL!. #{Net::ProtocolError}")
     end
 
 
@@ -143,7 +143,7 @@ RSpec.describe AlertLogger do
 
       subject.log_failure('this is a', error: Net::ProtocolError)
 
-      expect(File.read(filepath)).to include("Also see for possible info #{ApplicationMailer::LOG_FILE}")
+      expect(File.read(logfilepath)).to include("Also see for possible info #{ApplicationMailer::LOG_FILE}")
     end
 
 
@@ -172,7 +172,7 @@ RSpec.describe AlertLogger do
       expect(alert).to receive(:custom_failure_str_method).with('misslyckande').and_call_original
 
       alert_logger_custom_str.log_failure('misslyckande')
-      expect(File.read(filepath)).to include("[error] MembershipExpireAlert email ATTEMPT FAILED Detta är ett stort misslyckande.")
+      expect(File.read(logfilepath)).to include("[error] MembershipExpireAlert email ATTEMPT FAILED Detta är ett stort misslyckande.")
 
       # remove the method we added
       MembershipExpireAlert.undef_method(:custom_failure_str_method)
@@ -195,7 +195,7 @@ RSpec.describe AlertLogger do
         expect(alert).to receive(:custom_failure_str_method).with('really', 'big').and_call_original
 
         alert_logger_custom_str.log_failure('really', 'big', error: Net::ProtocolError)
-        expect(File.read(filepath)).to include("[error] MembershipExpireAlert email ATTEMPT FAILED Detta är really and big!.")
+        expect(File.read(logfilepath)).to include("[error] MembershipExpireAlert email ATTEMPT FAILED Detta är really and big!.")
 
         # remove the method we added
         MembershipExpireAlert.undef_method(:custom_failure_str_method)
@@ -218,7 +218,7 @@ RSpec.describe AlertLogger do
         expect(alert).to receive(:custom_failure_str_method).with(five_args).and_call_original
 
         alert_logger_custom_str.log_failure(five_args, error: Net::ProtocolError)
-        expect(File.read(filepath)).to include("[error] MembershipExpireAlert email ATTEMPT FAILED Detta är 1, 2, 3, 4, 5.")
+        expect(File.read(logfilepath)).to include("[error] MembershipExpireAlert email ATTEMPT FAILED Detta är 1, 2, 3, 4, 5.")
 
         # remove the method we added
         MembershipExpireAlert.undef_method(:custom_failure_str_method)

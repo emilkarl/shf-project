@@ -6,6 +6,7 @@ require 'cucumber/timecop'
 require 'cucumber/rspec/doubles'
 require 'capybara/poltergeist'
 require 'email_spec/cucumber'
+require 'webdrivers/chromedriver'
 
 # Put the Geocoder into test mode so no actual API calls are made and stub with fake data
 require_relative '../../spec/support/geocoder'
@@ -13,6 +14,8 @@ require_relative '../../spec/support/geocoder'
 # version required on SemaphoreCI as of 2018-12-13
 #
 # Chromedriver.set_version "2.24" unless ENV.has_key?('SEMAPHORECI')
+
+Webdrivers.install_dir = Rails.root.join('features', 'support', 'webdrivers')
 
 ActionController::Base.allow_rescue = false
 
@@ -26,8 +29,11 @@ Cucumber::Rails::Database.javascript_strategy = :truncation
 
 
 Before do
- # I18n.locale = 'en'
- ENV['SHF_BETA'] = 'no'
+  # I18n.locale = 'en'
+  ENV['SHF_BETA'] = 'no'
+
+  # shush the ActivityLogger: Don't have it show every message to STDOUT.
+  allow_any_instance_of(ActivityLogger).to receive(:show).and_return(false)
 end
 
 

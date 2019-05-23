@@ -3,10 +3,6 @@ require 'email_spec/rspec'
 require 'timecop'
 
 
-LOG_DIR      = 'tmp'
-LOG_FILENAME = 'testlog.txt'
-
-
 RSpec.describe UserEmailAlert, type: :model do
 
   let(:all_users) do

@@ -7,8 +7,8 @@ end
 
 RSpec.describe PageMetaOgTagsSetterTestController, type: :controller do
 
-  MOCK_BASE_URL   = 'http://test.host'
-  MOCK_REQ_PATH   = '/test-path'
+  MOCK_BASE_URL   = 'http://test.host' unless defined?(MOCK_BASE_URL)
+  MOCK_REQ_PATH   = '/test-path' unless defined?(MOCK_REQ_PATH)
 
 
   before(:all) do

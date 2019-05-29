@@ -29,7 +29,7 @@ RSpec.describe OneTimeTasksFinder, type: :model do
       # Create 4 .rake files and in the 2019_Q2 directory
       make_simple_rakefiles_under_subdir(temp_onetime_path, '2019_Q2', 4)
 
-      subject.logfile = filepath # logfile name in the shared_context/activity_logger
+      subject.logfile = logfilepath # logfile name in the shared_context/activity_logger
 
       # Create a log file that has entries for task0 and task2 (already run)
       log.info("One-time task shf:test:task0 was run on ..whatever...")
@@ -49,7 +49,7 @@ RSpec.describe OneTimeTasksFinder, type: :model do
       # Create 3 .rake files in the 2019_Q2 directory
       make_simple_rakefiles_under_subdir(temp_onetime_path, '2019_Q2', 3)
 
-      subject.logfile = filepath # logfile name in the shared_context/activity_logger
+      subject.logfile = logfilepath # logfile name in the shared_context/activity_logger
 
       # Create a log file that has entries for task0 and task1 and task2 (already run)
       log.info("One-time task shf:test:task0 was run on ..whatever...")
@@ -192,11 +192,11 @@ RSpec.describe OneTimeTasksFinder, type: :model do
 
     it 'true if an entry for the task_name is in the log file' do
       log.info("One-time task #{task_name} was run on ..whatever...")
-      expect(subject.task_in_log_file?(task_name, filepath)).to be_truthy
+      expect(subject.task_in_log_file?(task_name, logfilepath)).to be_truthy
     end
 
     it 'false if there is no entry for the task_name in the log file' do
-      expect(subject.task_in_log_file?(task_name, filepath)).to be_falsey
+      expect(subject.task_in_log_file?(task_name, logfilepath)).to be_falsey
     end
 
     it 'false if logfile does not exist' do

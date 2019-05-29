@@ -11,7 +11,7 @@ namespace :shf do
     SHFDEPLOY_LOG_FACILITY = 'SHF_DEPLOY_TASK' unless defined?(SHFDEPLOY_LOG_FACILITY)
 
 
-    desc 'run any one_time tasks not yet run, for this quarter (in this year)'
+    desc 'run any one_time tasks not yet run, for this quarter in this year'
     task run_onetime_tasks: [:environment] do |task_name|
 
       logfile_name = LogfileNamer.name_for(OneTimeTasksFinder::SHFDEPLOY_LOG_NAME)

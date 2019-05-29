@@ -4,7 +4,7 @@ require 'shared_context/activity_logger'
 require 'shared_context/simple_rake_task_maker'
 
 
-RSpec.describe 'shf_deploy shf:deploy:run_onetime_tasks', type: :task do
+RSpec.describe 'shf_deploy_onetime shf:deploy:run_onetime_tasks', type: :task do
 
   include_context 'rake'
   include_context 'create logger'
@@ -121,6 +121,7 @@ RSpec.describe 'shf_deploy shf:deploy:run_onetime_tasks', type: :task do
 
     it 'nothing invoked' do
 
+      allow(OneTimeTasksFinder.instance).to receive(:names_of_tasks_to_run_today).and_return([])
       Timecop.freeze(may_1_2019) do
         expect { subject.invoke }.not_to raise_error
       end

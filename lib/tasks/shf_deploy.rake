@@ -1,4 +1,4 @@
-# Tasks to run to deploy the application.
+# Tasks to run to deploy the application.  Tasks defined here can be called by capistrano.
 
 require 'active_support/logger'
 require_relative 'one_time_tasks_finder'
@@ -44,6 +44,7 @@ namespace :shf do
 
       task_names.each do |task_name|
         begin
+          Rake.application[task_name].reenable
           Rake.application[task_name].invoke
           log.record('info', tasks_finder.task_log_entry_str(task_name) + " #{Time.zone.now}")
 

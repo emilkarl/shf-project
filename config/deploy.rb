@@ -1,3 +1,9 @@
+# Tasks to run to deploy the application.  Tasks defined here will be called by capistrano.
+
+# ============================================
+# Capistrano configuration settings
+#
+
 # config valid only for Capistrano 3.11
 lock '3.11'
 
@@ -49,30 +55,36 @@ set :keep_releases, 5
 set :migration_role, :app
 
 
+# ============================================
+# Tasks
+#   See Task sequencing below, after the code for the tasks
+
 namespace :deploy do
 
+
+  # this ensures that the description (a.k.a. comment) for each task will be recorded
+  Rake::TaskManager.record_task_metadata = true
+
+  # ----------------------------------------------------
+  # Tasks
+  #
+
   desc 'run load_conditions task to put conditions into the DB'
-  task run_load_conditions: [:set_rails_env] do
-
-    LOAD_TASK = 'shf:load_conditions'
-
-    on release_roles :all do
-
-      within release_path do
-        with rails_env: fetch(:rails_env) do
-          execute :rake, LOAD_TASK
-          info "[deploy:run_load_conditions] invoked #{LOAD_TASK} to load conditions into the DB"
-        end
-      end
-    end
-
+  task run_load_conditions: [:set_rails_env] do | this_task |
+    run_task_from(this_task, 'shf:load_conditions')
   end
-  before :publishing, :run_load_conditions
+
+
+  desc 'run any one-time tasks for this year and this quaters'
+  task run_one_time_tasks: [:set_rails_env] do | this_task |
+    run_task_from(this_task, 'shf:deploy:run_onetime_tasks')
+  end
 
 
   desc 'Restart application'
   task :restart do
     on roles(:app), in: :sequence, wait: 5 do
+      info 'Restarting...'
       execute :touch, release_path.join('tmp/restart.txt')
     end
   end
@@ -105,6 +117,45 @@ namespace :deploy do
   end
 
 
+  # ----------------------------------------------------
+  # Task sequencing:
+  #
+
+  before :publishing, :run_load_conditions
+  after :run_load_conditions, :run_one_time_tasks
+
+  # Have to wait until all files are copied and symlinked before trying to remove
+  # these files.  (They won't exist until then.)
+  before :restart, :remove_test_files
+
+  after :publishing, :restart
+
+
+  # ----------------------------------------------------
+  # supporting methods
+  #
+
+
+  # execute a task and show an info line
+  def run_task_from(_calling_task, task_name_to_run)
+
+    on release_roles :all do
+      within release_path do
+        with rails_env: fetch(:rails_env) do
+          #info task_invoking_info(calling_task.name, task_name_to_run)
+          execute :rake, task_name_to_run
+        end
+      end
+    end
+  end
+
+
+  # information string about a task that invoked another one
+  def task_invoking_info(task_name, task_invoked_name)
+    "[#{task_name}] invoking #{task_invoked_name}"
+  end
+
+
   def remove_file(full_fn_path)
     if test("[ -f #{full_fn_path} ]") # if the file exists on the remote server
       execute %{rm -f #{full_fn_path} }
@@ -122,13 +173,6 @@ namespace :deploy do
     end
   end
 
-
-  # Have to wait until all files are copied and symlinked before trying to remove
-  # these files.  (They won't exist until then.)
-  before :restart, :remove_test_files
-
-
-  after :publishing, :restart
 end
 
 

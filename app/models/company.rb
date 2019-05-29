@@ -14,7 +14,8 @@ class Company < ApplicationRecord
   validates_uniqueness_of :company_number,
     message: I18n.t('activerecord.errors.models.company.attributes.company_number.taken')
   validates_length_of :company_number, is: 10
-  validates_format_of :email, with: /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i, on: [:create, :update]
+  validates :email, email: true
+
   validate :swedish_organisationsnummer
 
   validates :dinkurs_company_id, dinkurs_id: true

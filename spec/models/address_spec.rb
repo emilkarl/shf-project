@@ -341,6 +341,31 @@ RSpec.describe Address, type: :model do
     it { is_expected.to belong_to(:addressable) }
   end
 
+  describe 'Calls #format_city_name before save' do
+    let(:address) { build(:address, addressable: build(:company)) }
+
+    it 'removes unneeded white space' do
+      address.city = '   lots  of   white   space   '
+      address.save
+      expect(address.city).to eq 'Lots Of White Space'
+    end
+
+    it 'converts city to Title Case' do
+      address.city = 'trollhättan'
+      address.save
+      expect(address.city).to eq 'Trollhättan'
+
+      address.city = 'ÄLMHULT'
+      address.save
+      expect(address.city).to eq 'Älmhult'
+
+      address.city = 'saltsjö-boo'
+      address.save
+      expect(address.city).to eq 'Saltsjö-Boo'
+    end
+
+  end
+
 
   describe 'scopes' do
     let!(:has_regions) { [addr_has_region] }

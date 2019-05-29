@@ -216,7 +216,7 @@ sv:
         company_number: *org_nr
         name: *name
         phone_number: &company_phone Telefonnummer till företaget
-        email: *email
+        email: Företagets email
         website: Webbplats
         org_nr: *org_nr
         post_code: *post_code

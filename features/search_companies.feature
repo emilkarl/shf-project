@@ -247,7 +247,7 @@ Scenario: Search by category and region 2
   Then I select "Sweden" in select list t("activerecord.attributes.company.region")
   And I click on t("search")
   And I should see "We Luv Dogs"
-  And I should see "city4" in the list of companies
+  And I should see "City4" in the list of companies
 
 @selenium @time_adjust
 Scenario: Toggle Hide/Show search form
@@ -264,13 +264,13 @@ Scenario: Toggle Hide/Show search form
   Scenario: Search by city
     Given I am Logged out
     And I am on the "landing" page
-    Then I select "city1" in select list t("activerecord.attributes.company.city")
+    Then I select "City1" in select list t("activerecord.attributes.company.city")
     And I click on t("search")
     And I should see "Barky Boys"
     And I should not see "HappyMutts" in the list of companies
     And I should not see "We Luv Dogs" in the list of companies
     And I should not see "Dogs R Us" in the list of companies
-    Then I select "city2" in select list t("activerecord.attributes.company.city")
+    Then I select "City2" in select list t("activerecord.attributes.company.city")
     And I click on t("search")
     And I should see "HappyMutts"
     And I should see "Barky Boys"
@@ -280,17 +280,16 @@ Scenario: Toggle Hide/Show search form
   Scenario: Search by city ignores case, and leading and trailing whitespace in city name
     Given I am Logged out
     And I am on the "landing" page
-    Then I select "space city" in select list t("activerecord.attributes.company.city")
+    Then I select "Space City" in select list t("activerecord.attributes.company.city")
     And I click on t("search")
     And I should see "New Company"
     And I should not see "HappyMutts" in the list of companies
     And I should not see "We Luv Dogs" in the list of companies
     And I should not see "Dogs R Us" in the list of companies
 
-    Then I select "city1" in select list t("activerecord.attributes.company.city")
+    Then I select "City1" in select list t("activerecord.attributes.company.city")
     And I click on t("search")
     And I should see "Barky Boys"
     And I should see "DogCo_01"
     And I should see "DogCo_02"
-    And I should see "city1" in the list of companies
-    And I should see "CITY1" 2 times in the list of companies
+    And I should see "City1" 3 times in the list of companies

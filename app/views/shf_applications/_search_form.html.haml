@@ -1,4 +1,4 @@
-= search_form_for @search_params, method: :get, url: shf_applications_path,
+= search_form_for search_params, method: :get, url: shf_applications_path,
                                   class: 'form-horizontal' do |f|
   .form-group.mt-3
     .form-row
@@ -10,7 +10,7 @@
                         :to_s, :to_s, { include_blank: false },
                         { multiple: true, size: 5, style: 'width: 100%;',
                           class: 'form-control search_field',
-                          data: {language: "#{@locale}" } }
+                          data: {language: language } }
       .col-sm-3
         = f.label :user_last_name_in,
                   "#{t('activerecord.attributes.shf_application.last_name')}"
@@ -19,7 +19,7 @@
                         :to_s, :to_s, { include_blank: false },
                         { multiple: true, size: 5, style: 'width: 100%;',
                           class: 'form-control search_field',
-                          data: {language: "#{@locale}" } }
+                          data: {language: language } }
       .col-sm-2
         = f.label :companies_company_number_in,
                   "#{t('shf_applications.index.org_nr')}"
@@ -28,7 +28,7 @@
                         :to_s, :to_s, { include_blank: false },
                         { multiple: true, size: 5, style: 'width: 100%;',
                           class: 'form-control search_field',
-                          data: {language: "#{@locale}" } }
+                          data: {language: language } }
       .col-sm-3
         = f.label :state_in,
                   "#{t('shf_applications.index.state')}"
@@ -37,7 +37,7 @@
                        :second, :first, { include_blank: false },
                        { multiple: true, size: 5, style: 'width: 100%;',
                          class: 'form-control search_field',
-                         data: {language: "#{@locale}" } }
+                         data: {language: language } }
       .col-sm-2
         %br
         = submit_tag "#{t('search')}", class: 'btn btn-primary btn-lg btn-block mt-1'

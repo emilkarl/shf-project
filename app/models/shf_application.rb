@@ -38,7 +38,7 @@ class ShfApplication < ApplicationRecord
 
   validates :file_delivery_method, presence: { on: :create }
 
-  validates_format_of :contact_email, with: /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i, on: [:create, :update]
+  validates :contact_email, email: true
 
   validates_uniqueness_of :user_id
 

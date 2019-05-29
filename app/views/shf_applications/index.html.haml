@@ -14,7 +14,8 @@
 
   .panel-collapse.collapse.show#toggled_search_form{ 'aria-labelledby' => 'toggle-heading', role: 'tabpanel' }
     .panel-body
-      = render 'search_form'
+      = render partial: 'search_form',
+               locals: { search_params: @search_params, language: @locale }
 
 
   - if @shf_applications.empty?

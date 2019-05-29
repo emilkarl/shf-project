@@ -215,7 +215,7 @@ en:
         company_number: *org_nr
         name: *name
         phone_number: Phone Number
-        email: *email
+        email: Company email
         post_code: *post_code
         city: *city
         kommun: *kommun

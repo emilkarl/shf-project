@@ -2,7 +2,8 @@
   %h1.entry-title= t('.title')
 .entry-content
   = render partial: 'search_form',
-           locals: { q: @q,
+           locals: { search_params: @q,
+                     language: @locale,
                      filter_ignore_membership: @filter_ignore_membership,
                      filter_are_members: @filter_are_members,
                      filter_are_not_members: @filter_are_not_members }

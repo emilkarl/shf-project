@@ -5,6 +5,8 @@ class Address < ApplicationRecord
   # Thus the model behavior is consistent with the business rules of the
   # Company model.  This is manifest in some of the Address controller actions.
 
+  before_save :format_city_name
+
   belongs_to :addressable, polymorphic: true
 
   # When an address is initially created, it may not have a kommun or region assigned,
@@ -145,6 +147,20 @@ class Address < ApplicationRecord
 
   end
 
+  # TODO: Make this a private method after a one-time rake task - which updates
+  #       non-conforming city names in addresses - has been run.
+  def format_city_name
+    # Capitalize first letter of each word
+    # Convert remaining letters of each word to lower case
+    # Remove leading and trailing white space
+    # Reduce internal string of multiple white spaces to single white space
+    # Preserve non-whitespace, non-word characters as-is (e.g. dashes)
+
+    self.city = city.strip.gsub(/\s\s+/, ' ').gsub(/(\w|å|ä|ö|Å|Ä|Ö)+/) do |word|
+      word.mb_chars.capitalize.to_s
+    end
+  end
+
 
   private
 
@@ -156,8 +172,6 @@ class Address < ApplicationRecord
       (!latitude.nil? && !longitude.nil?)  &&
       (self.new_record? || !((self.changed & GEO_FIELDS).any?) )
   end
-
-
 
   def sverige_if_nil
     country = 'Sverige' if country.nil?

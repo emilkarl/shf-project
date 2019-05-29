@@ -4,6 +4,8 @@ RSpec.shared_context 'simple rake task maker' do
 
   # Create a subdirectory <subdir> under <directory if it doesn't already exist,
   # and then create <num> simple rake files in <subdir>
+  #
+  # @return [Array[String]] - list of file names created
   def make_simple_rakefiles_under_subdir(directory, subdir, num = 1, start_num: 0)
     new_sub_dir = File.join(directory, subdir)
     Dir.mkdir(new_sub_dir) unless Dir.exist?(new_sub_dir)
@@ -14,24 +16,34 @@ RSpec.shared_context 'simple rake task maker' do
 
   # Make <num> .rake files in the directory; each rake file contains 1 simple task
   # start_num = the first task number
+  # @return [Array[String]] - list of file names created
+  #
   def make_simple_rakefiles(directory, num = 1, start_num: 0)
+    files_created = []
     num.times do |i|
       task_num = i + start_num
-      File.open(File.join(directory, "test#{task_num}.rake"), 'w') do |f|
+      fname = File.join(directory, "test#{task_num}.rake")
+      files_created << fname
+      File.open(fname, 'w') do |f|
         f.puts simple_rake_task("task#{task_num}")
       end
     end
+    files_created
   end
 
 
   # Make a simple rakefile in the subdirectory under directory.
+  # @return [String] - name of file created (full path)
   def make_simple_rakefile_under_subdir(directory, subdir, task_name = 'test-task', task_body = "\n")
     new_sub_dir = File.join(File.absolute_path(directory), subdir)
     Dir.mkdir(new_sub_dir) unless Dir.exist?(new_sub_dir)
 
-    File.open(File.join(new_sub_dir, "#{task_name}.rake"), 'w') do |f|
+    filepath_created = File.join(File.absolute_path(new_sub_dir), "#{task_name}.rake")
+    File.open(filepath_created, 'w') do |f|
       f.puts simple_rake_task(task_name, task_body)
     end
+
+    filepath_created
   end
 
 

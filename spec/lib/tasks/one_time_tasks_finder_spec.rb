@@ -20,11 +20,9 @@ RSpec.describe OneTimeTasksFinder, type: :model do
 
   describe 'names_of_tasks_to_run_today' do
 
-
     it 'only those tasks that have not yet been run' do
       temp_onetime_path = Dir.mktmpdir('test-onetime_rake_files')
       allow(subject).to receive(:onetime_tasks_path).and_return(temp_onetime_path)
-
 
       # Create 4 .rake files and in the 2019_Q2 directory
       make_simple_rakefiles_under_subdir(temp_onetime_path, '2019_Q2', 4)
@@ -37,6 +35,32 @@ RSpec.describe OneTimeTasksFinder, type: :model do
 
       Timecop.freeze(may_1_2019) do
         expect(subject.names_of_tasks_to_run_today).to match_array(['shf:test:task1', 'shf:test:task3'])
+      end
+    end
+
+
+    it 'gets all tasks in a .rake file (can handle multiple tasks in a .rake file)' do
+      temp_onetime_path = Dir.mktmpdir('test-onetime_rake_files')
+      allow(subject).to receive(:onetime_tasks_path).and_return(temp_onetime_path)
+
+      allow(subject).to receive(:directory_name_meets_criteria?).and_return(true)
+      allow(subject).to receive(:has_task_been_run?).and_return(false)
+
+
+      # Create 1 .rake file and in the 2019_Q2 directory
+      simple_rakefiles =  make_simple_rakefiles_under_subdir(temp_onetime_path, '2019_Q2', 1)
+
+      # add 2 other tasks to the .rake file
+      task2_in_file = simple_rake_task('task1_in_file')
+      task3_in_file = simple_rake_task('task2_in_file')
+
+      File.open(simple_rakefiles.first, 'a') do |f|
+        f.puts task2_in_file
+        f.puts task3_in_file
+      end
+
+      Timecop.freeze(may_1_2019) do
+        expect(subject.names_of_tasks_to_run_today).to match_array(['shf:test:task0', 'shf:test:task1_in_file', 'shf:test:task2_in_file'])
       end
     end
 

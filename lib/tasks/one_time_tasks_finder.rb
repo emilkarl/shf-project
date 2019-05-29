@@ -36,7 +36,7 @@ class OneTimeTasksFinder
 
   # Returns a list of Rake::Tasks names that
   #  (1) have not been run yet, and
-  #  (2) are in a directory that meets the pattern matching criteria
+  #  (2) are in a .rake file that is in directory that meets the pattern matching criteria
   def names_of_tasks_to_run_today
 
     rakefiles = onetime_rake_files

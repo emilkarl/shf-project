@@ -57,9 +57,9 @@ class ActivityLogger
       ensure
         log.close unless @is_system_outstream
       end
-    else
-      log
     end
+    # always return the log
+    log
   end
 
 

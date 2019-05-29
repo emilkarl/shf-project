@@ -1,8 +1,5 @@
 %header.entry-header
   %h1.entry-title= t('.title', company_name: @company.name)
-  - if @address.mail
-    = t('.cannot_delete_address')
-    = fas_tooltip(t('.delete_address_tooltip'))
 
 .entry-content
   = render partial: 'form',
@@ -11,6 +8,9 @@
   %hr
   .text-center
     = link_to "#{t('companies.view_company')}", @company, class: 'btn btn-sm btn-light'
+    - if @address.mail
+      = t('.cannot_delete_address')
+      = fas_tooltip(t('.delete_address_tooltip'))
     - unless @address.mail
       = link_to "#{t('.delete')}", company_address_delete_path(@company, @address),
                 method: :delete,

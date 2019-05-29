@@ -565,6 +565,13 @@ table {
   }
 }
 
+@media (max-width: 768px) {
+  .dropdown-menu a, 
+  nav.navbar .dropdown-menu li a {
+    border: 0;
+  }
+}
+
 @media (max-width: 990px) {
   #companies_list {
     margin-top: 0;

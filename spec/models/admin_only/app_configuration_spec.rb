@@ -1,6 +1,12 @@
 require 'rails_helper'
+require 'shared_context/unstub_paperclip_file_commands'
+
 
 RSpec.describe AdminOnly::AppConfiguration, type: :model do
+
+  # These are required to get the content type and validate it
+  include_context 'unstub Paperclip file commands'
+
   let(:app_configuration) { create(:app_configuration) }
 
   PHOTOS_PATH = File.join(Rails.root, 'spec', 'fixtures', 'member_photos')
@@ -37,100 +43,48 @@ RSpec.describe AdminOnly::AppConfiguration, type: :model do
     it { is_expected.to have_db_column :email_admin_new_app_received_enabled }
   end
 
+
   describe 'Validations' do
-    it 'validates content type of chairperson signature file' do
-      is_expected.to validate_attachment_content_type(:chair_signature)
-        .allowing('image/png', 'image/jpeg')
-        .rejecting('image/gif', 'image/bmp')
-    end
-    it 'validates content type of SHF logo file' do
-      is_expected.to validate_attachment_content_type(:shf_logo)
-        .allowing('image/png', 'image/jpeg')
-        .rejecting('image/gif', 'image/bmp')
-    end
-    it 'validates content type of H-Brand logo file' do
-      is_expected.to validate_attachment_content_type(:h_brand_logo)
-        .allowing('image/png', 'image/jpeg')
-        .rejecting('image/gif', 'image/bmp')
-    end
-    it 'validates content type of dog trainers banner' do
-      is_expected.to validate_attachment_content_type(:sweden_dog_trainers)
-        .allowing('image/png', 'image/jpeg')
-        .rejecting('image/gif', 'image/bmp')
-    end
 
-    describe 'rejects invalid file contents and file type - chairperson signature' do
+    describe 'image attachments' do
 
-      it 'rejects if content not jpeg or png' do
-        app_configuration.chair_signature = txt_file
-        expect(app_configuration).not_to be_valid
+      image_attachments = [:chair_signature,
+                           :shf_logo,
+                           :h_brand_logo,
+                           :sweden_dog_trainers
+      ]
 
-        app_configuration.chair_signature = gif_file
-        expect(app_configuration).not_to be_valid
+      image_attachments.each do |image_attachment|
 
-        app_configuration.chair_signature = ico_file
-        expect(app_configuration).not_to be_valid
+        describe "content type for #{image_attachment}" do
+
+          it "'image/png', 'image/jpg' are valid, 'image/gif', 'image/bmp' are not" do
+            is_expected.to validate_attachment_content_type(image_attachment)
+                               .allowing('image/png', 'image/jpeg')
+                               .rejecting('image/gif', 'image/bmp')
+          end
+
+          it "is not valid if content is text, gif, ico, or a file type <> jpg or png" do
+            app_configuration.send("#{image_attachment}=", txt_file)
+            expect(app_configuration).not_to be_valid
+
+            app_configuration.send("#{image_attachment}=", gif_file)
+            expect(app_configuration).not_to be_valid
+
+            app_configuration.send("#{image_attachment}=", ico_file)
+            expect(app_configuration).not_to be_valid
+          end
+
+          it 'rejects if content type is ok but file type is wrong' do
+            app_configuration.send("#{image_attachment}=", xyz_file)
+            expect(app_configuration).not_to be_valid
+          end
+        end
+
       end
-      it 'rejects if content OK but file type wrong' do
-        app_configuration.chair_signature = xyz_file
-        expect(app_configuration).not_to be_valid
-      end
-    end
 
-    describe 'rejects invalid file contents and file type - SHF logo' do
-
-      it 'rejects if content not jpeg or png' do
-        app_configuration.shf_logo = txt_file
-        expect(app_configuration).not_to be_valid
-
-        app_configuration.shf_logo = gif_file
-        expect(app_configuration).not_to be_valid
-
-        app_configuration.shf_logo = ico_file
-        expect(app_configuration).not_to be_valid
-      end
-      it 'rejects if content OK but file type wrong' do
-        app_configuration.shf_logo = xyz_file
-        expect(app_configuration).not_to be_valid
-      end
     end
 
-    describe 'rejects invalid file contents and file type - H-Brand logo' do
-
-      it 'rejects if content not jpeg or png' do
-        app_configuration.h_brand_logo = txt_file
-        expect(app_configuration).not_to be_valid
-
-        app_configuration.h_brand_logo = gif_file
-        expect(app_configuration).not_to be_valid
-
-        app_configuration.h_brand_logo = ico_file
-        expect(app_configuration).not_to be_valid
-      end
-      it 'rejects if content OK but file type wrong' do
-        app_configuration.h_brand_logo = xyz_file
-        expect(app_configuration).not_to be_valid
-      end
-    end
-
-    describe 'rejects invalid file contents and file type - dog trainers banner' do
-
-      it 'rejects if content not jpeg or png' do
-        app_configuration.sweden_dog_trainers = txt_file
-        expect(app_configuration).not_to be_valid
-
-        app_configuration.sweden_dog_trainers = gif_file
-        expect(app_configuration).not_to be_valid
-
-        app_configuration.sweden_dog_trainers = ico_file
-        expect(app_configuration).not_to be_valid
-      end
-      it 'rejects if content OK but file type wrong' do
-        app_configuration.sweden_dog_trainers = xyz_file
-        expect(app_configuration).not_to be_valid
-      end
-    end
   end
-
 
 end

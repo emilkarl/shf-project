@@ -11,9 +11,12 @@ require 'webdrivers/chromedriver'
 # Put the Geocoder into test mode so no actual API calls are made and stub with fake data
 require_relative '../../spec/support/geocoder'
 
-# version required on SemaphoreCI as of 2018-12-13
+# Mock the AppConfiguration so that Paperclip commands are not called multiple times for every scenario
+require_relative '../../spec/shared_context/mock_app_configuration.rb'
+
 #
-# Chromedriver.set_version "2.24" unless ENV.has_key?('SEMAPHORECI')
+# Configurations
+#
 
 Webdrivers.install_dir = Rails.root.join('features', 'support', 'webdrivers')
 
@@ -28,18 +31,69 @@ end
 Cucumber::Rails::Database.javascript_strategy = :truncation
 
 
+# These sites are where to download webdrivers.
+# WebMock and VCR need to 'allow' them.
+webdriver_download_sites = [
+    'chromedriver.storage.googleapis.com',
+    'github.com/mozilla/geckodriver/releases',
+    'selenium-release.storage.googleapis.com',
+    'developer.microsoft.com/en-us/microsoft-edge/tools/webdriver'
+]
+WebMock.disable_net_connect!(allow_localhost: true, allow: webdriver_download_sites)
+
+
+VCR.configure do |c|
+  c.hook_into :webmock
+  c.cassette_library_dir     = 'features/vcr_cassettes'
+  c.allow_http_connections_when_no_cassette = true
+  c.ignore_localhost = true
+  c.default_cassette_options = { allow_playback_repeats: true }
+  webdriver_download_sites.each do | webdriver_download_site |
+    c.ignore_hosts(webdriver_download_site)
+  end
+end
+
+Warden.test_mode!
+World Warden::Test::Helpers
+
+Capybara.register_driver :selenium do |app|
+  options = Selenium::WebDriver::Chrome::Options.new(args: ['headless'])
+  Capybara::Selenium::Driver.new(
+      app,
+      browser: :chrome,
+      options: options
+  )
+end
+
+# Displayed chrome browser - @selenium_browser
+Capybara.register_driver :selenium_browser do |app|
+  Capybara::Selenium::Driver.new(
+      app,
+      browser: :chrome
+  )
+end
+
+
+#
+# Global Before/After
+#
+
 Before do
   # I18n.locale = 'en'
   ENV['SHF_BETA'] = 'no'
 
   # shush the ActivityLogger: Don't have it show every message to STDOUT.
   allow_any_instance_of(ActivityLogger).to receive(:show).and_return(false)
+
+  mock_the_app_configuration
 end
 
 
-Warden.test_mode!
-World Warden::Test::Helpers
 After { Warden.test_reset! }
+
+#
+# 'Global' methods available to all steps
+#
 
 def path_with_locale(visit_path)
   "/#{I18n.locale}#{visit_path}"
@@ -49,24 +103,8 @@ def i18n_content(content, locale=I18n.locale)
   I18n.t(content, locale)
 end
 
-Capybara.register_driver :selenium do |app|
-  options = Selenium::WebDriver::Chrome::Options.new(args: ['headless'])
-  Capybara::Selenium::Driver.new(
-    app,
-    browser: :chrome,
-    options: options
-  )
-end
 
-# Displayed chrome browser - @selenium_browser
-Capybara.register_driver :selenium_browser do |app|
-  Capybara::Selenium::Driver.new(
-    app,
-    browser: :chrome
-  )
-end
-
-
+# ----------------------------------------------------
 # Uncomment this to show the 20 slowest scenarios
 =begin
 scenario_times = {}
@@ -86,3 +124,22 @@ at_exit do
   end
 end
 =end
+# ----------------------------------------------------
+
+
+#
+# private methods
+#
+
+private
+
+# Don't force a load of the AppConfiguration every time we run a test:
+# mock the application configuration instead.
+# Using the  MockAppConfig saves time because it means we don't ever call Paperclip
+# for it. Calling and using Paperclip is very slow.
+#  If you have a feature or scenario that requires a 'real' ApplicationConfiguration,
+#  use the step defined in step_definitions/app_configuration_steps/rb
+#
+def mock_the_app_configuration
+  allow(AdminOnly::AppConfiguration).to receive(:config_to_use).and_return(MockAppConfig)
+end

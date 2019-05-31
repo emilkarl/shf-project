@@ -1,5 +1,7 @@
 require 'rails_helper'
 require 'email_spec/rspec'
+require 'shared_context/unstub_paperclip_all_run_commands'
+
 
 # ================================================================================
 
@@ -32,6 +34,15 @@ end
 # ================================================================================
 
 RSpec.describe User, type: :model do
+
+  # These are required to get the content type and validate it
+  include_context 'unstub Paperclip all run commands'
+
+  before(:each) do
+    allow_any_instance_of(Paperclip::Attachment).to receive(:post_process_file)
+                                                        .with(any_args)
+                                                        .and_call_original
+  end
 
   let(:user) { create(:user) }
   let(:user_with_member_photo) { create(:user, :with_member_photo) }
@@ -161,6 +172,7 @@ RSpec.describe User, type: :model do
         user_with_member_photo.member_photo = ico_file
         expect(user_with_member_photo).not_to be_valid
       end
+
       it 'rejects if content OK but file type wrong' do
         user_with_member_photo.member_photo = xyz_file
         expect(user_with_member_photo).not_to be_valid

@@ -3,6 +3,8 @@ Feature: As an user I want to be able to view and download my proof-of-membershi
   And gain the value that comes from being a member of the organization
 
   Background:
+    Given the App Configuration is not mocked and is seeded
+
     Given the following users exist
       | email         | admin | member | membership_number | first_name | last_name |
       | emma@mutts.se |       | true   | 1001              | Emma       | Edmond    |

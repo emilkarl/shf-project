@@ -9,23 +9,46 @@ require 'paperclip/matchers'
 require 'support/data_creation_helper'
 
 require 'create_membership_seq_if_needed'
+require 'shared_context/mock_app_configuration'
+require 'shared_context/stub_paperclip_methods_dynamic'
+
+require 'support/geocoder'  # Put Geocoder into test mode (mock responses)
 
 
 ActiveRecord::Migration.maintain_test_schema!
 
+
 RSpec.configure do |config|
 
-  config.include Devise::Test::ControllerHelpers, :type => :controller
-  config.include Devise::Test::ControllerHelpers, :type => :view
+  #
+  # includes
+  #
+
+  config.include Devise::Test::ControllerHelpers, type: :controller
+  config.include Devise::Test::ControllerHelpers, type: :view
+
+  config.include Shoulda::Matchers::ActiveRecord, type: :model
+  config.include FactoryBot::Syntax::Methods
+  config.include Paperclip::Shoulda::Matchers
+
+  config.include_context 'stub Paperclip methods'
+
+  #
+  # Rspec.configuration settings
+  #
 
   config.fixture_path = "#{::Rails.root}/spec/fixtures"
 
   config.infer_spec_type_from_file_location!
   config.filter_rails_from_backtrace!
 
-  config.include Shoulda::Matchers::ActiveRecord, type: :model
-  config.include FactoryBot::Syntax::Methods
-  config.include Paperclip::Shoulda::Matchers
+  config.file_fixture_path = 'spec/fixtures/uploaded_files'
+  config.use_transactional_fixtures = false
+
+
+  #
+  # other related configurations (not RSpec directly)
+  #
 
   Shoulda::Matchers.configure do |shoulda_config|
     shoulda_config.integrate do |with|
@@ -34,10 +57,10 @@ RSpec.configure do |config|
     end
   end
 
-  config.file_fixture_path = 'spec/fixtures/uploaded_files'
-  
 
-  config.use_transactional_fixtures = false
+  #
+  # before / after hooks
+  #
 
   config.before(:suite) do
     if config.use_transactional_fixtures
@@ -55,13 +78,23 @@ RSpec.configure do |config|
     DatabaseCleaner.clean_with(:truncation)
   end
 
+
   config.before(:each) do
     DatabaseCleaner.strategy = :transaction
+    DatabaseCleaner.start
+    create_user_membership_num_seq_if_needed
+
+    # shush the ActivityLogger: Don't have it show every message to STDOUT.
+    allow_any_instance_of(ActivityLogger).to receive(:show).and_return(false)
+
+    # Don't force a load of the AppConfiguration every time we run a test; mock the application configuration instead.
+    # Using the  MockAppConfig saves time because it means we don't ever call Paperclip.
+    # Calling and using Paperclip is very slow.
+    allow(AdminOnly::AppConfiguration).to receive(:config_to_use).and_return(MockAppConfig)
   end
 
   config.before(:each, :js => true) do
     DatabaseCleaner.strategy = :truncation
-
   end
 
   config.before(:each, type: :feature) do
@@ -77,22 +110,9 @@ RSpec.configure do |config|
     end
   end
 
-  config.before(:each) do
-    DatabaseCleaner.start
-    create_user_membership_num_seq_if_needed
-
-    # shush the ActivityLogger: Don't have it show every message to STDOUT.
-    allow_any_instance_of(ActivityLogger).to receive(:show).and_return(false)
-  end
 
   config.append_after(:each) do
     DatabaseCleaner.clean
   end
 
 end
-
-
-# put Geocoder into test mode
-# Will have to manually set the information returned by Geocoder
-
-require 'support/geocoder'

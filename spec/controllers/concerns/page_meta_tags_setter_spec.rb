@@ -42,12 +42,8 @@ RSpec.describe PageMetaTagsSetterTestController, type: :controller do
 
     describe 'uses defaults if entries are not in the locale file' do
 
-      before(:all) do
-
+      before(:each) do
         @meta_setter.set_meta_tags_for_url_path(MOCK_BASE_URL, MOCK_REQ_PATH)
-
-        # have to check results like this since the method calls set_meta_tags twice
-        # and thus we could only check the second call with .to receive...
         @meta_tags_set = @meta_setter.send(:meta_tags).send(:meta_tags)
       end
 
@@ -88,6 +84,8 @@ RSpec.describe PageMetaTagsSetterTestController, type: :controller do
 
           it "locale :sv = 'sv_SE'" do
             I18n.locale = :sv
+
+            #set_the_meta_tags
             subject.set_meta_tags_for_url_path(MOCK_BASE_URL, MOCK_REQ_PATH)
 
             expect(subject.send(:meta_tags)

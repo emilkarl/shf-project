@@ -13,11 +13,12 @@ RSpec.describe PageMetaOgTagsSetterTestController, type: :controller do
 
   before(:all) do
     @orig_locale = I18n.locale
+  end
 
+  before(:each) do
     @meta_setter = PageMetaOgTagsSetterTestController.new
     @meta_setter.set_request! ActionDispatch::TestRequest.create
     @meta_setter.request.path = MOCK_REQ_PATH
-
   end
 
   after(:all) { I18n.locale = @orig_locale }
@@ -25,13 +26,18 @@ RSpec.describe PageMetaOgTagsSetterTestController, type: :controller do
 
   describe 'set_og_meta_tags (Facebook OpenGraph))' do
 
-    describe 'defaults' do
+
+    describe 'defaults uses SiteMetaInfoDefaults' do
 
       before(:all) do
         I18n.locale = :sv
+      end
+
+      before(:each) do
         @meta_setter.set_og_meta_tags
         @meta_tags_set = @meta_setter.send(:meta_tags)['og']
       end
+
 
       it 'site_name' do
         expect(@meta_tags_set['site_name']).to eq SiteMetaInfoDefaults.site_name
@@ -44,6 +50,7 @@ RSpec.describe PageMetaOgTagsSetterTestController, type: :controller do
       it 'description' do
         expect(@meta_tags_set['description']).to eq SiteMetaInfoDefaults.description
       end
+
       it 'type' do
         expect(@meta_tags_set['type']).to eq SiteMetaInfoDefaults.og_type
       end
@@ -54,6 +61,9 @@ RSpec.describe PageMetaOgTagsSetterTestController, type: :controller do
 
       before(:all) do
         I18n.locale = :sv
+      end
+
+      before(:each) do
         @meta_setter.set_og_meta_tags(site_name: 'site name',
                                       title:       'page title',
                                       description: 'page description',
@@ -62,6 +72,7 @@ RSpec.describe PageMetaOgTagsSetterTestController, type: :controller do
                                       fullpath:    MOCK_REQ_PATH)
         @meta_tags_set = @meta_setter.send(:meta_tags)['og']
       end
+
 
       it 'site_name' do
         expect(@meta_tags_set['site_name']).to eq 'site name'
@@ -87,6 +98,5 @@ RSpec.describe PageMetaOgTagsSetterTestController, type: :controller do
     end
 
   end
-
 
 end

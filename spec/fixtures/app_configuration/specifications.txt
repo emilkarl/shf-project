@@ -1,0 +1,4 @@
+This is just a dummy file to test the app.
+
+Tests expect it to be here, so do not delete it.
+This should be a file with some text in it.

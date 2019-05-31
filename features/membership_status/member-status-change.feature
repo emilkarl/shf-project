@@ -11,6 +11,8 @@ Feature: Membership status updated due to payments or expiration
 
   Background:
 
+    Given the App Configuration is not mocked and is seeded
+
     Given the following users exist
       | email               | admin | member | membership_number |
       | emma@mutts.com      |       | true   | 1001              |

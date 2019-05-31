@@ -3,6 +3,8 @@ Feature: As an user I want to be able to view and download my company h-brand
   And also show my business services that have been certified by the organization
 
   Background:
+    Given the App Configuration is not mocked and is seeded
+
     Given the following users exist
       | email         | admin | member | membership_number | first_name | last_name |
       | emma@mutts.se |       | true   | 1001              | Emma       | Edmond    |

@@ -36,6 +36,7 @@ Feature: Applicant gets an email when membership has been granted. (They are now
   @time_adjust
   Scenario: Applicant pays all fees, membership is granted; applicant gets email
     Given the date is set to "2018-01-01"
+    And the App Configuration is not mocked and is seeded
     When I am in "emma@happymutts.se" browser
     And I am logged in as "emma@happymutts.se"
     And I am on the "user details" page for "emma@happymutts.se"

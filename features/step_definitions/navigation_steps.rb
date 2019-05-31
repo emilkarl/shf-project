@@ -3,14 +3,24 @@ Given(/^I am on the "([^"]*)" page(?: for "([^"]*)")?$/) do |page, email|
 
   begin
     visit path_with_locale(get_path(page, user))
-  rescue => exception
-    warn exception.message
+  rescue StandardError => orig_exception
+    raise orig_exception  # if the original exception
+
+  rescue => exception  # FIXME -- only do this branch if the path cannot be found. Need to match on the message,  not just the exception class Do not swallow (loose) the original exception
+    # ex: Code above might through a NoMethod exception for some other reason (not having to do with the page path)
+
+    warn exception.message  # FIXME: what is the purpose of this statement?
+
     begin
       path_components = page.split(/\s+/)
       visit self.send(path_components.push('path').join('_').to_sym)
-    rescue NoMethodError, ArgumentError
+
+    rescue NoMethodError, ArgumentError => error
       raise "Can't find mapping from \"#{page}\" to a path.\n" +
-        "Now, go and add a mapping in #{__FILE__} or assertion_steps.rb"
+        "Now, go and add a mapping in #{__FILE__} or assertion_steps.rb\n" +
+          "original error: #{error}\n" +
+          "exception: #{exception}\n"
+
     end
   end
 

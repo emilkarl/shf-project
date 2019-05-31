@@ -55,7 +55,8 @@ Feature: Admin sets when member packets were sent on the all users page
 
   @selenium
   Scenario: I set the membership packet sent to today for a user
-    Given I am on the "all users" page
+    Given the App Configuration is not mocked and is seeded
+    And I am on the "all users" page
     And the date is set to "2019-03-01"
     Then I should see the checkbox with id "date_membership_packet_sent" unchecked in the row for user "hannah@happymutts.se"
     When I check the checkbox with id "date_membership_packet_sent" for the row with "hannah@happymutts.se"
@@ -69,7 +70,8 @@ Feature: Admin sets when member packets were sent on the all users page
 
   @selenium
   Scenario: I clear the membership packet sent date for a user
-    Given I am on the "all users" page
+    Given the App Configuration is not mocked and is seeded
+    And I am on the "all users" page
     Then I should see the checkbox with id "date_membership_packet_sent" checked in the row for user "lars@happymutts.se"
     When I uncheck the checkbox with id "date_membership_packet_sent" for the row with "lars@happymutts.se"
     Then I should see the checkbox with id "date_membership_packet_sent" unchecked in the row for user "lars@happymutts.se"

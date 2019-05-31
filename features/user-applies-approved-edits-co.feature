@@ -2,6 +2,8 @@ Feature: Whole process of a new user creating a login, applying, being approved,
   This exercises the entire process to ensure that data we are creating in the features and/or factories is not somehow masking any problems.
 
   Background:
+    Given the App Configuration is not mocked and is seeded
+
     Given the following users exists
       | email                | admin | first_name | last_name |
       | new_user@example.com |       | NewUser1   | Lastname  |

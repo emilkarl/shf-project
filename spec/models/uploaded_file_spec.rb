@@ -1,6 +1,12 @@
 require 'rails_helper'
+require 'shared_context/unstub_paperclip_file_commands'
+
 
 RSpec.describe UploadedFile, type: :model do
+
+  # These are required to get the content type and validate it
+  include_context 'unstub Paperclip file commands'
+
 
   describe 'Factory' do
     it 'has a valid factory' do
@@ -29,6 +35,7 @@ RSpec.describe UploadedFile, type: :model do
   end
 
   describe "accepted content types" do
+
     it "png" do
       expect(build(:uploaded_file, :png)).to be_valid
     end

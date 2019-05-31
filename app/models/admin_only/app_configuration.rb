@@ -40,6 +40,24 @@ module AdminOnly
     scope :config_to_use, -> { last }
 
 
+    # Helpful method to get all images for the configuration
+    def self.image_attributes
+      [:chair_signature,
+       :sweden_dog_trainers,
+       :h_brand_logo,
+       :shf_logo
+      ].freeze
+    end
+
+
+    def image_attributes
+      self.class.image_attributes
+    end
+
+
+    # =========================================================================
+
+
     private
 
     def url_for_images

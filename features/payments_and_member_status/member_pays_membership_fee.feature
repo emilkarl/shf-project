@@ -3,6 +3,8 @@ Feature: As a member
   I need to be able to pay my membership fee
 
   Background:
+    Given the App Configuration is not mocked and is seeded
+
     Given the date is set to "2017-01-10"
     Given the following users exist
       | email          | admin | member    | membership_number |

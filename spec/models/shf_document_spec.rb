@@ -1,6 +1,12 @@
 require 'rails_helper'
+require 'shared_context/unstub_paperclip_file_commands'
+
 
 RSpec.describe ShfDocument, type: :model do
+
+  # These are required to get the content type and validate it
+  include_context 'unstub Paperclip file commands'
+
 
   describe 'Factory' do
     it 'has a valid factory' do

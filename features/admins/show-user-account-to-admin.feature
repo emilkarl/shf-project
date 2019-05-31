@@ -7,6 +7,7 @@ Feature: Admin sees user account information
   PT:  https://www.pivotaltracker.com/story/show/140358959
 
   Background:
+    Given the App Configuration is not mocked and is seeded
 
     Given the following users exists
       | email                           | admin | membership_number | member |

@@ -8,6 +8,8 @@ Feature: As an admin
   PT: https://www.pivotaltracker.com/story/show/135472437
 
   Background:
+    Given the App Configuration is not mocked and is seeded
+
     Given the following users exists
       | email                 | admin |
       | emma@happymutts.se    |       |

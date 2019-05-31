@@ -22,6 +22,8 @@ Feature: Admin enables/disables the emails sent when a new application is receiv
       | name                 | company_number | email                  | region     |
       | No More Snarky Barky | 5560360793     | snarky@snarkybarky.com | Stockholm  |
 
+    And the App Configuration is not mocked and is seeded
+
 
   @selenium
   Scenario: Admin disables send new app received emails

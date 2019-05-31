@@ -3,6 +3,8 @@ Feature: As a user
   I need to be able to pay my membership fee
 
   Background:
+    Given the App Configuration is not mocked and is seeded
+
     Given the following users exist
       | email          | admin | member |
       | emma@mutts.com |       | false  |

@@ -40,7 +40,7 @@ Feature: Admin uploads meeting PDFs
     Given I am on the "new SHF document" page
     And I fill in the translated form with data:
       | shf_documents.new.title | shf_documents.new.description |
-      | Uploaded diploma        | some description              |
+      | Uploaded tred.exe        | some description              |
     And I choose a shf-document named "tred.exe" to upload
     When I click on t("submit") button
     Then I should see t("shf_documents.invalid_upload_type")

@@ -3,6 +3,8 @@ Feature: As an admin
   So that I have flexibility in managing membership status
 
   Background:
+    Given the App Configuration is not mocked and is seeded
+
     Given the following users exist
       | email          | admin | member | membership_number |
       | emma@mutts.com |       | true   | 1001              |

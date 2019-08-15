@@ -78,6 +78,9 @@ gem 'counter_culture', '~> 2.0'
 
 gem 'cookies_eu'
 
+# schedules: handle repeating events
+gem 'ice_cube'
+
 group :development, :test do
   gem 'rspec-rails'
   gem 'shoulda-matchers'

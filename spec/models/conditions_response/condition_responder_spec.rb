@@ -22,26 +22,20 @@ RSpec.describe ConditionResponder, type: :model do
   end
 
 
-  it 'DEFAULT_TIMING is :on' do
-    expect(ConditionResponder::DEFAULT_TIMING).to eq :on
-  end
-
   describe '.get_timing' do
 
-    it 'always returns a symbol' do
-      expect(ConditionResponder.get_timing(create(:condition, timing: :blorf))).to eq(:blorf)
+    it 'always returns a ConditionSchedule' do
+      c = create(:condition, timing: ConditionSchedule.new)
+      puts c.pretty_inspect
+      expect(ConditionResponder.get_timing(c)).to be_a(ConditionSchedule)
     end
 
-    context 'condition is nil' do
-      it 'returns the DEFAULT TIMING' do
-        expect(ConditionResponder.get_timing(nil)).to eq ConditionResponder::DEFAULT_TIMING
-      end
+    it 'condition is nil returns the default schedule' do
+      expect(ConditionResponder.get_timing(nil).schedule).to eq ConditionSchedule.default_schedule
     end
 
-    context 'condition is not nil' do
-      it 'returns the timing from the condition if condition is not nil' do
-        expect(ConditionResponder.get_timing(create(:condition, timing: :flurb))).to eq(:flurb)
-      end
+    it 'condition is not nil returns the timing (schedule)' do
+      expect(ConditionResponder.get_timing(create(:condition, timing: ConditionSchedule.new))).to be_a(ConditionSchedule)
     end
 
   end

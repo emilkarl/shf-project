@@ -22,7 +22,7 @@
 #   to every instance of a class.
 #
 #   class_name - (String) the name of the class to instantiate
-#   timing - (Symbol) this can be mostly descriptive so that the code
+#   timing - (ConditionSchedule) this can be mostly descriptive so that the code
 #             reads much more naturally.  Some classes may need to use
 #             this when running :process_condition.
 #             NOTE: this is serialized, so the value can be specified as a symbol.
@@ -41,7 +41,7 @@ class Condition < ApplicationRecord
   # Note that we cannot validate the presence of an empty Hash because serialize persists is as NULL
 
   validate do
-    errors.add(:timing, :invalid) unless timing.blank? || timing.is_a?(Symbol)
+    errors.add(:timing, :invalid) unless timing.blank? || timing.is_a?(ConditionSchedule)
     errors.add(:config, :invalid) unless config.is_a?(Hash)
   end
 

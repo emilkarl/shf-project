@@ -36,8 +36,7 @@ end
 #--------------------------
 class ConditionResponder
 
-  DEFAULT_SCHEDULE = ConditionResponderSchedule.
-  DEFAULT_TIMING = TIMING_ON
+  DEFAULT_SCHEDULE = ConditionSchedule.new
   DEFAULT_CONFIG = {}
 
 
@@ -65,7 +64,7 @@ class ConditionResponder
   # @return timing [ConditionResponseSchedule] - condition.timing if condition is nil,
   #                           return the DEFAULT_TIMING
   def self.get_timing(condition)
-    condition.nil? ? DEFAULT_TIMING : condition.timing.to_sym
+    condition.nil? ? DEFAULT_SCHEDULE : condition.timing
   end
 
 
@@ -79,7 +78,7 @@ class ConditionResponder
   # for this ConditionResponder.
   # If it is not, it logs an error and raises and exception
   #
-  # @param timing [ConditionResponderSchedule] - the timing to validate
+  # @param timing [ConditionSchedule] - the timing to validate
   # @param expected_timings [Array] - list of valid timings
   # @param log [Log] - the log to record the error to
   #

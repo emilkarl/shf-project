@@ -67,10 +67,10 @@ class UsersController < ApplicationController
     @user.update!(user_params) && (payment ?
                                        payment.update!(payment_params) : true)
 
-    render partial: 'member_payment_status', locals: { user: @user }
+    render partial: 'member_status', locals: { user: @user }
 
   rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotSaved
-    render partial: 'member_payment_status',
+    render partial: 'member_status',
            locals: { user: @user, error: t('users.update.error') }
   end
 

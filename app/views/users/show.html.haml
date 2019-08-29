@@ -15,7 +15,7 @@
       = field_or_none("#{t('.membership_number')}", @user.membership_number,
                       label_class: 'standard-label')
 
-  = render partial: 'member_payment_status', locals: { user: @user }
+  = render partial: 'member_status', locals: { user: @user }
 
   .row
     .col.mt-2

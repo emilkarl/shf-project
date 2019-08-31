@@ -1,0 +1,40 @@
+-# This expects the following locals:
+-#   term_name: the name of this term (ex: 'membership', 'branding license')
+-#   fee_name: the name of the fee (ex: 'membership fee', 'branding license fee', 'h-markt fee')
+-#   end_date : the date that the current term ends
+-#   extended_end_date:  if a payment is made, the new (extended) end date
+-#   link_to_url : url to pass to link_to for making a payment
+-#
+-# This is a Bootstrap 4 modal.
+-# @url https://getbootstrap.com/docs/4.2/components/modal/
+-#
+#payment-not-due-modal.modal.fade{tabindex:'-1', role:'dialog', aria: { labelledby: 'payment-not-due-modal-title', hidden: 'true'} }
+
+  .modal-dialog{role:'document'}
+    .modal-content
+      .payment-not-due
+
+        .modal-header
+          %h4#payment-not-due-modal-title.modal-title
+            = t('payment.no_payment_due_now')
+
+          %button.close{data: {dismiss: 'modal'}, aria: {label: "#{t('close')}"} }
+            %span{aria: {hidden: 'true'} } &times;
+
+        .modal-body
+          %p
+            You are already paid until
+            %span.end-date= "#{end_date}."
+            %br
+            You do not owe a payment until then.
+          %p= "Making a #{fee_name} payment now will extend your #{term_name} to #{extended_end_date}."
+          %p Do you really want to make a payment now?
+
+        .modal-footer
+          =link_to('Yes, make a payment', link_to_url,
+            {method: :post, class: 'btn btn-secondary btn-sm'})
+
+          %button.btn-primary.btn-sm{data: {dismiss:'modal'}}
+            No. Nevermind.
+
+

@@ -4,7 +4,7 @@ module PaymentsHelper
   # set based on whether or not the date has expired and a tooltip that explains it.
   #
   # @param entity [User | Object]- the entity that provides the expiration date. If a User,
-  # must respond to :membership_expire_date; else must respond to :branding_expire_date
+  # must respond to :entity_expire_date
   #
   # @return [String] - the HTML <span> string
   def expire_date_label_and_value(entity)
@@ -29,6 +29,26 @@ module PaymentsHelper
       concat fas_tooltip(expire_after_tooltip_title)
     end
   end
+
+
+  # @param entity [User or Company] - the entity with a possible membership expiration date
+  # @return [nil | date] - return nil if there is no expiration date (e.g. not a member), else
+  # the Date that the current membership term expires
+  def entity_expire_date(entity)
+    (entity.is_a? User) ? entity.membership_expire_date : entity.branding_expire_date
+  end
+
+
+  def payment_should_be_made_class(entity)
+    if entity.term_expired?
+      'No'
+    elsif entity.too_early_to_pay?
+      'Yes'
+    else
+      'Maybe'
+    end
+  end
+
 
   def expire_date_css_class(expire_date)
     today = Time.zone.today

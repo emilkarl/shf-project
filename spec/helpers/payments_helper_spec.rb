@@ -1,7 +1,10 @@
 require 'rails_helper'
+require 'shared_context/users'
+
 include ApplicationHelper
 
 RSpec.describe PaymentsHelper, type: :helper do
+
   let(:user) { create(:user) }
   let(:company) { create(:company) }
 
@@ -90,6 +93,40 @@ RSpec.describe PaymentsHelper, type: :helper do
       expect(payment_notes_label_and_value(user)).to match response
     end
   end
+
+
+  describe 'payment_should_be_made_class is based on entity.should_pay_now? and entity.too_early_to_pay?' do
+
+    include_context 'create users'
+
+    # ==================================
+    #  Today = DECEMBER 1 for EVERY EXAMPLE
+    around(:each) do |example|
+      Timecop.freeze(dec_1)
+      example.run
+      Timecop.return
+    end
+
+
+    it 'returns "yes" if too_early_to_pay?' do
+      expect(payment_should_be_made_class(user_membership_expires_EOD_feb3)).to eq 'Yes'
+    end
+
+    it 'returns "maybe" if it has not expired and should_pay_now?' do
+      expect(payment_should_be_made_class(user_membership_expires_EOD_feb1)).to eq 'Maybe'
+    end
+
+    it 'returns "no" if the payment term has expired' do
+      expect(payment_should_be_made_class(user_paid_lastyear_nov_29)).to eq 'No'
+    end
+
+    it 'returns "no" if no payments have been made' do
+      expect(payment_should_be_made_class(build(:user))).to eq 'No'
+      expect(payment_should_be_made_class(build(:company))).to eq 'No'
+    end
+
+  end
+
 
   describe 'expire_date_css_class' do
 

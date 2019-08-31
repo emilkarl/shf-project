@@ -2,6 +2,11 @@
 
 .app_configuration {
 
+  .section {
+    margin-bottom: 2em;
+    margin-left: 1em;
+  }
+
   .field-label {
     font-weight: bold;
   }
@@ -63,5 +68,13 @@
 
   .card {
     margin-top: 2rem;
+  }
+
+  .form-check {
+    line-height: 1em;
+  }
+
+  .payment-too-soon-days {
+    width: 5em;
   }
 }

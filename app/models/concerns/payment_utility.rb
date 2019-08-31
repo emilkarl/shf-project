@@ -3,19 +3,19 @@ module PaymentUtility
 
   included do
 
-    def most_recent_payment(payment_type)
+    def most_recent_payment(payment_type = self.class::THIS_PAYMENT_TYPE)
       payments.completed.send(payment_type).order(:created_at).last
     end
 
-    def payment_start_date(payment_type)
+    def payment_start_date(payment_type = self.class::THIS_PAYMENT_TYPE)
       most_recent_payment(payment_type)&.start_date
     end
 
-    def payment_expire_date(payment_type)
+    def payment_expire_date(payment_type = self.class::THIS_PAYMENT_TYPE)
       most_recent_payment(payment_type)&.expire_date
     end
 
-    def payment_notes(payment_type)
+    def payment_notes(payment_type = self.class::THIS_PAYMENT_TYPE)
       most_recent_payment(payment_type)&.notes
     end
   end
@@ -34,7 +34,7 @@ module PaymentUtility
     # @param payment_type [Payment::PAYMENT_TYPE_MEMBER | Payment::PAYMENT_TYPE_BRANDING] - the specific type of the payment to look for
     #
     # @return [Array] - the start_date _and_ expire_date for the next payment
-    def next_payment_dates(entity_id, payment_type)
+    def next_payment_dates(entity_id, payment_type = self::THIS_PAYMENT_TYPE)
       entity = find(entity_id)
 
       expire_date = entity.payment_expire_date(payment_type)

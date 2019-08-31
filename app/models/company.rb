@@ -48,9 +48,12 @@ class Company < ApplicationRecord
   delegate :visible, to: :addresses, prefix: true
 
 
+  THIS_PAYMENT_TYPE = Payment::PAYMENT_TYPE_BRANDING
+
+
 
   def self.next_branding_payment_dates(company_id)
-    next_payment_dates(company_id, Payment::PAYMENT_TYPE_BRANDING)
+    next_payment_dates(company_id, THIS_PAYMENT_TYPE)
   end
 
 
@@ -173,22 +176,23 @@ class Company < ApplicationRecord
 
 
   def most_recent_branding_payment
-    most_recent_payment(Payment::PAYMENT_TYPE_BRANDING)
+    most_recent_payment(THIS_PAYMENT_TYPE)
   end
 
 
   def branding_expire_date
-    payment_expire_date(Payment::PAYMENT_TYPE_BRANDING)
+    payment_expire_date(THIS_PAYMENT_TYPE)
   end
 
 
   def branding_payment_notes
-    payment_notes(Payment::PAYMENT_TYPE_BRANDING)
+    payment_notes(THIS_PAYMENT_TYPE)
   end
 
 
   # @return [Boolean] - true only if there is a branding_expire_date and it is in the future (from today)
   def branding_license?
+    # TODO can use term_expired?(THIS_PAYMENT_TYPE)
     branding_expire_date&.future? == true # == true prevents this from ever returning nil
   end
 

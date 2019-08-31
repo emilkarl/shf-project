@@ -1,12 +1,5 @@
-// TODO:  Is this file used??
-
 @import "shf-custom-colors";
-
-
-.is-admin {
-  color: $is-admin-color;
-  font-weight: bold;
-}
+@import "payor";
 
 .panel.admin-set-new-password-form {
   margin-left: 2em;
@@ -20,6 +13,15 @@
 
   .field.form-group {
     margin-left: 0;
+  }
+
+}
+
+
+.users {
+
+  table {
+    margin-top: 0;
   }
 
 }

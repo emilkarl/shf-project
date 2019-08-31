@@ -32,6 +32,7 @@ module PaymentsHelper
 
   def expire_date_css_class(expire_date)
     today = Time.zone.today
+
     if today < expire_date.months_ago(1)  # expire_date minus one month
       value_class = 'Yes'  # green
     elsif today >= expire_date
@@ -42,18 +43,26 @@ module PaymentsHelper
     value_class
   end
 
-  def payment_notes_label_and_value(entity)
-    if entity.is_a? User
-      notes = entity.membership_payment_notes
-    else
-      notes = entity.branding_payment_notes
-    end
 
-    if !notes || notes.empty?
-      return field_or_none("#{t('activerecord.attributes.payment.notes')}",
-                           "#{t('none_plur')}", label_class: 'standard-label')
-    end
-    return field_or_none("#{t('activerecord.attributes.payment.notes')}",
-                         notes, label_class: 'standard-label')
+  def payment_button_classes(additional_classes = [])
+    %w(btn btn-secondary btn-sm) + additional_classes
+  end
+
+  def payment_button_tooltip_text(payment_due_now = false, t_scope = 'users')
+    pay_button_tooltip = t("#{t_scope}.show.pay_membership_tooltip")
+    pay_button_tooltip += ".  \nNo payment is due now." unless payment_due_now
+    pay_button_tooltip
+  end
+
+
+  # TODO abstract out to Payor
+  def payment_notes_label_and_value(entity)
+
+    notes = entity.payment_notes(entity.class::THIS_PAYMENT_TYPE)
+    display_text = notes.blank? ? t('none_plur') : notes
+
+    field_or_none("#{t('activerecord.attributes.payment.notes')}",
+                  display_text, label_class: 'standard-label')
+
   end
 end

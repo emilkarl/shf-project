@@ -1,0 +1,32 @@
+// Styles for Payors
+@import 'shf-custom-colors';
+
+.status {
+  font-size: smaller;
+}
+
+.status-title {
+
+}
+
+.status-details {
+  padding-left: .75em;
+
+  .paid-through {
+    p {
+      line-height: 1.2em;
+    }
+  }
+
+  .note {
+    font-size: smaller;
+    padding-left: 1em;
+  }
+
+}
+
+
+.is-admin {
+  color: $is-admin-color;
+  font-weight: bold;
+}

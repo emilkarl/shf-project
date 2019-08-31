@@ -41,6 +41,8 @@ sv:
   'no': &no Nej
   'Yes': *yes
   'No': *no
+  close: Stänga
+
   application: &application Ansökan
   user_activity: Användaraktivitet
   none: Ingen eller Inget
@@ -247,6 +249,7 @@ sv:
         og_type: &site_og_type OG type
         twitter_card_type: &site_twitter_card_type Twitter card type
         facebook_app_id: &site_facebook_app_id Facebook Application ID
+        payment_too_soon_days: &payment_too_soon_days Number of days that a user will be warned that a payment is 'too soon'
 
 
     errors:
@@ -322,6 +325,12 @@ sv:
     kommun: *kommun
     none: *none_n
 
+
+  payors:
+    status:
+      no_payment_due_now: &no_payment_due_now No payment is due now.
+
+
   payment:
     payment_type:
       member_fee: Medlemsavgift
@@ -329,7 +338,7 @@ sv:
     status:
       paid: &paid Betald
       never_paid: &never_paid Aldrig betald
-
+    no_payment_due_now: *no_payment_due_now
 
   company_locator:
     error:
@@ -612,12 +621,15 @@ sv:
       click_to_edit: 'klicka för att redigera'
       edit_branding_status: Redigera Status
       branding_license: Betald H-märkespremie
+      membership_paid_through: &membership_paid_through Membership is paid through
+      no_payment_due_now: *no_payment_due_now
       pay_branding_fee_tooltip: Betald avgift förlänger H-märkningen i ett år.
       branding_fee_expire_date_tooltip: Efter detta datum går perioden för din H-märkning ut.
       members: Företagsmedlemmar
       dinkurs_fetch_events: Hämta Dinkurs Events
       dinkurs_fetching: Hämtar händelser ... vänligen vänta
       dinkurs_key: *dinkurs_company_key
+      pay_branding_fee: &pay_branding_fee Betala H-märkespremie
 
     index:
       title:  Hitta H-märkt företag
@@ -771,6 +783,11 @@ sv:
       please_note_new_password: Spara detta på ett säkert ställe. När du klickar på spara nedan kommer du inte att kunna se lösenordet igen och det finns ingen möjlighet att åter visa det.
       submit_new_password: Spara det nya lösenordet
       member: *member
+      membership_status: Membership Status
+      not_a_member: Not a member
+      is_a_member: Member in good standing
+      membership_paid_through: *membership_paid_through
+      no_payment_due_now: *no_payment_due_now
       pay_membership_tooltip: När du betalar din medlemsavgift förlängs ditt medlemskap i ett år.
       membership_expire_date_tooltip: Efter detta datum går perioden för ditt medlemskap ut.
       proof_of_membership: Behörighetsbevis
@@ -799,6 +816,8 @@ sv:
       member_packet: &member_packet medlemspaket
       sent: skickat
       not_sent: inte skickat
+      edit_member_status: &edit_member_status Redigera medlemsstatus
+      pay_membership: &pay_membership Betala medlemsavgift
 
     update:
       passwords_dont_match: De två lösenord du angivit matchar inte.
@@ -822,10 +841,11 @@ sv:
       all_users: Alla användare
 
     user:
+      # is this entry used anywhere?  (the entry in .show above is, and follows rails convention)
       user_has_never_signed_in: har aldrig loggat in.
       'yes': *yes # https://coderwall.com/p/ld65tq/rails-i18n-yes-no-translation
       'no': *no
-      edit_member_status: Redigera medlemsstatus
+      edit_member_status: *edit_member_status
       submit_button_label: Uppdatera status
 
     users_list:
@@ -1010,6 +1030,7 @@ sv:
         twitter_card_type: *site_twitter_card_type
         facebook_app_id: *site_facebook_app_id
         missing: *missing
+        payment_too_soon_days: *payment_too_soon_days
 
       show:
         title: *application_configuration
@@ -1027,6 +1048,7 @@ sv:
         twitter_card_type: *site_twitter_card_type
         facebook_app_id: *site_facebook_app_id
         missing: *missing
+        payment_too_soon_days: *payment_too_soon_days
 
       update:
         success: Programdata uppdaterades framgångsrikt
@@ -1346,10 +1368,10 @@ sv:
           view_company: Visa företagssida
           edit_company: Redigera företag
         my_application: *my_application
-        pay_membership: Betala medlemsavgift
+        pay_membership: *pay_membership
 
       company:
-        pay_branding_fee: Betala H-märkespremie
+        pay_branding_fee: *pay_branding_fee
 
       admin:
         shf_main_site: *shf_main_site

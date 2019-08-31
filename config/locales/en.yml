@@ -41,6 +41,8 @@ en:
   'no': &no 'No'
   'Yes': *yes
   'No': *no
+  close: Close
+
   application: &application Application
   user_activity: User Activity
   none: &none None
@@ -247,6 +249,7 @@ en:
         og_type: &site_og_type OG type
         twitter_card_type: &site_twitter_card_type Twitter card type
         facebook_app_id: &site_facebook_app_id Facebook Application ID
+        payment_too_soon_days: &payment_too_soon_days Number of days that a user will be warned that a payment is 'too soon'
 
 
     errors:
@@ -324,6 +327,12 @@ en:
     kommun: *kommun
     none: *none
 
+
+  payors:
+    status:
+      no_payment_due_now: &no_payment_due_now No payment is due now.
+
+
   payment:
     payment_type:
       member_fee: Member Fee
@@ -331,6 +340,7 @@ en:
     status:
       paid: &paid Paid
       never_paid: &never_paid Never Paid
+    no_payment_due_now: *no_payment_due_now
 
 
   # Automatic and manual lookup for views:
@@ -569,7 +579,6 @@ en:
 
 
 
-
   companies:
     new:
       title: New company
@@ -603,15 +612,20 @@ en:
       confirm_are_you_sure: '*are_you_sure_confirm you want to delete the company?'
       add_address: 'Add address'
       click_to_edit: 'click to edit'
+      membership_paid_through: H-Branding License is paid through
+      no_payment_due_now: *no_payment_due_now
+
       edit_branding_status: Edit Branding Status
       branding_license: H-Branding License
       pay_branding_fee_tooltip: Paying H-Branding fee will extend your branding
                                 license for one year
-      branding_fee_expire_date_tooltip: Branding license expires after this date
+      branding_fee_expire_date_tooltip: &branding_fee_expire_date_tooltip Branding license expires after this date
+      membership_expire_date_tooltip: *branding_fee_expire_date_tooltip
       members: Company Members
       dinkurs_fetch_events: Get Dinkurs Events
       dinkurs_fetching: Fetching events ... please wait
       dinkurs_key: *dinkurs_company_key
+      pay_branding_fee: &pay_branding_fee Pay H-Branding Fee
 
     index:
       title: Find H-labeled companies
@@ -763,6 +777,12 @@ en:
       please_note_new_password: Please record this in a safe and secure place. Once you press the Save button below you will not be able to see the password again and there is no way to display it again.
       submit_new_password: Save the New Password
       member: *member
+      membership_status: Membership Status
+      not_a_member: Not a member
+      is_a_member: Member in good standing
+      membership_paid_through: Membership is paid through
+      no_payment_due_now: *no_payment_due_now
+
       pay_membership_tooltip: Paying membership fee will extend your membership
                               for one year
       membership_expire_date_tooltip: Membership expires after this date
@@ -790,6 +810,8 @@ en:
       member_packet: &member_packet member packet
       sent: sent
       not_sent: not sent
+      edit_member_status: &edit_member_status Edit Member Status
+      pay_membership: &pay_membership Pay Membership Fee
 
     update:
       passwords_dont_match: "The two passwords entered don't match."
@@ -817,7 +839,7 @@ en:
       user_has_never_signed_in: has never logged in.
       'yes': *yes # https://coderwall.com/p/ld65tq/rails-i18n-yes-no-translation
       'no': *no
-      edit_member_status: Edit Member Status
+      edit_member_status: *edit_member_status
       submit_button_label: Update Status
 
     users_list:
@@ -1008,6 +1030,7 @@ en:
         twitter_card_type: *site_twitter_card_type
         facebook_app_id: *site_facebook_app_id
         missing: *missing
+        payment_too_soon_days: *payment_too_soon_days
 
       show:
         title: *application_configuration
@@ -1025,6 +1048,7 @@ en:
         twitter_card_type: *site_twitter_card_type
         facebook_app_id: *site_facebook_app_id
         missing: *missing
+        payment_too_soon_days: *payment_too_soon_days
 
       update:
         success: Application data updated successfully
@@ -1346,10 +1370,10 @@ en:
           view_company: View Company
           edit_company: Edit My Company
         my_application: *my_application
-        pay_membership: Pay Membership Fee
+        pay_membership: *pay_membership
 
       company:
-        pay_branding_fee: Pay H-Branding Fee
+        pay_branding_fee: *pay_branding_fee
 
       admin:
         shf_main_site: *shf_main_site

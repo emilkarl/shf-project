@@ -7,7 +7,7 @@
 
   %header.entry-header
     %h1.entry-title= @company.name
-  .entry-content
+  .entry-content.container
     .row
       .col
         - if @company.categories
@@ -16,7 +16,7 @@
               categories: @company.business_categories
         - if payment_visible_for_user?(current_user, @company)
           %hr
-          = render partial: 'branding_payment_status', locals: { company: @company }
+          = render partial: 'branding_term_status', locals: { company: @company }
           %hr
 
     .row

@@ -298,6 +298,8 @@ margin: 5px 0 0 0;
 }
 
 .post-categories li {
+  font-weight: bold;
+  font-size: larger;
   display: inline-block;
   list-style: none;
 }
@@ -566,7 +568,7 @@ table {
 }
 
 @media (max-width: 768px) {
-  .dropdown-menu a, 
+  .dropdown-menu a,
   nav.navbar .dropdown-menu li a {
     border: 0;
   }

@@ -105,8 +105,16 @@ CREATE TABLE public.app_configurations (
     site_meta_image_content_type character varying,
     site_meta_image_file_size integer,
     site_meta_image_updated_at timestamp without time zone,
-    singleton_guard integer DEFAULT 0 NOT NULL
+    singleton_guard integer DEFAULT 0 NOT NULL,
+    payment_too_soon_days integer DEFAULT 60 NOT NULL
 );
+
+
+--
+-- Name: COLUMN app_configurations.payment_too_soon_days; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.app_configurations.payment_too_soon_days IS 'Warn user that they are paying too soon if payment is due more than this many days away.';
 
 
 --
@@ -1515,6 +1523,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20190312204251'),
 ('20190326120854'),
 ('20190514172102'),
-('20190815215041');
+('20190815215041'),
+('20190830212208');
 
 

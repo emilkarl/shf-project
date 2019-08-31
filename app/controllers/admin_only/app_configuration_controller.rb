@@ -49,7 +49,8 @@ module AdminOnly
                   :og_type,
                   :twitter_card_type,
                   :facebook_app_id,
-                  :site_meta_image)
+                  :site_meta_image,
+                  :payment_too_soon_days)
     end
   end
 

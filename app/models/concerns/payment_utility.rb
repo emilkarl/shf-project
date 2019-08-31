@@ -18,6 +18,33 @@ module PaymentUtility
     def payment_notes(payment_type = self.class::THIS_PAYMENT_TYPE)
       most_recent_payment(payment_type)&.notes
     end
+
+
+    def term_expired?(payment_type = self.class::THIS_PAYMENT_TYPE)
+      expires = payment_expire_date(payment_type)
+      ((expires.nil?) || !expires.future?)
+    end
+
+
+    # A payment 'should' be made if the payment term has expired OR
+    # the expiration date is "close" to today.
+    # How close it should be = the "should_pay_cutoff" - this AppConfiguration.config_to_use.payment_too_soon_days
+    #   Must convert this to a Duration by using the .days method
+    #
+    # Note this does not take into consideration anything else about whether a payment should be made.
+    #
+    def should_pay_now?(should_pay_cutoff = AdminOnly::AppConfiguration.config_to_use.payment_too_soon_days.days,
+                        payment_type = self.class::THIS_PAYMENT_TYPE)
+      term_expired?(payment_type) ||
+          (payment_expire_date(payment_type) < (Time.current + should_pay_cutoff))
+    end
+
+
+    def too_early_to_pay?(should_pay_cutoff = AdminOnly::AppConfiguration.config_to_use.payment_too_soon_days.days,
+                          payment_type = self.class::THIS_PAYMENT_TYPE)
+      !should_pay_now?(should_pay_cutoff, payment_type)
+    end
+
   end
 
 

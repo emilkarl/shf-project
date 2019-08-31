@@ -1,0 +1,6 @@
+-# Display an error alert
+-# This partial expects the following local(s):
+-#   error -- the error to display
+
+- if defined?(error) && error
+  .alert.alert-danger= error

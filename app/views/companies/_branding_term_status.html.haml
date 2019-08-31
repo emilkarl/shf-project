@@ -1,0 +1,29 @@
+- title = company.branding_license? ? 'Can use the H-Brand image. (License fee is paid)' : 'Cannot use the H-Brand image. (License fee is not paid)'
+- term_name = 'h-markt license'
+- term_end = company.branding_expire_date
+- next_term_end = Company.next_branding_payment_dates(company.id).last
+- can_make_payment = true
+- payment_text = t('menus.nav.company.pay_branding_fee')
+
+-# FIXME how is the company id used in payments_path below? is it a parameter or argument?
+    It does not appear in the list of routes (rake routes)) but is used as an argument by the PaymentsController
+
+- payment_action_path = payments_path(user_id: current_user.id,
+                  company_id: company.id,
+                  type: company.class::THIS_PAYMENT_TYPE)
+- fee_name = 'h-markt license fee'
+- admin_edit_status_text = t('companies.show.edit_branding_status')
+- admin_edit_target_id = '#edit-branding-modal'
+
+#company-branding-status
+  = render partial: 'shared/payor/term_status', locals: { entity: company,
+    title: title,
+    term_name: term_name,
+    term_end: term_end,
+    next_term_end: next_term_end,
+    can_make_payment: can_make_payment,
+    payment_text: payment_text,
+    payment_action_path: payment_action_path,
+    fee_name: fee_name,
+    admin_edit_status_text: admin_edit_status_text,
+    admin_edit_target_id: admin_edit_target_id }

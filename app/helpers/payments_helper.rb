@@ -8,25 +8,22 @@ module PaymentsHelper
   #
   # @return [String] - the HTML <span> string
   def expire_date_label_and_value(entity)
-    if entity.is_a? User
-      expire_date = entity.membership_expire_date
-      expire_after_tooltip_title = "#{t('users.show.membership_expire_date_tooltip')}"
+
+    expire_date = entity_expire_date(entity)
+    t_scope = entity.is_a?(User) ? 'users' : 'companies'
+
+    expire_after_tooltip_title = t("#{t_scope}.show.membership_expire_date_tooltip")
+    expire_label = t("#{t_scope}.show.membership_paid_through")
+
+    if expire_date
+      tag.p do
+        concat tag.span "#{expire_label}: ", class: 'standard-label'
+        concat tag.span "#{expire_date}", class: payment_should_be_made_class(entity)
+        concat ' '
+        concat fas_tooltip(expire_after_tooltip_title)
+      end
     else
-      expire_date = entity.branding_expire_date # Company
-      expire_after_tooltip_title = "#{t('companies.show.branding_fee_expire_date_tooltip')}"
-    end
-
-    unless expire_date
-      return field_or_none("#{t('activerecord.attributes.payment.expire_date')}",
-                           "#{t('none_t')}", label_class: 'standard-label')
-    end
-
-    tag.p do
-      concat tag.span "#{t('activerecord.attributes.payment.expire_date')}: ",
-                      class: 'standard-label'
-      concat tag.span "#{expire_date}", class: expire_date_css_class(expire_date)
-      concat ' '
-      concat fas_tooltip(expire_after_tooltip_title)
+      field_or_none(expire_label, t('none_t'), label_class: 'standard-label')
     end
   end
 

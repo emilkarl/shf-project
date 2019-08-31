@@ -2,6 +2,11 @@ require 'meta_image_tags_helper'
 
 module ApplicationHelper
 
+
+  CSS_CLASS_YES = 'yes'
+  CSS_CLASS_NO = 'no'
+
+
   include MetaTagsHelper
   include MetaImageTagsHelper
 
@@ -167,7 +172,24 @@ module ApplicationHelper
 
   # return a span tag with class yes || no and text = t('yes')||t('no') depending on the boolean value
   def yes_no_span(boolean_value)
-    boolean_value ? content_tag(:span, t('yes'), class: 'yes') : content_tag(:span, t('no'), class: 'no')
+    # boolean_value ? content_tag(:span, t('yes'), class: 'yes') : content_tag(:span, t('no'), class: 'no')
+    span_with_yes_no_class((boolean_value ? t('yes'): t('no')), boolean_value)
+  end
+
+
+  # Return a span tag with text = text, and class = the yes or no CSS class
+  # depending on the boolean_value
+  # This ensures that we are always using the same CSS classes for styling
+  # yes and no
+  #
+  # Ex:
+  #   span_with_yes_no_class('surround this text', true)
+  #    => "<span class: 'yes'>surround this text</span>"
+  #
+  #   span_with_yes_no_class('surround this text', false)
+  #    => "<span class: 'no'>surround this text</span>"
+  def span_with_yes_no_class(text, boolean_value)
+    content_tag(:span, text, class: (boolean_value ? CSS_CLASS_YES : CSS_CLASS_NO))
   end
 
 

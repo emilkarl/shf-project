@@ -26,6 +26,8 @@ $black: #000;
 $body-text: #333;
 $body-background: #f7f7f2;
 
+$secondary-lighter: lighten($secondary, 45%);
+
 $toggler-hide-color: #1a1a1a;
 $dark-gray-text: #6c757d;
 
@@ -52,6 +54,12 @@ $light-taupe: #f7f7f7;
 $yes-background-green:  #d8efc2;
 $maybe-background-yellow: #ffe7a8;
 $no-background-red: #ffdede;
+
+$admin-only-background: #f0f8ff;
+
+$grayed-button-background: #dadada;
+$grayed-button-text: #565656;
+
 
 // -----------------------------------------------------
 // colors used in application-mailer.scss

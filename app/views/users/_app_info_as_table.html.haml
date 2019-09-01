@@ -1,0 +1,29 @@
+-# This partial expects the following local(s):
+-#   application - the application that is being displayed in this table
+-#
+%table.table.table-hover.table-sm.table-md-responsive
+  %thead
+    %tr
+      %th
+        = t('activerecord.attributes.shf_application.contact_email')
+      %th
+        = t('activerecord.attributes.shf_application.state')
+      %th
+        = t('activerecord.attributes.shf_application.company_number')
+      %th
+        = t('activerecord.attributes.company.name')
+  %tbody
+    %tr.shf_application
+      - if application.nil?
+        %td ---
+      - else
+        %td= mail_to(application.contact_email)
+        %td
+          - i18n_state = t("shf_applications.state.#{application.state}")
+          - if application.accepted?
+            %span.yes= i18n_state
+          - else
+            %span.maybe= i18n_state
+        - if application.companies.any?
+          %td= link_to(application.company_numbers, shf_application_path(application))
+          %td= application.company_names

@@ -3,7 +3,7 @@ FactoryBot.define do
 
     shf_application
 
-    FIXTURE_DIR = File.join("#{Rails.root}",'spec','fixtures','uploaded_files')
+    FIXTURE_DIR = File.join("#{Rails.root}",'spec','fixtures','uploaded_files') unless defined?(FIXTURE_DIR)
     trait :png do
       actual_file { File.new(File.join(FIXTURE_DIR, 'image.png')) }
     end

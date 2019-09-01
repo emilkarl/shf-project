@@ -1,4 +1,4 @@
-APP_CONFIG_FIXTURES = Rails.root.join('spec', 'fixtures', 'app_configuration')
+APP_CONFIG_FIXTURES = Rails.root.join('spec', 'fixtures', 'app_configuration') unless defined?(APP_CONFIG_FIXTURES)
 
 FactoryBot.define do
 

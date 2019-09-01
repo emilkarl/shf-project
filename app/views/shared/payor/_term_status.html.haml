@@ -13,7 +13,7 @@
 
 #term-status
   .row.mt-2
-    = render(partial: 'shared/payor/alert_error', error: error) if error
+    = render(partial: 'shared/payor/alert_error', error: error) if defined?(error)
 
   .row.mt-2
     .col-md

@@ -110,9 +110,9 @@ RSpec.describe User, type: :model do
     end
 
     it 'false if today is before (<) latest expire time' do
-      expect(user_membership_expires_EOD_feb2.term_expired?(membership_fee)).to be_falsey
-      expect(user_membership_expires_EOD_feb2.term_expired?).to be_falsey
-      u_co = user_membership_expires_EOD_feb2.companies.first
+      expect(user_membership_expires_EOD_feb1.term_expired?(membership_fee)).to be_falsey
+      expect(user_membership_expires_EOD_feb1.term_expired?).to be_falsey
+      u_co = user_membership_expires_EOD_feb1.companies.first
       expect(u_co.term_expired?(branding_license_fee)).to be_falsey
       expect(u_co.term_expired?).to be_falsey
     end
@@ -127,24 +127,24 @@ RSpec.describe User, type: :model do
     end
 
     it 'true if the expiration date < (today + cutoff duration)' do
+      expect(user_membership_expires_EOD_feb1.should_pay_now?).to be_falsey
+      u_co = user_membership_expires_EOD_feb1.companies.first
+      expect(u_co.should_pay_now?).to be_falsey
+    end
+
+    it 'false if expiration date >= (today + cutoff duration)' do
       expect(user_membership_expires_EOD_feb2.should_pay_now?).to be_falsey
       u_co = user_membership_expires_EOD_feb2.companies.first
       expect(u_co.should_pay_now?).to be_falsey
     end
 
-    it 'false if expiration date >= (today + cutoff duration)' do
-      expect(user_membership_expires_EOD_feb3.should_pay_now?).to be_falsey
-      u_co = user_membership_expires_EOD_feb3.companies.first
-      expect(u_co.should_pay_now?).to be_falsey
-    end
-
     it 'can give a cutoff duration to add to Today' do
-      expect(user_membership_expires_EOD_dec8.should_pay_now?(1.week)).to be_truthy
-      u_co = user_membership_expires_EOD_dec8.companies.first
+      expect(user_membership_expires_EOD_dec7.should_pay_now?(1.week)).to be_truthy
+      u_co = user_membership_expires_EOD_dec7.companies.first
       expect(u_co.should_pay_now?(1.week)).to be_truthy
 
-      expect(user_membership_expires_EOD_dec9.should_pay_now?(1.week)).to be_falsey
-      u_co = user_membership_expires_EOD_dec9.companies.first
+      expect(user_membership_expires_EOD_dec8.should_pay_now?(1.week)).to be_falsey
+      u_co = user_membership_expires_EOD_dec8.companies.first
       expect(u_co.should_pay_now?(1.week)).to be_falsey
     end
   end
@@ -158,24 +158,24 @@ RSpec.describe User, type: :model do
     end
 
     it 'true if the expiration date < (today + cutoff duration)' do
+      expect(user_membership_expires_EOD_feb1.too_early_to_pay?).to be_truthy
+      u_co = user_membership_expires_EOD_feb1.companies.first
+      expect(u_co.too_early_to_pay?).to be_truthy
+    end
+
+    it 'false if expiration date >= (today + cutoff duration)' do
       expect(user_membership_expires_EOD_feb2.too_early_to_pay?).to be_truthy
       u_co = user_membership_expires_EOD_feb2.companies.first
       expect(u_co.too_early_to_pay?).to be_truthy
     end
 
-    it 'false if expiration date >= (today + cutoff duration)' do
-      expect(user_membership_expires_EOD_feb3.too_early_to_pay?).to be_truthy
-      u_co = user_membership_expires_EOD_feb3.companies.first
-      expect(u_co.too_early_to_pay?).to be_truthy
-    end
-
     it 'can give a cutoff duration to add to Today' do
-      expect(user_membership_expires_EOD_dec8.too_early_to_pay?(1.week)).to be_falsey
-      u_co = user_membership_expires_EOD_dec8.companies.first
+      expect(user_membership_expires_EOD_dec7.too_early_to_pay?(1.week)).to be_falsey
+      u_co = user_membership_expires_EOD_dec7.companies.first
       expect(u_co.too_early_to_pay?(1.week)).to be_falsey
 
-      expect(user_membership_expires_EOD_dec9.too_early_to_pay?(1.week)).to be_truthy
-      u_co = user_membership_expires_EOD_dec9.companies.first
+      expect(user_membership_expires_EOD_dec8.too_early_to_pay?(1.week)).to be_truthy
+      u_co = user_membership_expires_EOD_dec8.companies.first
       expect(u_co.too_early_to_pay?(1.week)).to be_truthy
     end
   end

@@ -35,6 +35,7 @@ RSpec.shared_context 'create users' do
   let(:lastyear_dec_8) { Time.zone.local(THIS_YEAR - 1, 12, 8) }
   let(:lastyear_dec_9) { Time.zone.local(THIS_YEAR - 1, 12, 9) }
 
+  let(:jan_30) { Time.zone.local(THIS_YEAR, 1, 30) }
   let(:feb_1) { Time.zone.local(THIS_YEAR, 2, 1) }
   let(:feb_2) { Time.zone.local(THIS_YEAR, 2, 2) }
   let(:feb_3) { Time.zone.local(THIS_YEAR, 2, 3) }
@@ -180,31 +181,31 @@ RSpec.shared_context 'create users' do
   let(:company_no_payments)  { create(:company) }
 
 
-  let(:user_membership_expires_EOD_feb1) {
+  let(:user_membership_expires_EOD_jan29) {
     u    = create(:member_with_membership_app)
     u_co = u.shf_application.companies.first
 
-    Timecop.freeze(feb_1) do
+    Timecop.freeze(jan_30) do
       create(:membership_fee_payment,
              :successful,
              user:        u,
              company:     u_co,
-             start_date:  feb_1,
-             expire_date: User.expire_date_for_start_date(feb_1),
-             notes:       'feb_1 membership')
+             start_date:  jan_30,
+             expire_date: User.expire_date_for_start_date(jan_30),
+             notes:       'jan_30 membership')
       create(:h_branding_fee_payment,
              :successful,
              user:        u,
              company:     u_co,
-             start_date:  feb_1,
-             expire_date: Company.expire_date_for_start_date(feb_1),
-             notes:       'feb_1 branding')
+             start_date:  jan_30,
+             expire_date: Company.expire_date_for_start_date(jan_30),
+             notes:       'jan_30 branding')
     end
 
     u
   }
 
-  let(:user_membership_expires_EOD_feb2) {
+  let(:user_membership_expires_EOD_feb1) {
     u    = create(:member_with_membership_app)
     u_co = u.shf_application.companies.first
 
@@ -228,7 +229,7 @@ RSpec.shared_context 'create users' do
     u
   }
 
-  let(:user_membership_expires_EOD_feb3) {
+  let(:user_membership_expires_EOD_feb2) {
     u    = create(:member_with_membership_app)
     u_co = u.shf_application.companies.first
 
@@ -252,7 +253,7 @@ RSpec.shared_context 'create users' do
     u
   }
 
-  let(:user_membership_expires_EOD_dec8) {
+  let(:user_membership_expires_EOD_dec7) {
     u    = create(:member_with_membership_app)
     u_co = u.shf_application.companies.first
 
@@ -276,7 +277,7 @@ RSpec.shared_context 'create users' do
     u
   }
 
-  let(:user_membership_expires_EOD_dec9) {
+  let(:user_membership_expires_EOD_dec8) {
     u    = create(:member_with_membership_app)
     u_co = u.shf_application.companies.first
 

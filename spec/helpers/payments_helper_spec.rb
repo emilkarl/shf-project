@@ -123,11 +123,11 @@ RSpec.describe PaymentsHelper, type: :helper do
 
 
     it 'returns "yes" if too_early_to_pay?' do
-      expect(payment_should_be_made_class(user_membership_expires_EOD_feb3)).to eq 'Yes'
+      expect(payment_should_be_made_class(user_membership_expires_EOD_feb2)).to eq 'Yes'
     end
 
     it 'returns "maybe" if it has not expired and should_pay_now?' do
-      expect(payment_should_be_made_class(user_membership_expires_EOD_feb1)).to eq 'Maybe'
+      expect(payment_should_be_made_class(user_membership_expires_EOD_jan29)).to eq 'Maybe'
     end
 
     it 'returns "no" if the payment term has expired' do

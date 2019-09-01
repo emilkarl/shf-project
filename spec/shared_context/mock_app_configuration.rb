@@ -118,6 +118,9 @@ class MockAppConfig
     1234567890
   end
 
+  def self.payment_too_soon_days
+    60
+  end
 
   # ----------------------------------------------------
   #  Default results to use to stub methods

@@ -12,7 +12,7 @@ module PaymentsHelper
     expire_date = entity_expire_date(entity)
     t_scope = entity.is_a?(User) ? 'users' : 'companies'
 
-    expire_after_tooltip_title = t("#{t_scope}.show.membership_expire_date_tooltip")
+    expire_after_tooltip_title = t("#{t_scope}.show.term_expire_date_tooltip")
     expire_label = t("#{t_scope}.show.membership_paid_through")
 
     if expire_date

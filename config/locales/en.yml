@@ -620,7 +620,7 @@ en:
       pay_branding_fee_tooltip: Paying H-Branding fee will extend your branding
                                 license for one year
       branding_fee_expire_date_tooltip: &branding_fee_expire_date_tooltip Branding license expires after this date
-      membership_expire_date_tooltip: *branding_fee_expire_date_tooltip
+      term_expire_date_tooltip : *branding_fee_expire_date_tooltip
       members: Company Members
       dinkurs_fetch_events: Get Dinkurs Events
       dinkurs_fetching: Fetching events ... please wait
@@ -785,7 +785,8 @@ en:
 
       pay_membership_tooltip: Paying membership fee will extend your membership
                               for one year
-      membership_expire_date_tooltip: Membership expires after this date
+      membership_expire_date_tooltip: &membership_expire_date_tooltip Membership expires after this date
+      term_expire_date_tooltip : *membership_expire_date_tooltip
       proof_of_membership: Proof of Membership
       proof_of_membership_describe: This image is your proof of membership in SHF.
       proof_of_membership_photo_needed: 'If you see "Photo Unavailable" then please

@@ -624,7 +624,8 @@ sv:
       membership_paid_through: &membership_paid_through Membership is paid through
       no_payment_due_now: *no_payment_due_now
       pay_branding_fee_tooltip: Betald avgift förlänger H-märkningen i ett år.
-      branding_fee_expire_date_tooltip: Efter detta datum går perioden för din H-märkning ut.
+      branding_fee_expire_date_tooltip: &branding_fee_expire_date_tooltip Efter detta datum går perioden för din H-märkning ut.
+      term_expire_date_tooltip: *branding_fee_expire_date_tooltip
       members: Företagsmedlemmar
       dinkurs_fetch_events: Hämta Dinkurs Events
       dinkurs_fetching: Hämtar händelser ... vänligen vänta
@@ -789,7 +790,8 @@ sv:
       membership_paid_through: *membership_paid_through
       no_payment_due_now: *no_payment_due_now
       pay_membership_tooltip: När du betalar din medlemsavgift förlängs ditt medlemskap i ett år.
-      membership_expire_date_tooltip: Efter detta datum går perioden för ditt medlemskap ut.
+      membership_expire_date_tooltip: &membership_expire_date_tooltip Efter detta datum går perioden för ditt medlemskap ut.
+      term_expire_date_tooltip: *membership_expire_date_tooltip
       proof_of_membership: Behörighetsbevis
       proof_of_membership_describe: Detta är ditt behörighetsbevis.
       proof_of_membership_photo_needed: 'Om du saknar profilbild (ser "Photo

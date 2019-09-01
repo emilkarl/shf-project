@@ -4,6 +4,13 @@ rerun_opts = rerun.to_s.strip.empty? ? "--format #{ENV['CUCUMBER_FORMAT'] || 'pr
 base_opts = "--format #{ENV['CUCUMBER_FORMAT'] || 'pretty'} --strict"
 std_opts = "--format #{ENV['CUCUMBER_FORMAT'] || 'pretty'} --strict --tags 'not @wip'"
 %>
+# These are Cucumber profiles.
+#  Usage:  cucumber --profile <profile_name>
+#     Note:  You may want to start your command with 'bundle exec' if you are working with a Gemfile.
+#
+#  Ex:  cucumber --profile shf_core
+#  Ex:  bundle exec cucumber --profile shf_core
+#
 default: <%= std_opts %> features
 wip: --tags @wip:3 --wip features
 rerun: <%= rerun_opts %> --format rerun --out rerun.txt --strict --tags ~@wip

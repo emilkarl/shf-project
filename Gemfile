@@ -65,7 +65,7 @@ gem 'wkhtmltoimage-binary'
 gem 'chartkick'
 gem 'groupdate'
 
-gem 'mini_racer', platforms: :ruby
+# gem 'mini_racer', platforms: :ruby
 
 gem 'hashie'  # powerful methods for searching nested Hashes (ex: params) and more
 
@@ -131,7 +131,7 @@ group :test do
   gem 'email_spec'
   gem 'selenium-webdriver'
 
-  gem 'webdrivers', '~> 3.0'
+  gem 'webdrivers', '~> 4.0'
 
   gem 'webmock'  # to mock web (HTTP) interactions.  Required by the vcr gem
   gem 'vcr'      # to record and 'playback' (mock) http requests

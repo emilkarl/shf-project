@@ -327,9 +327,9 @@ sv:
 
 
   payors:
-    status:
-      no_payment_due_now: &no_payment_due_now No payment is due now.
-
+    status: Status
+    no_payment_due_now: &no_payment_due_now No payment is due now.
+    term_paid_through: &term_paid_through Paid through
 
   payment:
     payment_type:
@@ -621,7 +621,7 @@ sv:
       click_to_edit: 'klicka för att redigera'
       edit_branding_status: Redigera Status
       branding_license: Betald H-märkespremie
-      membership_paid_through: &membership_paid_through Membership is paid through
+      term_paid_through: *term_paid_through
       no_payment_due_now: *no_payment_due_now
       pay_branding_fee_tooltip: Betald avgift förlänger H-märkningen i ett år.
       branding_fee_expire_date_tooltip: &branding_fee_expire_date_tooltip Efter detta datum går perioden för din H-märkning ut.
@@ -787,7 +787,7 @@ sv:
       membership_status: Membership Status
       not_a_member: Not a member
       is_a_member: Member in good standing
-      membership_paid_through: *membership_paid_through
+      term_paid_through: *term_paid_through
       no_payment_due_now: *no_payment_due_now
       pay_membership_tooltip: När du betalar din medlemsavgift förlängs ditt medlemskap i ett år.
       membership_expire_date_tooltip: &membership_expire_date_tooltip Efter detta datum går perioden för ditt medlemskap ut.

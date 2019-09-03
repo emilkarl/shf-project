@@ -7,20 +7,28 @@
         (#{t('.is_an_admin')})
 
 .entry-content.container
-  .row
-    .col-md-6
-      = field_or_none("#{t('.email')}", mail_to(@user.email),
-                      label_class: 'standard-label',
-                      value_class: 'login-email')
-    .col-md-4
-      = field_or_none("#{t('.membership_number')}", @user.membership_number,
-                      label_class: 'standard-label',
-                      value_class: 'membership-number')
+
+  .login-name
+    .row
+      .col
+        = field_or_none("#{t('.email')}", mail_to(@user.email),
+                        label_class: 'standard-label',
+                        value_class: 'login-email')
 
 
-  = render partial: 'membership_term_status', locals: { user: @user }
+  .membership
+    %h3.section-title Membership
+    .section
+      .row
+        .col
+          = field_or_none("#{t('.membership_number')}", @user.membership_number,
+                          label_class: 'standard-label',
+                          value_class: 'membership-number')
 
-  .row
+      = render partial: 'membership_term_status', locals: { user: @user }
+
+
+  .row.section-title
     .col.mt-2
       - has_none = @user.shf_application.blank? ? 'None' : ''
       %h3= "#{t('application')}: #{has_none}"

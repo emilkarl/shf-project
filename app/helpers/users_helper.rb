@@ -6,16 +6,6 @@ module UsersHelper
 
 
 
-  # Create the Membership Status title with CSS classes based on the
-  # current membership status (is a member | not a member)
-  #
-  # @return [String] - HTML for the title
-  def membership_status_title(user)
-    is_member_text = user.member? ? t('users.show.is_a_member') : t('users.show.not_a_member')
-    "#{t('users.show.membership_status')} " + span_with_yes_no_class(is_member_text, user.member?)
-  end
-
-
   def paperclip_path_str(attached_file, image_type, render_to)
     # Produces path for attached_file, for use in image_tag method.
     #  attached_file: Model attribute managed via paperclip

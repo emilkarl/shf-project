@@ -2,19 +2,18 @@
 @import 'shf-custom-colors';
 
 .status {
-  font-size: smaller;
-}
-
-.status-title {
-
+  .value {
+    font-weight: bold;
+  }
 }
 
 .status-details {
-  padding-left: .75em;
+  padding-left: 15px; // same as .col
 
   .paid-through {
     p {
       line-height: 1.2em;
+      margin-bottom: 0;
     }
   }
 
@@ -23,6 +22,9 @@
     padding-left: 1em;
   }
 
+  .no-payment-needed {
+    font-size: smaller;
+  }
 }
 
 

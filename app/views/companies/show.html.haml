@@ -14,9 +14,13 @@
           .categories
             = render 'business_categories/as_list',
               categories: @company.business_categories
+
         - if payment_visible_for_user?(current_user, @company)
           %hr
-          = render partial: 'branding_term_status', locals: { company: @company }
+            .branding-license
+              %h3.section-title H-markt License
+              .section
+                = render partial: 'branding_term_status', locals: { company: @company }
           %hr
 
     .row

@@ -1,0 +1,10 @@
+%header.entry-header
+  %h1.entry-title= "Editing checklist item: #{@checklist_item.title}"
+
+.entry-content
+  = render 'form', class_name: 'edit-checklist-item'
+
+  %hr
+    .text-center
+      = link_to "View Checklist item", @checklist_item, class: 'btn btn-sm btn-light'
+      = link_to "List all checklist items", checklist_items_path, class: 'btn btn-sm btn-light'

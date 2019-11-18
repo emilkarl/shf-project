@@ -1,0 +1,53 @@
+= form_for @checklist_item, html: { class: "#{class_name}" }  do |f|
+
+  != model_errors_helper(@checklist_item)
+  .container
+    .row
+      .col
+        .form-group
+          = f.label :title, class: 'required'
+          = f.text_field :title,  class: 'form-control'
+    .row
+      .col
+        .form-group
+          = f.label :description
+          = f.text_field :description,  class: 'form-control'
+
+
+    .row
+      .col
+        .form-group
+          = f.label 'Complete?'
+          = f.check_box :complete, { id: 'complete-checkbox', class: 'checklist-checkbox' }
+
+    .row
+      .col-md
+        .form-group
+          #date-completed
+            = f.label :date_completed
+            = f.datetime_select :date_completed
+            %p.font-italic Need to use a calendar picker (widget). Default = today / now.
+
+    .actions.form-group
+      = f.submit 'Save', class: 'btn btn-primary mb-2 form-control'
+
+
+:javascript
+
+  window.onload = function(){
+    displayDateCompletedBasedOnCompleted();
+  }
+
+  $("#complete-checkbox").on('change',function () {
+    displayDateCompletedBasedOnCompleted();
+  })
+
+  // show the date completed if completed checkbox is checked; hide otherwise
+  function displayDateCompletedBasedOnCompleted() {
+    var checkBox = document.getElementById("complete-checkbox");
+    var dateCompleted = document.getElementById("date-completed");
+
+    // TODO if the checkBox is changed to true, then the default value fo dateCompleted should be now (not whatever _was_ in there)
+    dateCompleted.style.display = (checkBox.checked ? "block" : "none");
+  }
+

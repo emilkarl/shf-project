@@ -1,0 +1,36 @@
+%header.entry-header
+  %h1.entry-title Checklist Items
+  -#%h1.entry-title= t('.title')
+
+.entry-content
+  .table-responsive
+    %table.table.table-hover.table-sm#checklist-items
+      %thead
+        %tr
+      %th.title Title
+      %th.description Description
+      %th.complete Done?
+      %th.date_completed Date completed
+      %th
+      %th
+
+      %tbody.panel-body
+        - @checklist_items.each do |checklist_item|
+          %tr
+            %td= link_to  checklist_item.title, checklist_item
+            %td= link_to checklist_item.description, checklist_item
+            %td= check_box_tag 'completed', checklist_item.complete, checklist_item.complete,
+              {disabled: true, class: 'checklist-checkbox-small'}
+            -# checklist_item.complete
+            %td= date_completed_display(checklist_item)
+            %td.edit
+              = link_to icon('fas', 'edit'), edit_checklist_item_path(checklist_item)
+            %td.delete
+              = link_to icon('fas', 'trash', class: 'delete'),
+                        checklist_item_path(checklist_item), method: :delete,
+                        title: 'delete checklist item',
+                        data: { confirm: 'Are you sure?' }
+
+  %hr
+  .text-center
+    = link_to 'New Checklist Item', new_checklist_item_path, class: 'btn btn-sm btn-light'

@@ -168,6 +168,9 @@ Rails.application.routes.draw do
          as: :company_address_delete
   # ----------------------------------------------------------
 
+  resources :checklist_items
+
+
   get 'information', to: 'shf_applications#information'
 
   root to: 'companies#index'

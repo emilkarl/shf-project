@@ -9,6 +9,20 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
 SET default_tablespace = '';
 
 SET default_with_oids = false;
@@ -86,13 +100,21 @@ CREATE TABLE public.app_configurations (
     site_meta_image_height integer DEFAULT 0 NOT NULL,
     og_type character varying DEFAULT 'website'::character varying NOT NULL,
     twitter_card_type character varying DEFAULT 'summary'::character varying NOT NULL,
-    facebook_app_id bigint DEFAULT 0 NOT NULL,
+    facebook_app_id bigint DEFAULT '1292810030791186'::bigint NOT NULL,
     site_meta_image_file_name character varying,
     site_meta_image_content_type character varying,
     site_meta_image_file_size integer,
     site_meta_image_updated_at timestamp without time zone,
-    singleton_guard integer DEFAULT 0 NOT NULL
+    singleton_guard integer DEFAULT 0 NOT NULL,
+    payment_too_soon_days integer DEFAULT 60 NOT NULL
 );
+
+
+--
+-- Name: COLUMN app_configurations.payment_too_soon_days; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.app_configurations.payment_too_soon_days IS 'Warn user that they are paying too soon if payment is due more than this many days away.';
 
 
 --
@@ -186,6 +208,47 @@ CREATE SEQUENCE public.business_categories_shf_applications_id_seq
 --
 
 ALTER SEQUENCE public.business_categories_shf_applications_id_seq OWNED BY public.business_categories_shf_applications.id;
+
+
+--
+-- Name: checklist_items; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.checklist_items (
+    id bigint NOT NULL,
+    title character varying NOT NULL,
+    description character varying,
+    complete boolean DEFAULT false,
+    date_completed timestamp without time zone,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: COLUMN checklist_items.date_completed; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.checklist_items.date_completed IS 'this might have a value even if complete is false.  Whatever the complete column says is the truth about whether this is complete or not.';
+
+
+--
+-- Name: checklist_items_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.checklist_items_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: checklist_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.checklist_items_id_seq OWNED BY public.checklist_items.id;
 
 
 --
@@ -898,6 +961,13 @@ ALTER TABLE ONLY public.business_categories_shf_applications ALTER COLUMN id SET
 
 
 --
+-- Name: checklist_items id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.checklist_items ALTER COLUMN id SET DEFAULT nextval('public.checklist_items_id_seq'::regclass);
+
+
+--
 -- Name: ckeditor_assets id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1047,6 +1117,14 @@ ALTER TABLE ONLY public.business_categories
 
 ALTER TABLE ONLY public.business_categories_shf_applications
     ADD CONSTRAINT business_categories_shf_applications_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: checklist_items checklist_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.checklist_items
+    ADD CONSTRAINT checklist_items_pkey PRIMARY KEY (id);
 
 
 --
@@ -1552,6 +1630,8 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20190326120854'),
 ('20190514172102'),
 ('20190601004310'),
-('20190815215041');
+('20190815215041'),
+('20190830212208'),
+('20191114205334');
 
 

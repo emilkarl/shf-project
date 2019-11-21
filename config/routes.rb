@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
 
+  resources :checklists
   mount Ckeditor::Engine => '/ckeditor'
   filter :locale
 

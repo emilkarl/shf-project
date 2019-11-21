@@ -1,0 +1,33 @@
+- user_can_edit = policy(@checklist).update?
+.entry-content.container
+  .row.mt-2
+    .col
+      - unless @checklist.description.nil?
+        %p
+          -#%b #{t('.description')}:
+          %b Description:
+          = @checklist.description
+  .row.mt-2
+    .col
+      %p
+        %b Complete?
+        = @checklist.complete?
+  .row.mt-2
+    .col
+      %p
+        %b Date completed:
+        = @checklist.date_completed
+
+
+  %p TODO show items, add/delete/reorder items
+
+  %hr
+    .text-center
+      - if user_can_edit
+        = link_to "Edit Checklist",
+                    edit_checklist_item_path(@checklist), class: 'btn btn-secondary btn-sm edit-checklist'
+
+      - if current_user.admin?
+        = link_to "Delete checklist", @checklist, method: :delete,
+                        class:'btn btn-danger btn-sm delete-checklist',
+                        data: { confirm: "#{t('.confirm_are_you_sure')}" }

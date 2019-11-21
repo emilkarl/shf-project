@@ -13,4 +13,7 @@ RSpec.describe ChecklistItem do
     it { is_expected.to validate_presence_of :title }
   end
 
+  describe 'Associations' do
+    it { is_expected.to belong_to(:checklist) }
+  end
 end

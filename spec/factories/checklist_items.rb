@@ -5,6 +5,9 @@ FactoryBot.define do
     description { "Item description" }
     complete { false }
     date_completed { nil }
+    order_in_list { 0 }
+
+    association :checklist
   end
 
   trait(:completed) do

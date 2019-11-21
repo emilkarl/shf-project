@@ -1,4 +1,5 @@
 class ChecklistItemsController < ApplicationController
+
   before_action :set_checklist_item, only: [:show, :edit, :update, :destroy]
   before_action :authorize_checklist_item, only: [:update, :show, :edit, :destroy]
 
@@ -22,6 +23,7 @@ class ChecklistItemsController < ApplicationController
   def edit
   end
 
+
   # POST /checklist_items
   # POST /checklist_items.json
   def create
@@ -39,6 +41,7 @@ class ChecklistItemsController < ApplicationController
     end
   end
 
+
   # PATCH/PUT /checklist_items/1
   # PATCH/PUT /checklist_items/1.json
   def update
@@ -53,6 +56,7 @@ class ChecklistItemsController < ApplicationController
     end
   end
 
+
   # DELETE /checklist_items/1
   # DELETE /checklist_items/1.json
   def destroy
@@ -63,17 +67,19 @@ class ChecklistItemsController < ApplicationController
     end
   end
 
+
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_checklist_item
-      @checklist_item = ChecklistItem.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_checklist_item
+    @checklist_item = ChecklistItem.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def checklist_item_params
-      params.require(:checklist_item).permit(:title, :description, :date_completed, :complete)
-    end
 
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def checklist_item_params
+    params.require(:checklist_item).permit(:title, :description, :date_completed,
+                                           :complete, :order_in_list, :checklist_id)
+  end
 
 
   def authorize_checklist_item

@@ -11,18 +11,22 @@
       %th.description Description
       %th.complete Done?
       %th.date_completed Date completed
+      %th.checklist In List
+      %th.order_in_list Order #
       %th
       %th
 
       %tbody.panel-body
         - @checklist_items.each do |checklist_item|
           %tr
-            %td= link_to  checklist_item.title, checklist_item
-            %td= link_to checklist_item.description, checklist_item
-            %td= check_box_tag 'completed', checklist_item.complete, checklist_item.complete,
+            %td.title= link_to  checklist_item.title, checklist_item
+            %td.description= link_to checklist_item.description, checklist_item
+            %td.complete= check_box_tag 'completed', checklist_item.complete, checklist_item.complete,
               {disabled: true, class: 'checklist-checkbox-small'}
             -# checklist_item.complete
-            %td= date_completed_display(checklist_item)
+            %td.date_completed= date_completed_display(checklist_item)
+            %td.checklist= checklist_item.checklist.title
+            %td.order_in_list= checklist_item.order_in_list
             %td.edit
               = link_to icon('fas', 'edit'), edit_checklist_item_path(checklist_item)
             %td.delete

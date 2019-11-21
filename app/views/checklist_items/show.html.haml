@@ -23,6 +23,18 @@
         %b Date completed:
         = @checklist_item.date_completed
 
+  .row.mt-2
+    .col
+      %p
+        %b In list
+        = @checklist_item.checklist.title
+
+  .row.mt-2
+    .col
+      %p
+        %b Order in list
+        = @checklist_item.order_in_list
+
   %hr
     .text-center
       - if user_can_edit

@@ -1,6 +1,6 @@
 class ChecklistItem < ApplicationRecord
 
-  # TODO add  checklist reference (always belongs to a list)
+  belongs_to :checklist
 
   validates_presence_of :title
 

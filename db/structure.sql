@@ -221,7 +221,9 @@ CREATE TABLE public.checklist_items (
     complete boolean DEFAULT false,
     date_completed timestamp without time zone,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    checklist_id bigint,
+    order_in_list integer
 );
 
 
@@ -249,6 +251,38 @@ CREATE SEQUENCE public.checklist_items_id_seq
 --
 
 ALTER SEQUENCE public.checklist_items_id_seq OWNED BY public.checklist_items.id;
+
+
+--
+-- Name: checklists; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.checklists (
+    id bigint NOT NULL,
+    title character varying,
+    description character varying,
+    created_at timestamp without time zone NOT NULL,
+    updated_at timestamp without time zone NOT NULL
+);
+
+
+--
+-- Name: checklists_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.checklists_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: checklists_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.checklists_id_seq OWNED BY public.checklists.id;
 
 
 --
@@ -968,6 +1002,13 @@ ALTER TABLE ONLY public.checklist_items ALTER COLUMN id SET DEFAULT nextval('pub
 
 
 --
+-- Name: checklists id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.checklists ALTER COLUMN id SET DEFAULT nextval('public.checklists_id_seq'::regclass);
+
+
+--
 -- Name: ckeditor_assets id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1125,6 +1166,14 @@ ALTER TABLE ONLY public.business_categories_shf_applications
 
 ALTER TABLE ONLY public.checklist_items
     ADD CONSTRAINT checklist_items_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: checklists checklists_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.checklists
+    ADD CONSTRAINT checklists_pkey PRIMARY KEY (id);
 
 
 --
@@ -1296,6 +1345,13 @@ CREATE INDEX index_addresses_on_region_id ON public.addresses USING btree (regio
 --
 
 CREATE UNIQUE INDEX index_app_configurations_on_singleton_guard ON public.app_configurations USING btree (singleton_guard);
+
+
+--
+-- Name: index_checklist_items_on_checklist_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_checklist_items_on_checklist_id ON public.checklist_items USING btree (checklist_id);
 
 
 --
@@ -1478,6 +1534,14 @@ ALTER TABLE ONLY public.uploaded_files
 
 
 --
+-- Name: checklist_items fk_rails_3605ca8e4d; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.checklist_items
+    ADD CONSTRAINT fk_rails_3605ca8e4d FOREIGN KEY (checklist_id) REFERENCES public.checklists(id);
+
+
+--
 -- Name: shf_applications fk_rails_3ee395b045; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1632,6 +1696,8 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20190601004310'),
 ('20190815215041'),
 ('20190830212208'),
-('20191114205334');
+('20191114205334'),
+('20191119184425'),
+('20191119185202');
 
 

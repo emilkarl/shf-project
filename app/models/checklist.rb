@@ -1,5 +1,6 @@
 class Checklist < ApplicationRecord
 
+  has_ancestry
   has_many :checklist_items
 
   validates_presence_of :title
@@ -24,7 +25,7 @@ class Checklist < ApplicationRecord
   # After the insert, update the order_in_list [= position] for all checklist_items.
   #
   # @param index [Integer] - the 0-based position that the item will be put _before_
-  # @param item [ChecklistItem] - the item inserted
+  # @param checklist_item [ChecklistItem] - the item inserted
   #
   def insert(checklist_item, index = -1)
     checklist_items.insert(index, checklist_item)

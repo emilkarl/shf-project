@@ -78,6 +78,8 @@ gem 'counter_culture', '~> 2.0'
 
 gem 'cookies_eu'
 
+gem 'ancestry'
+
 group :development, :test do
   gem 'rspec-rails'
   gem 'shoulda-matchers'

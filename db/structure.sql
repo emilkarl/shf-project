@@ -262,7 +262,8 @@ CREATE TABLE public.checklists (
     title character varying,
     description character varying,
     created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
+    updated_at timestamp without time zone NOT NULL,
+    ancestry character varying
 );
 
 
@@ -339,7 +340,10 @@ CREATE TABLE public.companies (
     description text,
     dinkurs_company_id character varying,
     show_dinkurs_events boolean,
-    short_h_brand_url character varying
+    short_h_brand_url character varying,
+    facebook_url character varying,
+    instagram_url character varying,
+    youtube_url character varying
 );
 
 
@@ -1355,6 +1359,13 @@ CREATE INDEX index_checklist_items_on_checklist_id ON public.checklist_items USI
 
 
 --
+-- Name: index_checklists_on_ancestry; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_checklists_on_ancestry ON public.checklists USING btree (ancestry);
+
+
+--
 -- Name: index_ckeditor_assets_on_company_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1696,8 +1707,10 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20190601004310'),
 ('20190815215041'),
 ('20190830212208'),
+('20191030162238'),
 ('20191114205334'),
 ('20191119184425'),
-('20191119185202');
+('20191119185202'),
+('20191121221435');
 
 

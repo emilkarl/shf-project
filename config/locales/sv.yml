@@ -129,7 +129,7 @@ sv:
         other: &business_categories Kategorier
 
       company:
-        one: Företag
+        one: &company_one Företag
         other: Företag
 
       shf_document:
@@ -216,7 +216,7 @@ sv:
         name: *name
         phone_number: &company_phone Telefonnummer till företaget
         email: Företagets email
-        website: Webbplats
+        website: &company_website Webbplats
         org_nr: *org_nr
         post_code: *post_code
         city: *city
@@ -628,7 +628,7 @@ sv:
       address: &address Adress
       main_address: Huvudadress
       other_addresses: Andra adresser
-      mailing_address: Post
+      mailing_address: &post_address Post
       street: *street
       post_code: *post_code
       city: *city
@@ -1155,7 +1155,7 @@ sv:
           new_app_arrived: "En ny ansökan har inkommit som du borde kika på. "
           from: Från
           view_app_here: "Du kan se medlemskapsansökan här: "
-          must_be_logged_in: "(Du måste vara inloggad som en administratör för att se det.)"
+          must_be_logged_in: &must_be_logged_in_as_admin "(Du måste vara inloggad som en administratör för att se det.)"
 
       member_unpaid_over_x_months:
         subject: "Members unpaid for more than %{num_months} months"
@@ -1165,6 +1165,19 @@ sv:
 
         error_sending:  FIXME - need text to display if there is a problem sending this email
 
+
+      new_membership_granted_co_hbrand_paid:
+        subject: Ny medlem att välkomna och skicka paket till
+        message_text:
+          this_is_member: "Den här personen har betalat och är nu medlem. Välkomna dem och skicka medlemspaket, din smarta varelse!"
+          member_number: *membership_number
+          categories: *business_categories
+          company: *company_one
+          company_website: *company_website
+          company_facebook_url: Facebook
+          company_postal_address: *post_address
+
+          must_be_logged_in: *must_be_logged_in_as_admin
 
 
     shf_application_mailer:

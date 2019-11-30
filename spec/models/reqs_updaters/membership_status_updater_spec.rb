@@ -136,11 +136,13 @@ RSpec.describe MembershipStatusUpdater, type: :model do
     # Note - since this is a private method, we can only do unit testing of it
     # with RSpec if we explicitly :send the message to the subject
 
-    it 'user.member? is true' do
+    it 'user.member? is true after update' do
+      expect(subject).to receive(:grant_membership).and_call_original
+
       # mock the MemberMailer so we don't try to send emails
       expect(MemberMailer).to receive(:membership_granted).with(user).and_return(double('MemberMailer', deliver: true))
 
-      subject.send(:update_action, {user: user}) # this is equivalent to subject.update_action(user)
+      subject.send(:update_action, {user: user}) # this is equivalent to subject.update_action(user); assumes that the pre-conditions have been checked and met
       expect(user.member?).to be_truthy
     end
 
@@ -159,6 +161,51 @@ RSpec.describe MembershipStatusUpdater, type: :model do
       subject.send(:update_action, {user: user, send_email: false}) # this is equivalent to subject.update_action([user, send_email: false ])
     end
 
+    describe 'new_membership_granted_co_hbrand_paid email sent only if new member has at least one company that is complete and branding license is current' do
+
+      let(:new_member) do
+        u = create(:user)
+        create( :shf_application,
+                          :accepted,
+                          user: u )
+        u
+      end
+
+      let(:co) { new_member.shf_application.companies.first }
+
+
+      it 'has 1 co. complete AND branding license current = mail sent' do
+        create(:h_branding_fee_payment, :successful, user: new_member, company: co)
+
+        # mock the MemberMailer and AdminMailer so we don't try to send emails
+        expect(MemberMailer).to receive(:membership_granted).with(new_member).and_return(double('MemberMailer', deliver: true))
+        expect(AdminMailer).to receive(:new_membership_granted_co_hbrand_paid).with(new_member).and_return(double('AdminMailer', deliver: true))
+
+        subject.send(:update_action, {user: new_member}) # this is equivalent to subject.update_action(new_member)
+      end
+
+      it 'has 1 co complete (but branding lic. not current) = no mail sent' do
+        # mock the MemberMailer and AdminMailer so we don't try to send emails
+        expect(MemberMailer).to receive(:membership_granted).with(new_member).and_return(double('MemberMailer', deliver: true))
+        expect(AdminMailer).not_to receive(:new_membership_granted_co_hbrand_paid).with(new_member)
+
+        subject.send(:update_action, {user: new_member}) # this is equivalent to subject.update_action(new_member)
+
+      end
+
+
+      it 'has 1 co branding lic. is current but not complete = no mail sent' do
+        create(:h_branding_fee_payment, :successful, user: new_member, company: co)
+        co.name = '' # make this not complete
+
+        # mock the MemberMailer and AdminMailer so we don't try to send emails
+        expect(MemberMailer).to receive(:membership_granted).with(new_member).and_return(double('MemberMailer', deliver: true))
+        expect(AdminMailer).not_to receive(:new_membership_granted_co_hbrand_paid).with(new_member)
+
+        subject.send(:update_action, {user: new_member}) # this is equivalent to subject.update_action(new_member)
+
+      end
+    end
   end
 
 

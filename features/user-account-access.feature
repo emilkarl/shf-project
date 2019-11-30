@@ -1,8 +1,8 @@
-Feature: Show user account information
+Feature: Show user account information only to those that should see it
 
   As a user
-  So that I know what information SHF has about me
-  Show me my user account page
+  Because my user account page has private member and payment status information
+  Only I (and the admin) should be able to see it
 
   PT:  https://www.pivotaltracker.com/story/show/140358959
 
@@ -37,21 +37,21 @@ Feature: Show user account information
       | lars@example.com | 2019-03-01 |
 
 
-  Scenario: a visitor cannot see a user page
+  Scenario: a visitor cannot see a user account page
     Given I am logged out
-    When I am on the "user details" page for "lars@example.com"
+    When I am on the "user account" page for "lars@example.com"
     Then I should see t("errors.not_permitted")
 
 
-  Scenario: user cannot see the user page for another user
+  Scenario: user cannot see the user account page for another user
     Given I am logged in as "emma@example.com"
-    When I am on the "user details" page for "lars@example.com"
+    When I am on the "user account" page for "lars@example.com"
     Then I should see t("errors.not_permitted")
 
 
-  Scenario: a user can see their own user page
+  Scenario: a user can see their own user account page
     Given I am logged in as "emma@example.com"
-    When I am on the "user details" page for "emma@example.com"
+    When I am on the "user account" page for "emma@example.com"
     Then I should not see t("errors.not_permitted")
     And I should see t("users.show.email")
     And I should see "emma@example.com"
@@ -59,13 +59,13 @@ Feature: Show user account information
 
   Scenario: member cannot see the user page for another user
     Given I am logged in as "lars@example.com"
-    When I am on the "user details" page for "emma@example.com"
+    When I am on the "user account" page for "emma@example.com"
     Then I should see t("errors.not_permitted")
 
 
   Scenario: a member can see their own user page
     Given I am logged in as "lars@example.com"
-    When I am on the "user details" page for "lars@example.com"
+    When I am on the "user account" page for "lars@example.com"
     Then I should not see t("errors.not_permitted")
     And I should see t("users.show.email")
     And I should see "lars@example.com"

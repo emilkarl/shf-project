@@ -60,7 +60,7 @@ Feature: Member gets their customized SHF membership card (proof of membership)
 
   @selenium @time_adjust
   Scenario: Member sees custom context menu instead of normal browser context menu
-    Given I am on the "user profile" page for "emma@mutts.se"
+    Given I am on the "user account" page for "emma@mutts.se"
     When I right click on "#company-h-brand"
     Then I should see t("users.show.download_image")
     And I should see t("users.show.show_image")

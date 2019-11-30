@@ -144,7 +144,15 @@ class MembershipStatusUpdater < AbstractUpdater
     ActivityLogger.open(log_filename, self.class.to_s, LOGMSG_MEMBERSHIP_GRANTED, false) do |log|
 
       user.update(member: true, membership_number: user.issue_membership_number) # I don't think a User should be responsible for figuring out the next membership number
-      MemberMailer.membership_granted(user).deliver if send_email
+
+      if send_email
+        MemberMailer.membership_granted(user).deliver
+
+        # only send if there are companies that are complete AND branding license payment is current = "good companies" is how they're referred to here
+        user_good_cos = user.shf_application&.companies&.select{|co| co.complete? && co.branding_license? }
+        has_good_cos = user_good_cos.nil? ? false : user_good_cos.count > 0
+        AdminMailer.new_membership_granted_co_hbrand_paid(user).deliver if has_good_cos
+      end
 
       log.record(:info, "#{LOGMSG_MEMBERSHIP_GRANTED}: #{user.inspect}")
     end

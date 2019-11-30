@@ -1,6 +1,10 @@
+# email_spec gem
+# see examples <gem path>/email_spec-2.2.0/examples/rails4_root/features
+#
 # Commonly used email steps
 #
 # To add your own steps make a custom_email_steps.rb
+#
 # The provided methods are:
 #
 # last_email_address
@@ -56,6 +60,21 @@ Then /^(?:I|they|"([^"]*?)") should have (an|no|\d+) emails?$/ do |address, amou
   expect(mailbox_for(address).size).to eql parse_email_count(amount)
 end
 
+# This will match the following (even if some are grammatically incorrect):
+# "some-recipient@example.com" should receive an email with the subject t("some.translation.key")
+# "some-recipient@example.com" should receive an email with the subject "some subject line"
+# "some-recipient@example.com" should receive an email with the subject 'some subject line'
+# 'some-recipient@example.com' should receive an email with the subject t("some.translation.key")
+# 'some-recipient@example.com' should receive an email with the subject "some subject line"
+# 'some-recipient@example.com' should receive an email with the subject 'some subject line'
+# t("some.translation.key") should receive an email with the subject t("some.translation.key")
+# t("some.translation.key") should receive an email with the subject "some subject line"
+# t("some.translation.key") should receive an email with the subject 'some subject line'
+#
+Then("{capture_string} should receive an email with subject {capture_string}") do |recipient, subject|
+  expect(unread_emails_for(recipient).select { |m| m.subject =~ Regexp.new(Regexp.escape(subject)) }.size).to eql parse_email_count(1)
+end
+
 Then /^(?:I|they|"([^"]*?)") should receive (an|no|\d+) emails? with subject "([^"]*?)"$/ do |address, amount, subject|
   expect(unread_emails_for(address).select { |m| m.subject =~ Regexp.new(Regexp.escape(subject)) }.size).to eql parse_email_count(amount)
 end
@@ -65,7 +84,7 @@ Then /^(?:I|they|"([^"]*?)") should receive (an|no|\d+) emails? with subject \/(
 end
 
 Then /^(?:I|they|"([^"]*?)") should receive an email with the following body:$/ do |address, expected_body|
-  open_email(address, :with_text => expected_body)
+  open_email(address, with_text: expected_body)
 end
 
 #
@@ -77,20 +96,25 @@ When /^(?:I|they|"([^"]*?)") opens? the email$/ do |address|
   open_email(address)
 end
 
+
+When "(?:I|they|\"([^\"]*?)\") opens? the email with subject {capture_string}" do |address, subject|
+  open_email(address, with_subject: subject)
+end
+
 When /^(?:I|they|"([^"]*?)") opens? the email with subject "([^"]*?)"$/ do |address, subject|
-  open_email(address, :with_subject => subject)
+  open_email(address, with_subject: subject)
 end
 
 When /^(?:I|they|"([^"]*?)") opens? the email with subject \/([^"]*?)\/$/ do |address, subject|
-  open_email(address, :with_subject => Regexp.new(subject))
+  open_email(address, with_subject: Regexp.new(subject))
 end
 
 When /^(?:I|they|"([^"]*?)") opens? the email with text "([^"]*?)"$/ do |address, text|
-  open_email(address, :with_text => text)
+  open_email(address, with_text: text)
 end
 
 When /^(?:I|they|"([^"]*?)") opens? the email with text \/([^"]*?)\/$/ do |address, text|
-  open_email(address, :with_text => Regexp.new(text))
+  open_email(address, with_text: Regexp.new(text))
 end
 
 #

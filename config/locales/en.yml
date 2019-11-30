@@ -129,7 +129,7 @@ en:
         other: &business_categories Categories
 
       company:
-        one: Company
+        one: &company_one Company
         other: Companies
 
       shf_document:
@@ -220,7 +220,7 @@ en:
         kommun: *kommun
         region: *region
         region_short: *region_short
-        website: Website
+        website: &company_website Website
         org_nr: *org_nr
         dinkurs_key: &dinkurs_company_key Dinkurs Company key
         dinkurs_company_id: Dinkurs company key
@@ -617,7 +617,7 @@ en:
       main_address: Main Address
       other_addresses: Other Addresses
       address: Address
-      mailing_address: Mail
+      mailing_address: &post_address Mail
       street: *street
       post_code: *post_code
       city: *city
@@ -1150,7 +1150,7 @@ en:
           new_app_arrived: "A new membership application has been submitted that you should look at: "
           from: From
           view_app_here: "You can view the membership application here: "
-          must_be_logged_in: "(You must be logged in as the administrator to view it.)"
+          must_be_logged_in: &must_be_logged_in_as_admin "(You must be logged in as the administrator to view it.)"
 
       member_unpaid_over_x_months:
         subject: Members unpaid for more than %{num_months} months
@@ -1159,6 +1159,20 @@ en:
           full_name: Name
 
         error_sending:  FIXME - need text to display if there is a problem sending this email
+
+
+      new_membership_granted_co_hbrand_paid:
+        subject: New Member to welcome and send packet to
+        message_text:
+          this_is_member: "This person has paid and is now a member. Welcome them and send member package, you clever creature!"
+          member_number: *membership_number
+          categories: *business_categories
+          company: *company_one
+          company_website: *company_website
+          company_facebook_url: Facebook
+          company_postal_address: *post_address
+
+          must_be_logged_in: *must_be_logged_in_as_admin
 
 
     shf_application_mailer:

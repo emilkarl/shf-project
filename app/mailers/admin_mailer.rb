@@ -32,4 +32,19 @@ class AdminMailer < ApplicationMailer
     mail to: recipient_email, subject: t('member_unpaid_over_x_months.subject', num_months: @num_months, scope: I18N_SCOPE)
   end
 
+
+  def new_membership_granted_co_hbrand_paid(new_member)
+
+    # need to set these manually because we do not have a User object for the recipient, just an email address
+    @action_name = __method__.to_s
+    @recipient_email =  ENV['SHF_MEMBERSHIP_EMAIL']
+    @greeting_name = @recipient_email
+
+    @new_member = new_member
+    @complete_branded_cos =  new_member.companies.select{|co| co.branding_license? && co.complete? }
+    @category_names = new_member.shf_application.business_categories.map(&:name).join(', ')
+
+    mail to: recipient_email, subject: t('new_membership_granted_co_hbrand_paid.subject', scope: I18N_SCOPE)
+  end
+
 end

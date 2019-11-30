@@ -1,0 +1,23 @@
+- provide :signoff do
+  = render 'application_mailer/signoff', signoff: t('mailers.admin_mailer.signoff')
+
+- i18nscope = 'mailers.admin_mailer.new_membership_granted_co_hbrand_paid.message_text'
+
+.new-membership-granted-co-hbrand-paid
+
+  %p= t('this_is_member', scope: i18nscope)
+
+  %p.full-name= @new_member.full_name
+
+  .companies
+    - @complete_branded_cos.each do | co |
+      %p.company-name= label_and_value(t('company', scope: i18nscope),  co.name)
+      .company-details
+        %p.company-postal-address= label_and_value(t('company_postal_address', scope: i18nscope),  co.se_mailing_csv_str)
+        %p.company-website= label_and_value(t('company_website', scope: i18nscope),  co.website)
+
+        -#- unless co.facebook_url.blank?
+        -#  %p.company-facebook-url= label_and_value(t('company_facebook_url', scope: i18nscope),  co.facebook_url)
+
+  %p.categories= label_and_value(t('categories', scope: i18nscope),  @category_names)
+  %p.membership-number= label_and_value(t('member_number', scope: i18nscope),  @new_member.membership_number.to_s)

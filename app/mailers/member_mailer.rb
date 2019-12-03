@@ -73,4 +73,13 @@ class MemberMailer < ApplicationMailer
 
   end
 
+
+  def first_membership_fee_owed(user)
+
+    set_mail_info __method__, user
+    @user = user
+
+    mail to: recipient_email, subject: t('mailers.member_mailer.first_membership_fee_owed.subject')
+  end
+
 end

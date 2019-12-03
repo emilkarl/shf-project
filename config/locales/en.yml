@@ -1248,7 +1248,7 @@ en:
         message_text:
           expire_alert_html: "Your SHF membership term ended on <span class='date-warning'> %{expire_date}.</span>"
           renew_membership: You can renew your membership and keep taking advantage of SHF member benefits by logging in and paying your membership fee.
-          pay_on_acct_page: "Go to your account page to pay:"
+          pay_on_acct_page: &pay_on_acct_page "Go to your account page to pay:"
 
 
       co_info_incomplete:
@@ -1262,6 +1262,11 @@ en:
           co_region_missing: "company address"
           please_complete: "Please add the above information so the company information is complete."
           company_link_login_msg: "Here's the link to the company so you can edit it: "
+
+      first_membership_fee_owed:
+        subject: "Approved, but haven't paid yet?"
+        greeting: *email_greeting
+        message_text: "You have been approved to become a member, but you must pay a membership fee in order to take advantage of the benefits, offers and discounts included in the membership. You can easily pay by following the steps below."
 
 
   devise:

@@ -30,6 +30,10 @@ namespace :shf do
           timing:     :after,
           config:     { days: std_reminder_after_schedule } },
 
+        { class_name: 'FirstMembershipFeeOwedAlert',
+          timing:     :after,
+          config:     { days: std_reminder_after_schedule } },
+
         { class_name: 'HBrandingFeeWillExpireAlert',
           timing:     :before,
           config:     { days: std_reminder_before_schedule } },
@@ -46,6 +50,8 @@ namespace :shf do
         { class_name: 'ShfAppNoUploadedFilesAlert',
           timing:     :after,
           config:     { days: [60, 30, 14, 9, 2] } },
+
+
 
         # days_to_keep - specifies number of (daily) backups to retain on production server
         # backup_directory - where daily backups are retained on production server;

@@ -250,13 +250,17 @@ RSpec.describe CompanyInfoIncompleteAlert do
 
 
     it 'emails sent to all members and logged' do
+      # These memberships expire on dec 1 2019
       paid_member1
       incomplete_co
       paid_member2
 
-      expect(incomplete_co.current_members.size).to eq 2
 
       Timecop.freeze(dec_31) do
+
+        # memberships should be current as of dec 31 2018
+        expect(incomplete_co.current_members.size).to eq 2
+
         incomplete_co.current_members.each do | member |
           subject.send_email(incomplete_co, member, log)
         end

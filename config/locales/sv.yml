@@ -1264,8 +1264,14 @@ sv:
         greeting: *email_greeting
         message_text:
           expire_alert_html: "Ditt medlemsskap gick ut <span class='date-warning'> %{expire_date}.</span>"
-          renew_membership: Du kan förnya ditt medlemsskap och fortsätta dra nytta av medlemsfördelarna genom att logga in och betala.
-          pay_on_acct_page: "Du betalar via "
+          renew_membership: Du kan förnya ditt medlemskap och fortsätta dra nytta av medlemsfördelarna genom att logga in och betala.
+          pay_on_acct_page: &pay_on_acct_page "Du betalar via "
+
+      first_membership_fee_owed:
+        subject: "Godkänd, men missat att betala?"
+        greeting: *email_greeting
+        message_text: "Du har blivit godkänd för att bli medlem, men du måste betala medlemsavgift för att kunna dra nytta av de förmåner, erbjudande och rabatter som ingår i medlemskapet. Du kan enkelt betala genom att följa stegen nedan."
+
 
 
   devise:

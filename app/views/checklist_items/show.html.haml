@@ -1,47 +1,34 @@
-- user_can_edit = policy(@checklist_item).update?
 %header.entry-header
-  %h1.entry-title
-    = t('.title')
-    = @checklist_item.title
+  %h1.entry-title= t('.title', name: @checklist_item.name)
 
 .entry-content.container
+
   .row.mt-2
     .col
       - unless @checklist_item.description.nil?
         %p
-          -#%b #{t('.description')}:
-          %b Description:
+          %b #{t('activerecord.attributes.checklist_item.description')}:
           = @checklist_item.description
-  .row.mt-2
-    .col
-      %p
-        %b Complete?
-        = @checklist_item.complete
-  .row.mt-2
-    .col
-      %p
-        %b Date completed:
-        = @checklist_item.date_completed
 
   .row.mt-2
     .col
       %p
         %b In list
-        = @checklist_item.checklist.title
+        = link_to @checklist_item.checklist.name, checklist_path(@checklist_item.checklist)
 
   .row.mt-2
     .col
       %p
-        %b Order in list
+        %b= t('activerecord.attributes.checklist_item.order_in_list')
         = @checklist_item.order_in_list
 
   %hr
     .text-center
-      - if user_can_edit
+      - if policy(@checklist_item).update?
         = link_to "Edit Checklist item",
                     edit_checklist_item_path(@checklist_item), class: 'btn btn-secondary btn-sm edit-checklist-item'
 
       - if current_user.admin?
         = link_to "Delete checklist item", @checklist_item, method: :delete,
                         class:'btn btn-danger btn-sm delete-checklist-item',
-                        data: { confirm: "#{t('.confirm_are_you_sure')}" }
+                        data: { confirm: t('.delete_confirm', name: @checklist_item.name) }

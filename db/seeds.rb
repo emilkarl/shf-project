@@ -7,6 +7,7 @@ require 'ffaker'
 require 'rake'
 require_relative 'seed_helpers'
 require_relative 'seed_helpers/app_configuration_seeder'
+require_relative 'seed_helpers/checklists_seeder'
 
 include SeedHelper
 
@@ -104,6 +105,8 @@ if Rails.env.development? || Rails.env.staging? || ENV['HEROKU_STAGING']
   states.sort.each do | state |
     puts "  #{state}: #{ShfApplication.where(state: state).count }"
   end
+
+ ChecklistsSeeder.seed
 
  if AdminOnly::AppConfiguration.count == 0
    puts "Seeding AppConfiguration..."

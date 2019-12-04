@@ -45,4 +45,6 @@ class ApplicationPolicy
     !user.is_a? Visitor
   end
 
+  alias not_a_visitor? not_a_visitor
+
 end

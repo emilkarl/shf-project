@@ -1,22 +1,21 @@
 %header.entry-header
-  %h1.entry-title= "Editing checklist item: #{@checklist_item.title}"
-
+  %h1.entry-title= t('title', name: @checklist_item.name)
 .entry-content.container
-
 
   .row.mt-2
     .col
       %p
         %b In list
-        = @checklist_item.checklist.title
+        = @checklist_item.checklist.name
 
   .row.mt-2
     .col
       %p
-        %b Order in list
+        %b= t('activerecord.attributes.checklist_items.order_in_list')
         = @checklist_item.order_in_list
 
 
+  %hr
 
   = render 'form', class_name: 'edit-checklist-item'
 

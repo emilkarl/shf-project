@@ -117,7 +117,13 @@ en:
     one: My Company
     other: My Companies
 
- # Automatic and manual lookup for ActiveRecords:
+  checklist_common:
+    done: &done Done
+    complete: &complete Complete
+    date_completed: &date_completed Date Complete
+
+
+  # Automatic and manual lookup for ActiveRecords:
   activerecord:
     models:
       shf_application:
@@ -147,6 +153,18 @@ en:
       task_attempt:
         one: Task Attempt
         other: Task Attempts
+
+      checklist_item:
+        one: Checklist Item
+        other: Checklist Items
+
+      checklist:
+        one: Checklist
+        other: Checlists
+
+      ordered_list_entry:
+        one: List Entry
+        other: List Entries
 
 
     attributes:
@@ -225,7 +243,6 @@ en:
         dinkurs_key: &dinkurs_company_key Dinkurs Company key
         dinkurs_company_id: Dinkurs company key
 
-
       business_category:
         name: &business_category_name  Name
         description: &description  Description
@@ -259,6 +276,25 @@ en:
         task_source: Task source
         was_successful: Was successful
         attempted_on: Attempted on
+
+      checklist_item:
+        name: *name
+        description: *description
+        order_in_list: Order in list
+
+      checklist:
+        name: *name
+        description: *description
+
+      user_checklist_item:
+        complete: *done
+        date_complete: *date_completed
+
+      ordered_list_entry:
+        name: *name
+        description: *description
+        list_position: Position in list
+        ancestry: Parent lists
 
 
     errors:
@@ -882,6 +918,77 @@ en:
       search_distance_negative: 'Distance cannot be negative'
       latitude_blank: "Latitude cannot be blank."
       longitude_blank: "Longitude cannot be blank."
+
+  checklist_items:
+    new:
+      title: New Checklist item
+    create:
+      error: "There was a problem creating and saving the checklist item %{name}."
+      success: "%{name} was created and saved."
+    edit:
+      title: "Editing %{name}"
+      delete: &delete_checklist_item "Delete the checklist item named %{name}"
+      delete_confirm: &delete_checklist_item_confirm "Are you sure you want to delete the checklist item %{name}?"
+    update:
+      error:  "There was a problem updating the checklist item %{name}."
+      success: "The checklist item %{name} was updated."
+    index:
+      title: Checklist Items
+      done_col: "done?"
+      in_checklist_col: checklist
+      order_in_list_col: "# in list"
+      delete: *delete_checklist_item
+      delete_confirm: *delete_checklist_item_confirm
+    show:
+      title: "Checklist Item %{name}"
+    destroy:
+      error: "There was a problem deleting %{name}. It was not deleted."
+      success: "%{name} was deleted."
+
+  checklists:
+    new:
+      title: New Checklist
+    create:
+      error: "There was a problem creating and saving the checklist %{name}."
+      success: "%{name} was created and saved."
+    edit:
+      title: "Editing %{name}"
+      delete: "Delete the checklist named %{name}"
+      delete_confirm: "Are you sure you want to delete the checklist %{name}?"
+    update:
+      error:  "There was a problem updating the checklist %{name}."
+      success: "The checklist %{name} was updated."
+    index:
+      title: Checklists
+    show:
+      title: "Checklist %{name}"
+    destroy:
+      error: "There was a problem deleting %{name}. It was not deleted."
+      success: "%{name} was deleted."
+
+  ordered_list_entries:
+    new:
+      title: New List Entry
+    create:
+      error: "There was a problem creating and saving the list entry %{name}."
+      success: "%{name} was created and saved."
+    edit:
+      title: "Editing %{name}"
+      delete: &delete_ordered_list_entry_item "Delete the list entry named %{name}"
+      delete_confirm: &delete_ordered_list_entry_item_confirm "Are you sure you want to delete the list entry %{name}?"
+    update:
+      error:  "There was a problem updating the list entry %{name}."
+      success: "The list entry %{name} was updated."
+    index:
+      title: List Entries
+      in_parent_col: in list
+      delete: *delete_ordered_list_entry_item
+      delete_confirm: *delete_ordered_list_entry_item_confirm
+    show:
+      title: "List Entry: %{name}"
+    destroy:
+      error: "There was a problem deleting the list entry %{name}. It was not deleted."
+      success: "%{name} was deleted."
 
 
   admin:

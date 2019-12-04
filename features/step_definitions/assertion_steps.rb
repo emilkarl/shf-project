@@ -108,6 +108,36 @@ Then(/^I should see (\d+) (.*?) rows$/) do |n, css_class_name|
   expect(page).not_to have_selector(".#{css_class_name}", count: n+1)
 end
 
+
+def get_tbody_for_tableid(table_id)
+  table = page.find("table##{table_id}")
+  table.find(:xpath, "./tbody")
+end
+
+
+#  Example: this will match X rows in the <tbody> section of a table with the given id
+#   I should see 7 rows in the "companies" table
+Then "I should see {digits} rows in the table with id {capture_string}" do | num_times, table_id |
+  tbody = get_tbody_for_tableid(table_id)
+  expect(tbody.has_xpath?("./tr", count: num_times)).to be_truthy
+end
+
+
+#  Example: this will match a CSS class in the <tbody> section of a table with the given id
+#   I should see 7 rows with CSS class "name" in the "companies" table
+Then "I should see {digits} rows with CSS class {capture_string} in the table with id {capture_string}" do | num_times, css_class, table_id |
+  tbody = get_tbody_for_tableid(table_id)
+  expect(tbody.has_xpath?("//td[@class='#{css_class}']", count: num_times)).to be_truthy
+end
+
+
+Then "I should{negate} see CSS class {capture_string} with text {capture_string} in the table with id {capture_string}" do |negate, css_class, expected_text, table_id |
+  tbody = get_tbody_for_tableid(table_id)
+
+  expect(tbody).send ( negate ? :not_to : :to), have_xpath("./tr/td[@class='#{css_class}' and .//text()='#{expected_text}']")
+end
+
+
 Then(/^I should see at least one column with class "([^"]*)"/) do | css_class_name |
   expect(page).to  have_xpath("//td[@class='#{css_class_name}']")
 end

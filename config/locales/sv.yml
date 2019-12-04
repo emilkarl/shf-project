@@ -117,6 +117,12 @@ sv:
     one: Mitt företag
     other: Mina företag
 
+  checklist_common:
+    done: &done Done
+    complete: &complete Complete
+    date_completed: &date_completed Date Completed
+
+
   # Automatisk och manuell sökning för Active Records
   activerecord:
     models:
@@ -147,6 +153,18 @@ sv:
       task_attempt:
         one: Task Attempt
         other: Task Attempts
+
+      checklist_item:
+        one: Checklist Item
+        other: Checklist Items
+
+      checklist:
+        one: Checklist
+        other: Checklists
+
+    ordered_list_entry:
+      one: List Entry
+      other: List Entries
 
 
     attributes:
@@ -200,7 +218,6 @@ sv:
         true: Medlem
         false: Ej medlem
 
-
       address:
         street: &street Gata
         post_code: &post_code Post nr.
@@ -237,7 +254,6 @@ sv:
         actual_file_content_type: Uppladdad filtyp
         actual_file: Uppladdad fil
 
-
       member_app_waiting_reason:
         name_sv: "Namn (svenska)"
         name_en: "Namn (engelska)"
@@ -251,7 +267,6 @@ sv:
         was_successful: was successful
         attempted_on: attempted on
 
-
       app_configuration:
         site_name: &site_name Site name
         site_meta_title: &site_meta_title Site meta title
@@ -261,6 +276,25 @@ sv:
         og_type: &site_og_type OG type
         twitter_card_type: &site_twitter_card_type Twitter card type
         facebook_app_id: &site_facebook_app_id Facebook Application ID
+
+      checklist_item:
+        name: *name
+        description: *description
+        order_in_list: Order in list
+
+      checklist:
+        name: *name
+        description: *description
+
+      user_checklist_item:
+        complete: *done
+        date_complete: *date_completed
+
+      ordered_list_entry:
+        name: *name
+        description: *description
+        list_position: Position in list
+        ancestry: Parent lists
 
 
     errors:
@@ -888,6 +922,79 @@ sv:
 
     error:
       error: Det uppstod ett fel vid behandlingen av din betalning
+
+  checklist_items:
+    new:
+      title: New Checklist item
+    create:
+      error: "There was a problem creating and saving the checklist item %{name}."
+      success: "%{name} was created and saved."
+    edit:
+      title: "Editing %{name}"
+      delete: &delete_checklist_item "Delete the checklist item named %{name}"
+      delete_confirm: &delete_checklist_item_confirm "Are you sure you want to delete the checklist item %{name}?"
+    update:
+      error:  "There was a problem updating the checklist item %{name}."
+      success: "The checklist item %{name} was updated."
+    index:
+      title: Checklist Items
+      done_col: "done?"
+      in_checklist_col: checklist
+      order_in_list_col: "# in list"
+      delete: *delete_checklist_item
+      delete_confirm: *delete_checklist_item_confirm
+    show:
+      title: "Checklist Item %{name}"
+    destroy:
+      error: "There was a problem deleting %{name}. It was not deleted."
+      success: "%{name} was deleted."
+
+  checklists:
+    new:
+     title: New Checklist
+    create:
+      error: "There was a problem creating and saving the checklist %{name}."
+      success: "%{name} was created and saved."
+    edit:
+      title: "Editing %{name}"
+      delete: "Delete the checklist named %{name}"
+      delete_confirm: "Are you sure you want to delete the checklist %{name}?"
+    update:
+      error:  "There was a problem updating the checklist %{name}."
+      success: "The checklist %{name} was updated."
+    index:
+      title: Checklists
+    show:
+      title: "Checklist %{name}"
+    destroy:
+      error: "There was a problem deleting %{name}. It was not deleted."
+      success: "%{name} was deleted."
+
+
+  ordered_list_entries:
+    new:
+      title: New List Entry
+    create:
+      error: "There was a problem creating and saving the list entry %{name}."
+      success: "%{name} was created and saved."
+    edit:
+      title: "Editing %{name}"
+      delete: &delete_ordered_list_entry_item "Delete the list entry named %{name}"
+      delete_confirm: &delete_ordered_list_entry_item_confirm "Are you sure you want to delete the list entry %{name}?"
+    update:
+      error:  "There was a problem updating the list entry %{name}."
+      success: "The list entry %{name} was updated."
+    index:
+      title: List Entries
+      in_parent_col: in list
+      delete: *delete_ordered_list_entry_item
+      delete_confirm: *delete_ordered_list_entry_item_confirm
+    show:
+      title: "List Entry: %{name}"
+    destroy:
+      error: "There was a problem deleting the list entry %{name}. It was not deleted."
+      success: "%{name} was deleted."
+
 
   admin:
     index:

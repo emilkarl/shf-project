@@ -3,8 +3,8 @@
 %table
   %thead
     %tr
-      %th Title
-      %th Description
+      %th.name Name
+      %th.description Description
 
       %th
       %th
@@ -13,8 +13,8 @@
   %tbody
     - @checklists.each do |checklist|
       %tr
-        %td= checklist.title
-        %td= checklist.description
+        %td.name= checklist.name
+        %td.description= checklist.description
 
         %td= link_to 'Show', checklist
         %td= link_to 'Edit', edit_checklist_path(checklist)

@@ -6,7 +6,7 @@ class ChecklistItemsController < ApplicationController
 
   def index
     authorize ChecklistItem
-    @checklist_items = ChecklistItem.all
+    @checklist_items = ChecklistItem.all.includes(:checklist).order(:checklist_id, :order_in_list)
   end
 
 
@@ -17,21 +17,24 @@ class ChecklistItemsController < ApplicationController
   def new
     authorize ChecklistItem
     @checklist_item = ChecklistItem.new
+    @all_checklists = get_all_checklists
   end
 
 
   def edit
+    @all_checklists = get_all_checklists
   end
 
 
-  # POST /checklist_items
-  # POST /checklist_items.json
   def create
     authorize ChecklistItem
     @checklist_item = ChecklistItem.new(checklist_item_params)
 
     respond_to do |format|
       if @checklist_item.save
+        updated_order_in_list = params.dig(:checklist_item, :order_in_list)
+        update_checklist_items_order(updated_order_in_list.blank? ? -1 : updated_order_in_list.to_i)
+
         format.html { redirect_to @checklist_item, notice: 'Checklist item was successfully created.' }
         format.json { render :show, status: :created, location: @checklist_item }
       else
@@ -42,11 +45,12 @@ class ChecklistItemsController < ApplicationController
   end
 
 
-  # PATCH/PUT /checklist_items/1
-  # PATCH/PUT /checklist_items/1.json
   def update
     respond_to do |format|
       if @checklist_item.update(checklist_item_params)
+        updated_order_in_list = params.dig(:checklist_item, :order_in_list)
+        update_checklist_items_order(updated_order_in_list) unless updated_order_in_list.nil?
+
         format.html { redirect_to @checklist_item, notice: 'Checklist item was successfully updated.' }
         format.json { render :show, status: :ok, location: @checklist_item }
       else
@@ -57,8 +61,6 @@ class ChecklistItemsController < ApplicationController
   end
 
 
-  # DELETE /checklist_items/1
-  # DELETE /checklist_items/1.json
   def destroy
     @checklist_item.destroy
     respond_to do |format|
@@ -69,7 +71,8 @@ class ChecklistItemsController < ApplicationController
 
 
   private
-  # Use callbacks to share common setup or constraints between actions.
+
+
   def set_checklist_item
     @checklist_item = ChecklistItem.find(params[:id])
   end
@@ -77,12 +80,23 @@ class ChecklistItemsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def checklist_item_params
-    params.require(:checklist_item).permit(:title, :description, :date_completed,
+    params.require(:checklist_item).permit(:name, :description, :date_completed,
                                            :complete, :order_in_list, :checklist_id)
   end
 
 
   def authorize_checklist_item
     authorize @checklist_item
+  end
+
+
+  def get_all_checklists
+    Checklist.arrange_as_array({ order: 'name' })
+  end
+
+
+  # @param [Integer] order_for_this_item - default is -1, which will insert the item at the end of the list
+  def update_checklist_items_order(order_for_this_item = -1)
+    @checklist_item.checklist.insert(@checklist_item, order_for_this_item.to_i)
   end
 end

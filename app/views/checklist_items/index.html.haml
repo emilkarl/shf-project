@@ -1,39 +1,32 @@
 %header.entry-header
-  %h1.entry-title Checklist Items
-  -#%h1.entry-title= t('.title')
+  %h1.entry-title= t('.title')
 
 .entry-content
   .table-responsive
     %table.table.table-hover.table-sm#checklist-items
       %thead
         %tr
-      %th.title Title
-      %th.description Description
-      %th.complete Done?
-      %th.date_completed Date completed
-      %th.checklist In List
-      %th.order_in_list Order #
+      %th.name= t('activerecord.attributes.checklist_item.name')
+      %th.description= t('activerecord.attributes.checklist_item.description')
+      %th.checklist= t('.in_checklist_col')
+      %th.order_in_list= t('.order_in_list_col')
       %th
       %th
 
       %tbody.panel-body
         - @checklist_items.each do |checklist_item|
           %tr
-            %td.title= link_to  checklist_item.title, checklist_item
+            %td.name= link_to  checklist_item.name, checklist_item
             %td.description= link_to checklist_item.description, checklist_item
-            %td.complete= check_box_tag 'completed', checklist_item.complete, checklist_item.complete,
-              {disabled: true, class: 'checklist-checkbox-small'}
-            -# checklist_item.complete
-            %td.date_completed= date_completed_display(checklist_item)
-            %td.checklist= checklist_item.checklist.title
+            %td.checklist= checklist_item.checklist.name
             %td.order_in_list= checklist_item.order_in_list
             %td.edit
               = link_to icon('fas', 'edit'), edit_checklist_item_path(checklist_item)
             %td.delete
               = link_to icon('fas', 'trash', class: 'delete'),
                         checklist_item_path(checklist_item), method: :delete,
-                        title: 'delete checklist item',
-                        data: { confirm: 'Are you sure?' }
+                        title: t('.delete', name: checklist_item.name),
+                        data: { confirm: t('.delete_confirm',  name: checklist_item.name) }
 
   %hr
   .text-center

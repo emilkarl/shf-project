@@ -1,0 +1,54 @@
+---
+:Checklists:
+- :name: Register as a user
+  :description: Provide information needed to register.
+- :name: Application completion
+  :description: Steps to complete an application for joining SHF
+- :name: Membership
+  :description: Steps to become a member
+- :name: SHF Ethical Guidelines
+  :description: SHF Member Ethical Guidelines
+:ChecklistItems:
+- :name: email
+  :description: Provide a valid email address for logging in.
+  :checklist_name: Register as a user
+  :order_in_list: 0
+- :name: password
+  :description: Create a password for logging in.
+  :checklist_name: Register as a user
+  :order_in_list: 1
+- :name: Provide your org nummber
+  :description: Provide the Org nummer (company number)
+  :checklist_name: Application completion
+  :order_in_list: 0
+- :name: Business categories
+  :description: Check at least 1 business category
+  :checklist_name: Application completion
+  :order_in_list: 1
+- :name: Documents
+  :description: Provide documents that show your certifications for the buisness categories
+  :checklist_name: Application completion
+  :order_in_list: 2
+- :name: SHF has approved your application
+  :description: SHF has reviwed and approved your application.
+  :checklist_name: Membership
+  :order_in_list: 2
+- :name: Pay your membership fee
+  :description: pay your membership fee
+  :checklist_name: Membership
+  :order_in_list: 3
+- :name: Respect the Dog
+  :description: "... something about this"
+  :checklist_name: SHF Ethical Guidelines
+  :order_in_list: 0
+- :name: Respect the Owner
+  :description: "... something about this"
+  :checklist_name: SHF Ethical Guidelines
+  :order_in_list: 1
+:Sublists:
+- :sublist_name: Register as a user
+  :parent_checklist_name: Membership
+  :order_in_list: 0
+- :sublist_name: Application completion
+  :parent_checklist_name: Membership
+  :order_in_list: 1

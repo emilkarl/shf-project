@@ -11,7 +11,7 @@ class ChecklistPolicy < ApplicationPolicy
 
 
   def show?
-    true
+    user.admin?
   end
 
 
@@ -29,5 +29,9 @@ class ChecklistPolicy < ApplicationPolicy
     user.admin?
   end
 
+
+  def destroy?
+    user.admin?
+  end
 
 end

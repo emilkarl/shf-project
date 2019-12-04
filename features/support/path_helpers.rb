@@ -77,6 +77,19 @@ module PathHelpers
         path = shf_documents_path
 
 
+      # Checklist Item pages
+      when 'manage checklist items', 'all checklist items'
+        path = checklist_items_path
+
+
+      # Checklist pages
+      when 'manage checklists', 'all checklists'
+        path = checklists_path
+
+
+      # User-ChecklistItems pages
+
+
       # ==================================================
       # Other Admin pages - pages only administrators can access
 
@@ -109,6 +122,20 @@ module PathHelpers
         path = new_admin_only_member_app_waiting_reason_path
       when 'all member app waiting reasons'
         path = admin_only_member_app_waiting_reasons_path
+
+
+      # Checklist Item pages
+      when 'manage checklist items', 'all checklist items'
+        path = checklist_items_path
+
+
+      # Checklist pages
+      when 'manage checklists', 'all checklists'
+        path = checklists_path
+
+
+      # User-ChecklistItems pages
+
 
       when 'admin dashboard'
         path = admin_only_dashboard_path

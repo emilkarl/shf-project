@@ -3,6 +3,7 @@ class ChecklistsController < ApplicationController
   before_action :set_checklist, only: [:show, :edit, :update, :destroy]
   before_action :authorize_checklist, only: [:update, :show, :edit, :destroy]
 
+
   # GET /checklists
   # GET /checklists.json
   def index
@@ -82,7 +83,7 @@ class ChecklistsController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def checklist_params
-    params.require(:checklist).permit(:title, :description)
+    params.require(:checklist).permit(:name, :description, :parent_id)
   end
 
 

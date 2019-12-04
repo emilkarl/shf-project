@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
 
-  resources :checklists
+
   mount Ckeditor::Engine => '/ckeditor'
   filter :locale
 
@@ -169,6 +169,8 @@ Rails.application.routes.draw do
          as: :company_address_delete
   # ----------------------------------------------------------
 
+  # FIXME adjust and edit this for the correct route names, etc.
+  resources :checklists
   resources :checklist_items
 
 

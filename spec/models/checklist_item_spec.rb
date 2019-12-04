@@ -10,7 +10,8 @@ RSpec.describe ChecklistItem do
   end
 
   describe 'Validations' do
-    it { is_expected.to validate_presence_of :title }
+    it { is_expected.to validate_presence_of :name }
+    it { is_expected.to validate_presence_of :order_in_list }
   end
 
   describe 'Associations' do

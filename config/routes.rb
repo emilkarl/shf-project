@@ -1,6 +1,5 @@
 Rails.application.routes.draw do
 
-
   mount Ckeditor::Engine => '/ckeditor'
   filter :locale
 
@@ -170,9 +169,12 @@ Rails.application.routes.draw do
   # ----------------------------------------------------------
 
   # FIXME adjust and edit this for the correct route names, etc.
-  resources :checklists
   resources :checklist_items
-
+  resources :checklists
+  resources :user_checklists
+  resources :user_checklist_items
+  resources :ordered_list_entries
+  get 'ordered-list-entries/max-list-position', to: 'ordered_list_entries#max_list_position'
 
   get 'information', to: 'shf_applications#information'
 

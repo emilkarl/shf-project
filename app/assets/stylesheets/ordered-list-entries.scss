@@ -1,0 +1,47 @@
+// Styles for OrderedListEntries
+
+@import 'shf-custom-colors';
+
+$lighter-shf-blue: lighten($shf-blue, 30%);
+
+tr {
+  .ordered-list-entry {
+    border: 0;
+  }
+}
+
+body.ordered_list_entries.index {
+  table {
+    td.is-list { padding-top: 1rem;}
+    td.parent { font-size: smaller; }
+    td.list-position{ text-align: center; }
+  }
+}
+
+.ordered-list-entry {
+
+  a {
+    // just underline the bottom, but create space with transparent borders so this doesn't "jump" when hovered
+    border-bottom: 1px dotted $shf-blue;
+    border-left: 1px transparent solid;
+    border-right: 1px transparent solid;
+    border-top: 1px transparent solid;
+
+
+    &:hover {
+      //background-color:  $light-taupe;
+      background-color: $lighter-shf-blue;
+      border: 1px $lighter-shf-blue solid;
+      color: $body-text;
+    }
+  }
+
+  .is-list {
+    font-weight: bold;
+  }
+
+  .top-level-list {
+    color: $primary;
+  }
+
+}

@@ -1,0 +1,77 @@
+= form_for @ordered_list_entry, html: { class: "#{local_assigns.fetch(:class_name, '')}" }   do |f|
+
+  != model_errors_helper(@ordered_list_entry)
+
+  .container
+    .row
+      .col
+        .form-group
+          = f.label :name, class: 'required'
+          = f.text_field :name,  class: 'form-control'
+
+    .row
+      .col
+        .form-group
+          = f.label :description
+          = f.text_field :description,  class: 'form-control'
+
+
+    .row
+      .col
+        %p Add to a list (TODO: I18n)
+
+    .row
+      .col
+        .form-group
+          = f.label :parent
+          = f.collection_select :parent_id, @all_allowable_parents, :id, :display_name_with_depth, include_blank: true
+
+    .row
+      .col
+        .form-group
+          -# order in list is ZERO based
+          - max_position =  @ordered_list_entry.parent.nil? ? 0 : (@ordered_list_entry.parent.children.size - 1)
+          = f.label :list_position
+          = f.number_field :list_position, in: 0..max_position, step: 1
+      .col
+        %p Leave the order blank to add this to the end of the list
+
+
+    .actions.form-group
+      = f.submit t('submit'), class: 'btn btn-primary mb-2 form-control'
+
+
+-# update the list_position field whenever the parent is changed
+:javascript
+
+  window.onload = function(){
+    let maxPosition =  #{@ordered_list_entry.parent.nil? ? 0 : (@ordered_list_entry.parent.children.size - 1)};
+    updateListPositionMax(maxPosition);
+  }
+
+
+  $("#ordered_list_entry_parent_id").on('change',function () {
+
+    let selectedParentId = document.getElementById('ordered_list_entry_parent_id').value;
+    let ajaxURL = "/ordered-list-entries/max-list-position"
+
+    $.get( ajaxURL, { id: selectedParentId }, function( data ){
+
+      if (data.status === 'errors') {
+            console.error(" ordered_list_entry_parent_id AJAX returned status === 'error'.  error_text: " + data.error_text);
+            // ele.html(data.error_text); TODO display error
+
+          } else {
+            updateListPositionMax(data.max_position)
+          }
+      },
+     "json");
+  })
+
+  // update the options in the List Position selection based on the current parent list selected
+  function updateListPositionMax(maxValue = 0) {
+    console.info("updateListPositionOptions - maxValue is now: ", maxValue);
+
+    let listPositionInput = document.getElementById('ordered_list_entry_list_position');
+    listPositionInput.setAttribute('max', maxValue);
+  }

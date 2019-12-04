@@ -8,6 +8,8 @@ require 'rake'
 require_relative 'seed_helpers'
 require_relative 'seed_helpers/app_configuration_seeder'
 require_relative 'seed_helpers/checklists_seeder'
+require_relative 'seed_helpers/ordered_list_entries_seeder'
+
 
 include SeedHelper
 
@@ -77,11 +79,16 @@ end
 
 if Rails.env.development? || Rails.env.staging? || ENV['HEROKU_STAGING']
 
- number_of_users = (ENV['SHF_SEED_USERS'] || SEED_USERS).to_i
- puts "Creating #{number_of_users} additional users. (This number can be set with ENV['SHF_SEED_USERS'])..."
+  OrderedListEntriesSeeder.seed
 
- users = {}
-  while users.length < number_of_users-1 do
+  #
+  # === USERS ===
+  #
+  number_of_users = (ENV['SHF_SEED_USERS'] || SEED_USERS).to_i
+  puts "Creating #{number_of_users} additional users. (This number can be set with ENV['SHF_SEED_USERS'])..."
+
+  users = {}
+  while users.length < number_of_users - 1 do
     email = FFaker::InternetSE.disposable_email
     first_name = FFaker::NameSE.first_name
     last_name = FFaker::NameSE.last_name
@@ -92,6 +99,12 @@ if Rails.env.development? || Rails.env.staging? || ENV['HEROKU_STAGING']
 
   puts "Users now in the db: #{User.count}"
 
+  # =================================
+
+
+  #
+  # === MEMBERSHIP APPLICATIONS ===
+  #
   puts "\nCreating membership applications ..."
   puts "  If a company address must be created (instead of reading from a CSV file), it must be geocoded, which takes time.  Be patient."
   puts "  You can look at the /log/development.log to be sure that things are happening and this is not stuck."
@@ -106,16 +119,20 @@ if Rails.env.development? || Rails.env.staging? || ENV['HEROKU_STAGING']
     puts "  #{state}: #{ShfApplication.where(state: state).count }"
   end
 
- ChecklistsSeeder.seed
+  # =================================
 
- if AdminOnly::AppConfiguration.count == 0
-   puts "Seeding AppConfiguration..."
-   SeedHelper::AppConfigurationSeeder.seed
- else
-   puts "No AppConfiguration seeded.  One already exists."
-   puts ' ... but there is no site meta image! You need to set one on the edit app configuration page (as an admin).' unless AdminOnly::AppConfiguration.last.site_meta_image.exists?
- end
 
+  #
+  # === APPLICATION CONFIGURATION ===
+  #
+
+  if AdminOnly::AppConfiguration.count == 0
+    puts "Seeding AppConfiguration..."
+    SeedHelper::AppConfigurationSeeder.seed
+  else
+    puts "No AppConfiguration seeded.  One already exists."
+    puts ' ... but there is no site meta image! You need to set one on the edit app configuration page (as an admin).' unless AdminOnly::AppConfiguration.last.site_meta_image.exists?
+  end
 
 end
 

@@ -1,0 +1,8 @@
+%header.entry-header
+  %h1.entry-title= t('.title')
+
+.entry-content
+  = render 'form'
+  %hr
+  .text-center
+    = link_to 'All list entries', ordered_list_entries_path, class: 'btn btn-sm btn-light'

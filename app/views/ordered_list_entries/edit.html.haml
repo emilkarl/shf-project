@@ -1,0 +1,27 @@
+%header.entry-header
+  %h1.entry-title= t('.title', name: @ordered_list_entry.name)
+.entry-content.container
+
+  - if @ordered_list_entry.ancestors?
+    .row.mt-2
+      .col
+        %p
+          %b In list
+          = @ordered_list_entry.parent.name
+
+    .row.mt-2
+      .col
+        %p
+          %b= t('activerecord.attributes.ordered_list_entry.list_position')
+          = @ordered_list_entry.list_position
+
+
+  %hr
+
+  = render 'form', class_name: 'edit-ordered-list-entry'
+
+  %hr
+    .text-center
+      -# TODO I18n
+      = link_to "View List entry", @ordered_list_entry, class: 'btn btn-sm btn-light'
+      = link_to "List all list entries", ordered_list_entries_path, class: 'btn btn-sm btn-light'

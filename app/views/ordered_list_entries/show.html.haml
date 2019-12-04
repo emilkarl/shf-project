@@ -1,0 +1,51 @@
+%header.entry-header
+  %h1.entry-title= t('.title', name: @ordered_list_entry.name)
+
+.entry-content.container
+
+  .ordered-list-entry
+    .row.mt-2
+      .col
+        - unless @ordered_list_entry.description.nil?
+          %p
+            %b #{t('activerecord.attributes.ordered_list_entry.description')}:
+            = @ordered_list_entry.description
+
+    .row.mt-2
+      .col
+        %p
+          %b In list
+          - if @ordered_list_entry.ancestors?
+            = link_to @ordered_list_entry.parent.name, ordered_list_entry_path(@ordered_list_entry.parent), class: entry_name_css_classes(@ordered_list_entry.parent)
+
+            .row.mt-2
+              .col
+                %p
+                  %b= t('activerecord.attributes.ordered_list_entry.list_position')
+                  = @ordered_list_entry.list_position
+
+          - else
+            = t('none')
+            -# or text t(' this is a top level list ') ?
+
+
+    - if @ordered_list_entry.children?
+      %h4.children items:
+      =arranged_tree_as_list(@ordered_list_entry.children.arrange, {sort_by: [:id], list_type: :ol,
+        ul_class: ['child-entries'], li_class: ['child-entry']}) do | child_entry |
+        = link_to  child_entry.name, ordered_list_entry_path(child_entry), class: entry_name_css_classes(child_entry)
+
+
+  %hr
+    .text-center
+      - if policy(@ordered_list_entry).update?
+        = link_to "Edit list entry",
+                    edit_ordered_list_entry_path(@ordered_list_entry), class: 'btn btn-secondary btn-sm edit-ordered-list-entry'
+
+      - if current_user.admin?
+        = link_to "Delete list entry", @ordered_list_entry, method: :delete,
+                        class:'btn btn-danger btn-sm delete-ordered-list-entry',
+                        data: { confirm: t('.delete_confirm', name: @ordered_list_entry.name) }
+
+
+      = link_to 'All list entries', ordered_list_entries_path, class: 'btn btn-sm btn-light'

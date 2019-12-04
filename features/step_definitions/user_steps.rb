@@ -16,6 +16,7 @@ Given(/^the following users exist(?:[:])?$/) do |table|
 
     user.delete('last_name') if user['last_name'].blank?
     user.delete('first_name') if user['first_name'].blank?
+    user['sign_in_count'] = 0 if user['sign_in_count'].blank?
 
     is_legacy == 'true' ? FactoryBot.create(:user_without_first_and_lastname, user) : FactoryBot.create(:user, user)
 

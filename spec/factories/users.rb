@@ -11,7 +11,11 @@ FactoryBot.define do
     short_proof_of_membership_url { nil }
     member_photo {nil}
     date_membership_packet_sent { nil }
-
+    sign_in_count { 0 }
+    current_sign_in_at { nil }
+    last_sign_in_at { nil }
+    created_at { DateTime.now.utc }
+    updated_at { DateTime.now.utc }
 
     factory :admin do
       admin { true }

@@ -167,7 +167,7 @@ end
 
 Then(/^I should( not)? see "([^"]*)" before "([^"]*)"$/) do |not_see, toSearch, last|
   assert_text toSearch
-  regex = /#{Regexp.quote("#{toSearch}")}.+#{Regexp.quote("#{last}")}/m
+  regex = /#{Regexp.quote("#{toSearch}")}.*#{Regexp.quote("#{last}")}/m
 
   if not_see
     assert_no_text :visible, regex

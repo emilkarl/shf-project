@@ -1,4 +1,5 @@
 require 'rails_helper'
+require_relative '../../app/models/logfile_namer'
 
 
 RSpec.describe UsersController, type: :controller do
@@ -99,5 +100,25 @@ RSpec.describe UsersController, type: :controller do
       end
     end
   end
+
+
+  it '#destroy logs to a logfile, name is set by LogfileNamer' do
+
+    user = create(:user)
+
+    expected_logfile_name = LogfileNamer.name_for('users')
+    expected_logfile_facility = 'Manage Users'
+    expected_logfile_activity = 'Delete'
+
+    expect(ActivityLogger).to receive(:open).with(expected_logfile_name, expected_logfile_facility, expected_logfile_activity)
+
+    delete :destroy, params:  { "utf8" => "✓",
+                      "id"=>"#{user.id}",
+                      "locale"=>"en"
+    }
+
+
+  end
+
 
 end

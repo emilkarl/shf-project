@@ -5,13 +5,13 @@
         %tr
           %th= sort_link(q, :padded_membership_number, t('users.users_list.membership_number'), {}, { class: 'users_pagination', remote: true } )
           %th= sort_link(q, :email, t('.email'), { default_order: { email: :asc } }, { class: 'users_pagination', remote: true } )
-          %th= t('.created')
-          %th= t('.logged_in_count')
+          %th= sort_link(q, :created_at, t('.created'), {}, { class: 'users_pagination', remote: true })
+          %th= sort_link(q, :sign_in_count, t('.logged_in_count'), {}, { class: 'users_pagination', remote: true } )
           %th
             = t('.application')
             = fas_tooltip(t('.applications_tooltip'))
           %th= sort_link(q, :date_membership_packet_sent, t('users.users_list.member_packet'), {}, { class: 'users_pagination member-packet', remote: true } )
-          %th= t('.member')
+          %th= sort_link(q, :member, t('.member'), {}, { class: 'users_pagination', remote: true })
           %th= t('.expire_date')
           %th
       %tbody.panel-body

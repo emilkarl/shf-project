@@ -10,7 +10,7 @@ class CreateCompanies < ActiveRecord::Migration[5.1]
       t.string :post_code
       t.string :city
       t.string :region
-      t.string :website
+      t.string :website 
 
       t.timestamps
     end

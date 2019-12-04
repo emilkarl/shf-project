@@ -239,6 +239,9 @@ en:
         region: *region
         region_short: *region_short
         website: &company_website Website
+        facebook_url: Facebook page URL
+        instagram_url: Instagram URL
+        youtube_url: Youtube channel
         org_nr: *org_nr
         dinkurs_key: &dinkurs_company_key Dinkurs Company key
         dinkurs_company_id: Dinkurs company key
@@ -642,6 +645,7 @@ en:
       success_with_dinkurs_problem: THE COMPANY WAS CREATED, BUT PLEASE NOTE PROBLEM(S) BELOW
     edit:
       title: 'Editing: %{company_name}'
+      social_media_links: Social Media Links
     update:
       error: There was a problem updating the company.
       success: The company was updated.
@@ -662,7 +666,7 @@ en:
       website: Company website
       org_nr: *org_nr
       delete: "Delete company"
-      confirm_are_you_sure: '*are_you_sure_confirm you want to delete the company?'
+      confirm_are_you_sure: *are_you_sure_confirm
       add_address: 'Add address'
       click_to_edit: 'click to edit'
       edit_branding_status: Edit Branding Status

@@ -411,4 +411,22 @@ RSpec.describe ApplicationHelper, type: :helper do
     end
   end
 
+  describe 'icon_link' do
+    it 'returns the HTML for a link to the url with the FontAwesome (fa) icon name given, target = blank (open in a new window)' do
+      expect(helper.icon_link('http://example.com', 'facebook-square')).to eq "<a target=\"_blank\" href=\"http://example.com\"><i class=\"fab fa-facebook-square fa-2x\"></i></a>"
+    end
+
+    describe 'icon' do
+      it 'returns nil if the icon is nil' do
+        expect(helper.icon_link('http://example.com', nil)).to be_nil
+      end
+    end
+
+    describe 'url' do
+      it 'returns nil if url is empty or nil' do
+        expect(helper.icon_link(nil, 'facebook-square')).to be_nil
+      end
+    end
+  end
+
 end

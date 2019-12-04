@@ -4,38 +4,52 @@
   .container
     .row
       .col.form-group
-        = f.label :name, "#{t('companies.company_name')}", class: 'required'
+        = f.label :name, t('companies.company_name'), class: 'required'
         = f.text_field :name,  class: 'form-control'
       .col.form-group
-        = f.label :company_number, "#{t('companies.show.company_number')}", class: 'required'
+        = f.label :company_number, t('companies.show.company_number'), class: 'required'
         = fas_tooltip(t('.org_nr_tooltip'))
         = f.number_field :company_number,  class: 'form-control'
     .row
       .col.form-group
-        = f.label :phone_number, "#{t('companies.telephone_number')}"
+        = f.label :phone_number, t('companies.telephone_number')
         = f.text_field :phone_number,  class: 'form-control'
       .col.form-group
-        = f.label :email, "#{t('companies.show.email')}", class: 'required'
+        = f.label :email, t('companies.show.email'), class: 'required'
         = f.text_field :email,  class: 'form-control'
     .row
       .col.form-group
-        = f.label :website, "#{t('companies.website_include_http')}"
+        = f.label :website, t('companies.website_include_http')
         = f.text_field :website,  class: 'form-control'
       .col.form-group.dinkurs-company-id
-        = f.label :dinkurs_company_id, "#{t('companies.show.dinkurs_key')}"
+        = f.label :dinkurs_company_id, t('companies.show.dinkurs_key')
         = fas_tooltip(t('.dinkurs_id_tooltip'))
         = f.text_field :dinkurs_company_id,  class: 'form-control'
       .col.dinkurs-company-show
-        = f.label :show_dinkurs_events, "#{t('companies.show_dinkurs_events')}"
+        = f.label :show_dinkurs_events, t('companies.show_dinkurs_events')
         = fas_tooltip(t('.dinkurs_show_tooltip'))
         = f.check_box :show_dinkurs_events, { class: 'toggle', data: { toggle: 'toggle', onstyle: 'success', offstyle: 'danger'} }, "true", "false"
 
+    %p
+    %strong= t('companies.edit.social_media_links')
+    %hr
     .row
       .col.form-group
-        = f.label :description, "#{t('companies.description')}"
+        = f.label :facebook_url, t('activerecord.attributes.company.facebook_url')
+        = f.text_field :facebook_url,  class: 'form-control'
+      .col.form-group
+        = f.label :instagram_url, t('activerecord.attributes.company.instagram_url')
+        = f.text_field :instagram_url,  class: 'form-control'
+      .col.form-group
+        = f.label :youtube_url, t('activerecord.attributes.company.youtube_url')
+        = f.text_field :youtube_url,  class: 'form-control'
+
+    .row
+      .col.form-group
+        = f.label :description, t('companies.description')
         = f.cktext_area :description,  class: 'form-control'
 
-    = f.submit "#{t('submit')}", class: 'btn btn-primary mb-2 form-control'
+    = f.submit t('submit'), class: 'btn btn-primary mb-2 form-control'
 
 :javascript
   $(document).on('ready page:change', function() {

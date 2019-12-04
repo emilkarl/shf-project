@@ -1,5 +1,3 @@
-// TODO:  Is this file used??
-
 @import "shf-custom-colors";
 
 .field-label {
@@ -129,6 +127,23 @@
       font-style: italic;
     }
   }
+
+  .social-media {
+
+    a {
+      border-bottom: 0;
+    }
+
+    i {
+      margin-right: 15px;
+
+      &:hover {
+        filter: saturate(5);
+      }
+    }
+
+  }
+
 }
 
 

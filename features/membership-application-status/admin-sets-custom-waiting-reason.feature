@@ -113,17 +113,17 @@ Feature: Admin sets or enters the reason they are waiting for info from a user
     Then I should not see t("shf_applications.need_info.reason_title")
 
 
-  @selenium_browser @admin
-  Scenario: Press `back` button before saving custom reason
-    Given I am on the "landing" page
-    Then I am on the "application" page for "anna_waiting_for_info@nosnarkybarky.se"
-    When I select t("admin_only.member_app_waiting_reasons.other_custom_reason") in select list "member_app_waiting_reasons"
-    And I wait for all ajax requests to complete
-    And I fill in "custom_reason_text" with "This is my reason"
-    Then I click the browser back button and "dismiss" the prompt
-    And the t("shf_applications.need_info.other_reason_label") field should be set to "This is my reason"
-    And I fill in "custom_reason_text" with "This is my reason"
-    Then I click the browser back button and "accept" the prompt
-    And I should be on the "landing" page
-    Then I am on the "application" page for "anna_waiting_for_info@nosnarkybarky.se"
-    And I should not see "This is my reason"
+#  @selenium_browser @admin
+#  Scenario: Press `back` button before saving custom reason
+#    Given I am on the "landing" page
+#    Then I am on the "application" page for "anna_waiting_for_info@nosnarkybarky.se"
+#    When I select t("admin_only.member_app_waiting_reasons.other_custom_reason") in select list "member_app_waiting_reasons"
+#    And I wait for all ajax requests to complete
+#    And I fill in "custom_reason_text" with "This is my reason"
+#    Then I click the browser back button and "dismiss" the prompt
+#    And the t("shf_applications.need_info.other_reason_label") field should be set to "This is my reason"
+#    And I fill in "custom_reason_text" with "This is my reason"
+#    Then I click the browser back button and "accept" the prompt
+#    And I should be on the "landing" page
+#    Then I am on the "application" page for "anna_waiting_for_info@nosnarkybarky.se"
+#    And I should not see "This is my reason"

@@ -12,10 +12,20 @@ tr {
 
 body.ordered_list_entries.index {
   table {
-    td.is-list { padding-top: 1rem;}
-    td.parent { font-size: smaller; }
-    td.list-position{ text-align: center; }
+    //td.is-list { padding-top: 1rem;}
+
+    td.description,
+    td.parent,
+    th.description,
+    th.parent {
+      font-size: smaller;
+    }
+
+    td.list-position {
+      text-align: center;
+    }
   }
+
 }
 
 .ordered-list-entry {

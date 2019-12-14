@@ -1,0 +1,25 @@
+%h1 Listing user_checklists
+
+%table
+  %thead
+    %tr
+      %th User
+      %th Checklist
+      %th Date completed
+      %th
+      %th
+      %th
+
+  %tbody
+    - @user_checklists.each do |user_checklist|
+      %tr
+        %td= user_checklist.user
+        %td= user_checklist.checklist
+        %td= user_checklist.date_completed
+        %td= link_to 'Show', user_checklist
+        %td= link_to 'Edit', edit_user_checklist_path(user_checklist)
+        %td= link_to 'Destroy', user_checklist, method: :delete, data: { confirm: 'Are you sure?' }
+
+%br
+
+= link_to 'New User checklist', new_user_checklist_path

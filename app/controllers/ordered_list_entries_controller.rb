@@ -7,7 +7,7 @@ class OrderedListEntriesController < ApplicationController
 
   def index
     authorize_ordered_list_entry_class
-    @ordered_list_entries = OrderedListEntry.arrange_as_array(order: ['ancestry', 'list_position', 'name'])
+    @ordered_list_entries = OrderedListEntry.all_as_array_nested_by_name
   end
 
 
@@ -28,13 +28,16 @@ class OrderedListEntriesController < ApplicationController
 
   def create
     @ordered_list_entry = OrderedListEntry.new(ordered_list_entry_params)
+    @ordered_list_entry.list_position = corrected_list_position(ordered_list_entry_params) if ordered_list_entry_params.dig('list_position').blank?
+
+    insert_into_parent(ordered_list_entry_params)
 
     respond_to do |format|
       if @ordered_list_entry.save
-        format.html { redirect_to @ordered_list_entry, notice: 'A new OrderedListEntry was successfully created.' }
+        format.html { redirect_to @ordered_list_entry, notice: t('.success', name: @ordered_list_entry.name) }
         format.json { render :show, status: :created, location: @ordered_list_entry }
       else
-        format.html { render :new }
+        format.html { render :new, error: 'Error creating the new OrderedListEntry:  ' } # FIXME show the errors
         format.json { render json: @ordered_list_entry.errors, status: :unprocessable_entity }
       end
     end
@@ -43,6 +46,7 @@ class OrderedListEntriesController < ApplicationController
 
   def update
     respond_to do |format|
+
       if @ordered_list_entry.update(ordered_list_entry_params)
         format.html { redirect_to @ordered_list_entry, notice: 'OrderedListEntry was successfully updated.' }
         format.json { render :show, status: :ok, location: @ordered_list_entry }
@@ -55,7 +59,7 @@ class OrderedListEntriesController < ApplicationController
 
 
   def destroy
-    @ordered_list_entry.destroy
+    @ordered_list_entry.destroy # FIXME test to see if it has sublists, is associated with a User, etc.
     respond_to do |format|
       format.html { redirect_to ordered_list_entries_url, notice: 'OrderedListEntry was successfully destroyed.' }
       format.json { head :no_content }
@@ -81,7 +85,7 @@ class OrderedListEntriesController < ApplicationController
       max_position = ordered_list_entry.children.size - 1 if ordered_list_entry.children?
     else
       status = 'error' # not found
-      error_text = t('.not_found', id: ole_id) # FIXME
+      error_text = t('ordered_list_entries.max_list_position.not_found', id: ole_id) # FIXME
     end
 
     render json: { status: status, id: ole_id, max_position: max_position, error_text: error_text }
@@ -113,15 +117,51 @@ class OrderedListEntriesController < ApplicationController
 
   # @return [Array[OrderedListItem]] - list of all OrderedListEntries
   #   that could be a parent to @ordered_list_entry;
-  #   all OrderedListEntries _except_ @ordered_list_entry; cannot be a parent of itself.
   def all_allowable_parents
-    # FIXME must be sorted correctly
-    all_ordered_list_entries.reject { |entry| entry.id == @ordered_list_entry.id }
+    # FIXME should be sorted correctly
+    @ordered_list_entry.allowable_as_parents(all_ordered_list_entries)
   end
 
 
   def all_ordered_list_entries
-    OrderedListEntry.arrange_as_array({ order: 'name' })
+    #OrderedListEntry.arrange_as_array({ order: 'name' }) # FIXME shouldn't this be all_as_array_nested_by_name
+    OrderedListEntry.all_as_array_nested_by_name
+  end
+
+
+  # Set a default list position if none given:
+  # if there is a parent list, the default list position is the next position in the list
+  # else it is zero
+  # TODO - does this belong here or in the OrderedListEntry?  (or perhaps some of this belongs in OrderedListEntry?)
+  def corrected_list_position(list_entry_params)
+    default_list_position = 0
+
+    if list_entry_params.dig('list_position').blank?
+
+      unless list_entry_params.dig('parent_id').blank?
+        parent_list = OrderedListEntry.find(list_entry_params.fetch('parent_id', false).to_i)
+        default_list_position = parent_list.next_list_position
+      end
+
+    else
+      # this is here in case this check is not done when this is called
+      default_list_position = list_entry_params.dig('list_position')
+    end
+
+    default_list_position
+  end
+
+
+  # Insert this item into a parent is if there is a parent list for this item
+  def insert_into_parent(list_entry_params)
+
+    # if a parent list was specified
+    unless list_entry_params.fetch('parent_id', nil).blank?
+      parent_list = OrderedListEntry.find(ordered_list_entry_params.fetch('parent_id', false).to_i)
+
+      # insert this item in the position specified.  The position of other items may be altered per OrderedListEntry behavior
+      parent_list.insert(@ordered_list_entry, @ordered_list_entry.list_position)
+    end
   end
 
 

@@ -1,0 +1,15 @@
+%p#notice= notice
+
+%p
+  %b User:
+  = @user_checklist.user
+%p
+  %b Checklist:
+  = @user_checklist.checklist
+%p
+  %b Date completed:
+  = @user_checklist.date_completed
+
+= link_to 'Edit', edit_user_checklist_path(@user_checklist)
+\|
+= link_to 'Back', user_checklists_path

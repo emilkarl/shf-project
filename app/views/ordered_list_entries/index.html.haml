@@ -1,28 +1,30 @@
-%h1 All Lists and entries
--# TODO I18n
+%header.entry-header
+  %h1.entry-title= t('.title')
 
-- attr_i18n_scope = 'activerecord.attributes.ordered_list_entry'
-%table.table-hover
-  %thead
-    %tr
-      %th.name= t('name', scope: attr_i18n_scope)
-      %th.description= t('description', scope: attr_i18n_scope)
-      %th.parent= t('.in_parent_col')
-      %th.list-position= t('list_position', scope: attr_i18n_scope)
-      %th
-      %th
+.entry-content
+  - attr_i18n_scope = 'activerecord.attributes.ordered_list_entry'
 
-  %tbody
-    - @ordered_list_entries.each do |ordered_list_entry|
-      %tr.ordered-list-entry
-        %td.name{class: entry_name_css_classes(ordered_list_entry)}= link_to ordered_list_entry.name, ordered_list_entry
-        %td.description= link_to ordered_list_entry.description, ordered_list_entry
-        %td.parent= ordered_list_entry.ancestors? ? (link_to ordered_list_entry.parent.name, ordered_list_entry.parent): '-'
-        %td.list-position= ordered_list_entry.list_position
+  %table.table-hover#checklists
+    %thead
+      %tr
+        %th.name= t('name', scope: attr_i18n_scope)
+        %th.description= t('description', scope: attr_i18n_scope)
+        %th.parent= t('.in_parent_col')
+        %th.list-position= t('.pos_in_list')
+        %th
+        %th
 
-        %td= link_to t('edit'), edit_ordered_list_entry_path(ordered_list_entry)
-        %td= link_to t('delete'), ordered_list_entry, method: :delete, data: { confirm: t('.delete_confirm', name: ordered_list_entry.name) }
+    %tbody
+      - @ordered_list_entries.each do |ordered_list_entry|
+        %tr.ordered-list-entry
+          %td.name{class: entry_name_css_classes(ordered_list_entry)}= link_to ordered_list_entry.display_name_with_depth(prefix: ' -'), ordered_list_entry
+          %td.description= link_to ordered_list_entry.description, ordered_list_entry
+          %td.parent= ordered_list_entry.ancestors? ? (link_to ordered_list_entry.parent.name, ordered_list_entry.parent): '-'
+          %td.list-position= ordered_list_entry.list_position
 
-%br
+          %td= link_to t('edit'), edit_ordered_list_entry_path(ordered_list_entry)
+          %td= link_to t('delete'), ordered_list_entry, method: :delete, data: { confirm: t('.delete_confirm', name: ordered_list_entry.name) }
 
-= link_to 'New Ordered List entry', new_ordered_list_entry_path
+  %br
+
+  = link_to t('ordered_list_entries.new.title'), new_ordered_list_entry_path, class: 'btn btn-primary'

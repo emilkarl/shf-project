@@ -1,0 +1,26 @@
+
+= form_for @user_checklist, html: { class: "#{local_assigns.fetch(:class_name, '')}" }   do |f|
+
+  != model_errors_helper(@user_checklist)
+
+  .container
+    .row
+      .col
+        %p.user= @user_checklist.user.full_name
+
+    .row
+      .col
+        .form-group
+          = f.label :checklist
+          = f.collection_select :checklist, @all_ordered_list_entries, :id, :display_name_with_depth, include_blank: true
+
+    .row
+      .col
+        .form-group
+          = f.label :date_completed
+          = f.datetime_select :date_completed
+
+
+    .actions.form-group
+      = f.submit t('submit'), class: 'btn btn-primary mb-2 form-control'
+

@@ -168,12 +168,11 @@ Rails.application.routes.draw do
          as: :company_address_delete
   # ----------------------------------------------------------
 
-  # FIXME adjust and edit this for the correct route names, etc.
-  resources :checklist_items
-  resources :checklists
+  # FIXME adjust and edit UserChecklist and OrderedListEntry routes for the correct route names, etc.
   resources :user_checklists
-  resources :user_checklist_items
   resources :ordered_list_entries
+
+
   get 'ordered-list-entries/max-list-position', to: 'ordered_list_entries#max_list_position'
 
   get 'information', to: 'shf_applications#information'

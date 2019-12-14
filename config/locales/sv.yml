@@ -162,9 +162,9 @@ sv:
         one: Checklist
         other: Checklists
 
-    ordered_list_entry:
-      one: List Entry
-      other: List Entries
+      ordered_list_entry:
+        one: List Entry
+        other: List Entries
 
 
     attributes:
@@ -979,6 +979,8 @@ sv:
   ordered_list_entries:
     new:
       title: New List Entry
+      name: *name
+      description: *description
     create:
       error: "There was a problem creating and saving the list entry %{name}."
       success: "%{name} was created and saved."
@@ -992,13 +994,17 @@ sv:
     index:
       title: List Entries
       in_parent_col: in list
+      pos_in_list: "pos. in list"
       delete: *delete_ordered_list_entry_item
       delete_confirm: *delete_ordered_list_entry_item_confirm
     show:
       title: "List Entry: %{name}"
+      delete_confirm: *delete_ordered_list_entry_item_confirm
     destroy:
       error: "There was a problem deleting the list entry %{name}. It was not deleted."
       success: "%{name} was deleted."
+    max_list_position:
+      not_found: "Ordered List Entry with id %{id} was not found"
 
 
   admin:

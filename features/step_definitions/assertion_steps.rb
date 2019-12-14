@@ -55,7 +55,7 @@ end
 
 Then "I should{negate} see {capture_string} in the div with id {capture_string}" do |negate, expected_text, div_id|
   div = page.find(:id, div_id)
-  expect(div).send (negate ? :not_to : :to), have_content(expected_text)
+   expect(div).send (negate ? :not_to : :to), have_content(expected_text)
 end
 
 Then "I should{negate} see {capture_string} {digits} time(?:s) in the div with id {capture_string}" do |negate, expected_text, num_times, div_id|

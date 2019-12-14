@@ -1,4 +1,4 @@
-Feature: Access to checklists
+Feature: Access to Ordered checklists
 
 
   Background:

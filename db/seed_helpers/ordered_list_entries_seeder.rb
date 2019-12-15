@@ -9,6 +9,8 @@ module SeedHelper
 # @desc Responsibility: Seed checklists, their items and sub-checklists from a YAML file
 #   Can also write hardcoded data out to the YAML file. (can write out and read in)
 #
+# TODO - should this check for entries that already exist?  Or let the admin delete any duplicates?
+#
 # @author Ashley Engelund (ashley.engelund@gmail.com  weedySeaDragon @ github)
 # @date   2019-11-29
 #
@@ -21,6 +23,7 @@ module SeedHelper
     def self.seed
       yaml_entries = read_yaml
       yaml_entries.each { |yaml_entry| create_entry_and_children(yaml_entry) }
+      puts "#{OrderedListEntry.count} OrderedListEntries seeded."
     end
 
 
@@ -29,7 +32,7 @@ module SeedHelper
 
       new_ordered_entry = create_ordered_entry(yaml_hash, parent_ordered_entry: parent_ordered_entry)
 
-      yaml_hash[:children].each do |yaml_child_entry|
+      yaml_hash.fetch(:children, []).each do |yaml_child_entry|
         create_entry_and_children(yaml_child_entry, parent_ordered_entry: new_ordered_entry)
       end
     end
@@ -38,7 +41,7 @@ module SeedHelper
     def self.create_ordered_entry(yaml_entry, parent_ordered_entry: nil)
       OrderedListEntry.create!(name: yaml_entry[:name],
                                description: yaml_entry[:description],
-                               list_position: yaml_entry[:list_position],
+                               list_position: yaml_entry[:list_position] ? yaml_entry[:list_position] : 0,
                                parent: parent_ordered_entry)
     end
 
@@ -50,8 +53,8 @@ module SeedHelper
 
 
     def self.write_yaml
-      create_ordered_entries_to_write
-      write_to_yaml_source(serialized_order_entries)
+      #create_ordered_entries_to_write
+      write_to_yaml_source(serialized_ordered_entries)
     end
 
 
@@ -70,7 +73,6 @@ module SeedHelper
     # @return [String] - the file name written to
     def self.write_to_yaml_source(serialized_str = '', source_filename = ORDEREDLISTENTRIES_YAML_SOURCE)
       File.open(source_filename, "w") { |file| file.write(serialized_str.to_yaml) }
-
       source_filename
     end
 

@@ -35,8 +35,10 @@ module AncestryHelper
 #:li_class_top # applies given class(es) to list items (li) of depth = 0
 #:li_class_children # applies given class(es) to list items (li) of depth > 0
 #
-# arranged as tree expects 3 arguments. The hash from has_ancestry.arrange() method,
-# options, and a render block
+# arranged as tree expects 3 arguments:
+#  - the hash from has_ancestry.arrange() method,
+#  - options,
+#  - and a render block
 #
   def arranged_tree_as_list(hash, options = {}, &block)
 

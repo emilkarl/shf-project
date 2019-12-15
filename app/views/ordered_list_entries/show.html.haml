@@ -32,9 +32,12 @@
     - if @ordered_list_entry.children?
       -# TODO: I18n 'Entries'
       %h4.children Entries:
-      =arranged_tree_as_list(@ordered_list_entry.children.arrange, {sort_by: [:list_position], list_type: :ol,
+      =arranged_tree_as_list(@ordered_list_entry.children.arrange,
+       {sort_by: [:list_position], list_type: :ol,
         ul_class: ['child-entries'], li_class: ['child-entry']}) do | child_entry |
-        = link_to  child_entry.name, ordered_list_entry_path(child_entry), class: entry_name_css_classes(child_entry)
+        = link_to  child_entry.name,
+                   ordered_list_entry_path(child_entry),
+                   class: entry_name_css_classes(child_entry)
 
 
   %hr

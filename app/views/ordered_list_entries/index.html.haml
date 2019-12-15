@@ -17,7 +17,7 @@
     %tbody
       - @ordered_list_entries.each do |ordered_list_entry|
         %tr.ordered-list-entry
-          %td.name{class: entry_name_css_classes(ordered_list_entry)}= link_to ordered_list_entry.display_name_with_depth(prefix: ' -'), ordered_list_entry
+          %td.name{ class: entry_name_css_classes(ordered_list_entry) }= link_to ordered_list_entry.display_name_with_depth(prefix: ' -'), ordered_list_entry
           %td.description= link_to ordered_list_entry.description, ordered_list_entry
           %td.parent= ordered_list_entry.ancestors? ? (link_to ordered_list_entry.parent.name, ordered_list_entry.parent): '-'
           %td.list-position= ordered_list_entry.list_position

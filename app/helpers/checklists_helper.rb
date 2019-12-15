@@ -1,6 +1,8 @@
 module ChecklistsHelper
 
-  include ChecklistCommonHelper
+  # These might be used for UserChecklist views.  Keeping this file in the repo for now.
+
+include ChecklistCommonHelper
 
   TRUNCATE_LENGTH = 50
 

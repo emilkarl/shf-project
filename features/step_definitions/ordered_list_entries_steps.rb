@@ -74,7 +74,7 @@ And("I select {capture_string} as the parent list") do |parent_list_name|
   step %{I select "#{parent_list_name}" in select list "#{PARENT_LIST_ID}"}
 end
 
-And(/^I am (on )*the page for ordered list entry named "([^"]*)"$/) do |grammar_fix_on, list_name|
+And(/^I am (on )*the page for ordered list entry named "([^"]*)"$/) do |_grammar_fix_on, list_name|
   olist_entry = OrderedListEntry.find_by_name(list_name)
   visit path_with_locale(ordered_list_entry_path olist_entry)
 end

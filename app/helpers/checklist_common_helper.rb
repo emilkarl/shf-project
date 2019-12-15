@@ -1,6 +1,8 @@
 module ChecklistCommonHelper
 
 
+  # These might be used for UserChecklist views.  Keeping this file in the repo for now.
+
   # Return a string for displaying the date completed
   #
   # @param [Checklist | Checklist_item] item - must be able to respond to complete? and date_completed

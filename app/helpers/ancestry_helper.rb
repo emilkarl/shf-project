@@ -68,7 +68,7 @@ module AncestryHelper
 
     # sort the hash key based on sort_by options array
     unless options[:sort_by].empty?
-      hash = Hash[hash.sort_by { |k, _v| options[:sort_by].collect { |sort| k.send(sort) } }]
+      hash = Hash[hash.sort_by { |k, _v| options[:sort_by].map { |sort| k.send(sort) } }]
     end
 
     current_depth = 0

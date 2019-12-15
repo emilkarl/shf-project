@@ -1,9 +1,15 @@
+- all_ordered_list_entries = local_assigns.fetch(:all_ordered_list_entries, [])
 
 = form_for @user_checklist, html: { class: "#{local_assigns.fetch(:class_name, '')}" }   do |f|
 
   != model_errors_helper(@user_checklist)
 
+
   .container
+    .row
+      .col
+        %p.font-weight-bold This isn't working.  The checklist selection will throw an error when you save it.  TBD.
+
     .row
       .col
         %p.user= @user_checklist.user.full_name
@@ -12,7 +18,7 @@
       .col
         .form-group
           = f.label :checklist
-          = f.collection_select :checklist, @all_ordered_list_entries, :id, :display_name_with_depth, include_blank: true
+          = f.collection_select :checklist, all_ordered_list_entries, :id, :display_name_with_depth, include_blank: true
 
     .row
       .col

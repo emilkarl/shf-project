@@ -1,3 +1,4 @@
+- all_allowable_parents = local_assigns.fetch(:all_allowable_parents, [])
 = form_for @ordered_list_entry, html: { class: "#{local_assigns.fetch(:class_name, '')}" }   do |f|
 
   != model_errors_helper(@ordered_list_entry)

@@ -7,7 +7,6 @@ require 'ffaker'
 require 'rake'
 require_relative 'seed_helpers'
 require_relative 'seed_helpers/app_configuration_seeder'
-require_relative 'seed_helpers/checklists_seeder'
 require_relative 'seed_helpers/ordered_list_entries_seeder'
 
 

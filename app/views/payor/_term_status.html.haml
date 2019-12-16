@@ -1,0 +1,66 @@
+-# This partial expects the following locals:
+-#   entity - the (main) payor instance this is displaying
+-#   status_label - (optional) label to use for the status line.  Default = "Status:"
+-#   status_text - the text for the status (ex: "Current" "In Good standing")
+-#   fee_name_payment - <name of this fee> + 'payment' (ex: 'membership fee payment', 'medlemsbetalning', 'branding license fee payment')
+-#   term_name - name of this payment term (ex: 'membership', 'branding license')
+-#   term_end - date of the end of the term  (e.g. 'expire date')
+-#   next_term_end - date of the end of the term after another payment is made
+-#   can_make_payment - [boolean] whether or not to display the payment button and info
+-#   payment_text - text to show on the button/link to the user to make a payment
+-#   payment_action_path - path to go to when a payment action (button/link) is clicked
+-#   admin_edit_status_text - text to show on the button for editting the entity's status (for admins)
+-#   admin_edit_target_id - the id for the body of the modal to display to the admin, starting with '#'  ex: '#adminEditMembershipStatus'
+-#
+-#  TODO  should this be a layout (or parts of it)?
+
+-# Must make sure that status_label and status_text are not nil so that .html_safe can be called on them
+-# if status_label isn't defined or if it is nil
+- if local_assigns.fetch(:status_label, nil).nil?
+  - status_label = t('payors.status').capitalize
+-# if status_label isn't defined or if it is nil
+- if local_assigns.fetch(:status_text, nil).nil?
+  - status_text = '?'
+
+#term-status
+  - if defined?(error) && error
+    .row.mt-2
+      = render(partial: 'payor/alert_error', error: error)
+
+  .status-details
+    .row.mt-2.justify-content-between
+      .flex.status
+        %span.label= status_label.html_safe
+        %span.value= status_text.html_safe
+
+    .row.mt-2.justify-content-between
+      - if entity_expire_date(entity)
+        .flex.paid-through
+          = expire_date_label_and_value(entity)
+
+      - if can_make_payment
+        .flex
+          - if entity.too_early_to_pay?
+            = render partial: 'payor/no_payment_needed_now_modal',
+              locals: { term_name: term_name,
+               fee_name_payment: fee_name_payment,
+               end_date: term_end,
+               extended_end_date: next_term_end,
+               link_to_url: payment_action_path }
+
+            %button{ class: payment_button_classes(['grayed-btn-colors']),
+              data: { toggle: 'modal', target: '#payment-not-due-modal' } }
+              = payment_text
+
+          - else
+            = link_to(payment_text, payment_action_path,
+              { method: :post, class: payment_button_classes })
+
+          = fas_tooltip(payment_button_tooltip_text(payment_due_now: entity.should_pay_now?, t_scope: entity_i18n_scope(entity)))
+          .payment-status-hint= payment_due_hint(entity)
+
+    - if current_user.admin?
+      = render partial: 'payor/admin_note_and_edit_status_row',
+       locals: { entity: entity,
+       target_id: admin_edit_target_id,
+       button_text: admin_edit_status_text }

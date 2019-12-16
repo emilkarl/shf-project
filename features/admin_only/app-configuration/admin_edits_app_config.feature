@@ -116,9 +116,19 @@ Feature: Admin edits application configuration
 
 
     Scenario: Problem with editting AppConfig, goes back to edit page (SAD PATH)
-      And I am logged in as "admin@random.com"
+      Given I am logged in as "admin@random.com"
       And I am on the "admin edit app configuration" page
       And I fill in t("admin_only.app_configuration.edit.site_name") with ""
       And I click on t("submit") button
       Then I should see t("admin_only.app_configuration.update.error")
       And I should see t("admin_only.app_configuration.edit.title")
+
+
+    Scenario: Admin edits the number of days that it is 'too soon' to pay
+      Given I am logged in as "admin@random.com"
+      And I am on the "admin edit app configuration" page
+      Then I should see t("admin_only.app_configuration.edit.payment_too_soon_days")
+      When I fill in t("admin_only.app_configuration.edit.payment_too_soon_days") with "505"
+      And I click on t("submit") button
+      Then I should see t("admin_only.app_configuration.update.success")
+      And I should see the number of days that it is too early to pay is 505

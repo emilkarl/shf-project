@@ -8,13 +8,13 @@ $(function() {
     $('[data-toggle="tooltip"]').tooltip();
   });
 
-  $("#userStatusForm").on("ajax:success", function(e, data) {
-    $("#userMemberStatus").html(data);
+  $("#user-status-form").on("ajax:success", function(e, data) {
+    $("#user-member-status").html(data);
     $('[data-toggle="tooltip"]').tooltip();
   });
 
-  $("#editUserStatusSubmit").click(function() {
-    $("#editStatusModal").modal("hide");
+  $("#edit-user-status-submit").click(function() {
+    $("#edit-status-modal").modal("hide");
   });
 
   $(".custom-context").on("contextmenu", e => {

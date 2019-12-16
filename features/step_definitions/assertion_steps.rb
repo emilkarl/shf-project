@@ -28,6 +28,16 @@ Then "I should{negate} see {capture_string} link" do |negate, link_label|
   expect(page).send (negate ? :not_to : :to), have_link(link_label)
 end
 
+# Note that <a href> (links) that are styled as buttons are not really/always disabled if the disabled property is set. [2019-12-05]
+# This has not yet been standardized.  Per Bootstrap (getbootstrap.com) you must add the 'disabled' class
+# to the <a href>.  To check if a link button is disabled, check for that CSS class.
+Then "the link button {capture_string} should be disabled" do | link_button_label |
+  expect(page).to have_link(link_button_label)
+  link_button =find_link(link_button_label)
+
+  expect(link_button['class']).to include('disabled')
+end
+
 Then(/^I should( not)? see the (?:checkbox|radio button) with id "([^"]*)" checked$/) do |negate, checkbox_id|
   #  expect(page).send (negate ? :not_to : :to),  have_checked_field(checkbox_id)
   expect(page).to have_selector(:id, checkbox_id), "got: #{page.html}"
@@ -64,33 +74,37 @@ Then "I should{negate} see {capture_string} {digits} time(?:s) in the div with i
 end
 
 Then(/^I should see "([^"]*)" applications$/) do |number|
-  expect(page).to have_selector("tr.applicant", count: number)
+  expect(page).to have_selector('tr.applicant', count: number)
 end
 
 Then(/^I should see "([^"]*)" companies/) do |number|
-  expect(page).to have_selector("tr.company", count: number)
+  expect(page).to have_selector('tr.company', count: number)
 end
 
 Then(/^I should see "([^"]*)" business categories/) do |number|
-  expect(page).to have_selector("tr.business_category", count: number)
+  expect(page).to have_selector('tr.business_category', count: number)
 end
 
 Then(/^I should see "([^"]*)" address(?:es)?/) do |number|
-  expect(page).to have_selector("tr.address", count: number)
+  expect(page).to have_selector('tr.address', count: number)
 end
 
 Then(/^I should see "([^"]*)" event(?:s)?/) do |number|
-  expect(page).to have_selector("tr.event", count: number)
+  expect(page).to have_selector('tr.event', count: number)
 end
 
 Then "the field {capture_string} should{negate} have a required field indicator" do |label_text, negate|
   expect(page).send (negate ? :not_to : :to), have_xpath("//label[@class='required'][text()='#{label_text}']")
 end
 
-Then(/^I should see (\d+) (.*?) rows$/) do |n, css_class_name|
+
+# Examples of what this will match:
+#  I should see 3 a_css_class rows
+#  I should see 1 some_css_class row
+Then(/^I should see (\d+) (.*?) rows?$/) do |n, css_class_name|
   n = n.to_i
   expect(page).to have_selector(".#{css_class_name}", count: n)
-  expect(page).not_to have_selector(".#{css_class_name}", count: n + 1)
+  expect(page).not_to have_selector(".#{css_class_name}", count: n+1)
 end
 
 Then(/^I should see at least one column with class "([^"]*)"/) do |css_class_name|
@@ -129,18 +143,18 @@ Then(/^I should see link "([^"]*)" with target = "([^"]*)"$/) do |link_identifie
 end
 
 Then "I should see flash text {capture_string}" do |text|
-  expect(page).to have_selector("#flashes", text: text)
+  expect(page).to have_selector('#flashes', text: text )
 end
 
 Then "I should{negate} see {capture_string} in the row for user {capture_string}" do |negate, expected_text, user_email|
-  td = page.find(:css, "td", text: user_email) # find the td with text = user_email
-  tr = td.find(:xpath, "./parent::tr") # get the parent tr of the td
+  td = page.find(:css, 'td', text: user_email) # find the td with text = user_email
+  tr = td.find(:xpath, './parent::tr') # get the parent tr of the td
   expect(tr.text).send (negate ? :not_to : :to), match(Regexp.new(expected_text))
 end
 
 Then "I should{negate} see the checkbox with id {capture_string} {checked} in the row for user {capture_string}" do |negate_see_it, checkbox_id, checked, user_email|
-  td = page.find(:css, "td", text: user_email)  # find the td with text = user_email
-  tr = td.find(:xpath, "./parent::tr") # get the parent tr of the td
+  td = page.find(:css, 'td', text: user_email)  # find the td with text = user_email
+  tr = td.find(:xpath, './parent::tr') # get the parent tr of the td
 
   expect(tr).send (negate_see_it ? :not_to : :to), have_selector(:id, checkbox_id)
   #checkbox = tr.find(:xpath, '//td[descendant::input[@id="date_membership_packet_sent"]]')
@@ -156,8 +170,8 @@ Then "I should{negate} see the checkbox with id {capture_string} {checked} in th
 end
 
 Then "I should{negate} see {capture_string} for class {capture_string} in the row for user {capture_string}" do |negate, expected_text, css_class, user_email|
-  td = page.find(:css, "td", text: user_email) # find the td with text = user_email
-  tr = td.find(:xpath, "./parent::tr") # get the parent tr of the td
+  td = page.find(:css, 'td', text: user_email) # find the td with text = user_email
+  tr = td.find(:xpath, './parent::tr') # get the parent tr of the td
   expect(tr).send (negate ? :not_to : :to), have_css(".#{css_class}", text: expected_text)
 end
 
@@ -191,20 +205,21 @@ Then(/^all addresses for the company named "([^"]*)" should( not)? be geocoded$/
 end
 
 # Checks that a certain option is selected for a text field (from https://github.com/makandra/spreewald)
-Then "{capture_string} should{negate} have {capture_string} selected" do |select_list, negate, expected_string|
+Then "{capture_string} should{negate} have {capture_string} selected" do | select_list, negate, expected_string |
+
   try_again = true
 
   begin
     field = find_field(select_list)
 
     field_value = case field.tag_name
-                  when "select"
-                    options = field.all("option")
+                    when 'select'
+                      options = field.all('option')
                     selected_option = options.detect(&:selected?) || options.first
                     if selected_option && selected_option.text.present?
                       selected_option.text.strip
                     else
-                      ""
+                        ''
                     end
                   else
                     field.value
@@ -223,12 +238,12 @@ Then "{capture_string} should{negate} have {capture_string} selected" do |select
 end
 
 # Checks that a certain option does or does not exist in a select list
-Then "{capture_string} should{negate} have {capture_string} as an option" do |select_list, negate, expected_string|
+Then("{capture_string} should{negate} have {capture_string} as an option") do |select_list, negate, expected_string|
   field = find_field(select_list)
 
   select_options = case field.tag_name
-                   when "select"
-                     field.all("option")
+                  when 'select'
+                    field.all('option')
                    end
   expect(select_options.map(&:text)).send((negate ? :not_to : :to), include(expected_string))
 end
@@ -236,6 +251,7 @@ end
 And(/^the "([^"]*)" should( not)? go to "([^"]*)"$/) do |link, negate, url|
   expect(page).send (negate ? :not_to : :to), have_link(link, href: url)
 end
+
 
 And(/^the url "([^"]*)" should( not)? be a valid route$/) do |url, negate|
   if negate
@@ -250,8 +266,10 @@ And(/^the page should( not)? be blank$/) do |negate|
 end
 
 Then(/^I should get a downloaded image with the filename "([^\"]*)"$/) do |filename|
-  expect(page.driver.response_headers["Content-Disposition"]).to include("attachment; filename=\"#{filename}\"")
-  expect(page.driver.response_headers["Content-Type"]).to eq "image/jpg"
+  expect(page.driver.response_headers['Content-Disposition'])
+    .to include("attachment; filename=\"#{filename}\"")
+  expect(page.driver.response_headers['Content-Type'])
+    .to eq 'image/jpg'
 end
 
 When "I cannot select {capture_string} in select list {capture_string}" do |option, list|

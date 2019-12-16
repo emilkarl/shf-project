@@ -1,10 +1,10 @@
-.modal.fade#editStatusModal{ tabindex: '-1', role: 'dialog' }
+.modal.fade#edit-status-modal{ tabindex: '-1', role: 'dialog' }
   .modal-dialog{ role: 'document' }
     .modal-content
 
       = form_for user, url: edit_status_user_path(user),
                  method: :put, remote: true,
-                 html: { id: 'userStatusForm' } do |f|
+                 html: { id: 'user-status-form' } do |f|
         .modal-header
           %h4.modal-title.text-center
             = t('users.user.edit_member_status')
@@ -37,7 +37,7 @@
 
         .modal-footer
           = f.submit t('users.user.submit_button_label'), class: "btn btn-primary form-control",
-                     id: 'editUserStatusSubmit'
+                     id: 'edit-user-status-submit'
 
           %button{ type: 'button', class: 'btn btn-outline-secondary', data: { dismiss: 'modal' } }
             = t('cancel')

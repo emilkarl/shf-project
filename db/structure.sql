@@ -105,8 +105,16 @@ CREATE TABLE public.app_configurations (
     site_meta_image_content_type character varying,
     site_meta_image_file_size integer,
     site_meta_image_updated_at timestamp without time zone,
-    singleton_guard integer DEFAULT 0 NOT NULL
+    singleton_guard integer DEFAULT 0 NOT NULL,
+    payment_too_soon_days integer DEFAULT 60 NOT NULL
 );
+
+
+--
+-- Name: COLUMN app_configurations.payment_too_soon_days; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.app_configurations.payment_too_soon_days IS 'Warn user that they are paying too soon if payment is due more than this many days away.';
 
 
 --
@@ -200,80 +208,6 @@ CREATE SEQUENCE public.business_categories_shf_applications_id_seq
 --
 
 ALTER SEQUENCE public.business_categories_shf_applications_id_seq OWNED BY public.business_categories_shf_applications.id;
-
-
---
--- Name: checklist_items; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.checklist_items (
-    id bigint NOT NULL,
-    name character varying NOT NULL,
-    description character varying,
-    checklist_id bigint,
-    order_in_list integer NOT NULL,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
-);
-
-
---
--- Name: COLUMN checklist_items.order_in_list; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.checklist_items.order_in_list IS 'This is zero-based. It is the order (positi.on) that this item should appear in its checklist';
-
-
---
--- Name: checklist_items_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.checklist_items_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: checklist_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.checklist_items_id_seq OWNED BY public.checklist_items.id;
-
-
---
--- Name: checklists; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.checklists (
-    id bigint NOT NULL,
-    name character varying,
-    description character varying,
-    ancestry character varying,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
-);
-
-
---
--- Name: checklists_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.checklists_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: checklists_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.checklists_id_seq OWNED BY public.checklists.id;
 
 
 --
@@ -709,40 +643,6 @@ ALTER SEQUENCE public.one_time_tasker_task_attempts_id_seq OWNED BY public.one_t
 
 
 --
--- Name: ordered_list_entries; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.ordered_list_entries (
-    id bigint NOT NULL,
-    name character varying,
-    description character varying,
-    list_position integer,
-    ancestry character varying,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
-);
-
-
---
--- Name: ordered_list_entries_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.ordered_list_entries_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: ordered_list_entries_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.ordered_list_entries_id_seq OWNED BY public.ordered_list_entries.id;
-
-
---
 -- Name: payments; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -934,71 +834,6 @@ ALTER SEQUENCE public.uploaded_files_id_seq OWNED BY public.uploaded_files.id;
 
 
 --
--- Name: user_checklist_items; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.user_checklist_items (
-    id bigint NOT NULL,
-    checklist_item_id bigint,
-    user_id bigint,
-    time_completed timestamp without time zone,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
-);
-
-
---
--- Name: user_checklist_items_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.user_checklist_items_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: user_checklist_items_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.user_checklist_items_id_seq OWNED BY public.user_checklist_items.id;
-
-
---
--- Name: user_checklists; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.user_checklists (
-    id bigint NOT NULL,
-    checklist_id bigint,
-    user_id bigint,
-    created_at timestamp without time zone NOT NULL,
-    updated_at timestamp without time zone NOT NULL
-);
-
-
---
--- Name: user_checklists_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.user_checklists_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: user_checklists_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.user_checklists_id_seq OWNED BY public.user_checklists.id;
-
-
---
 -- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1085,20 +920,6 @@ ALTER TABLE ONLY public.business_categories_shf_applications ALTER COLUMN id SET
 
 
 --
--- Name: checklist_items id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.checklist_items ALTER COLUMN id SET DEFAULT nextval('public.checklist_items_id_seq'::regclass);
-
-
---
--- Name: checklists id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.checklists ALTER COLUMN id SET DEFAULT nextval('public.checklists_id_seq'::regclass);
-
-
---
 -- Name: ckeditor_assets id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1169,13 +990,6 @@ ALTER TABLE ONLY public.one_time_tasker_task_attempts ALTER COLUMN id SET DEFAUL
 
 
 --
--- Name: ordered_list_entries id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.ordered_list_entries ALTER COLUMN id SET DEFAULT nextval('public.ordered_list_entries_id_seq'::regclass);
-
-
---
 -- Name: payments id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1208,20 +1022,6 @@ ALTER TABLE ONLY public.shf_documents ALTER COLUMN id SET DEFAULT nextval('publi
 --
 
 ALTER TABLE ONLY public.uploaded_files ALTER COLUMN id SET DEFAULT nextval('public.uploaded_files_id_seq'::regclass);
-
-
---
--- Name: user_checklist_items id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.user_checklist_items ALTER COLUMN id SET DEFAULT nextval('public.user_checklist_items_id_seq'::regclass);
-
-
---
--- Name: user_checklists id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.user_checklists ALTER COLUMN id SET DEFAULT nextval('public.user_checklists_id_seq'::regclass);
 
 
 --
@@ -1269,22 +1069,6 @@ ALTER TABLE ONLY public.business_categories
 
 ALTER TABLE ONLY public.business_categories_shf_applications
     ADD CONSTRAINT business_categories_shf_applications_pkey PRIMARY KEY (id);
-
-
---
--- Name: checklist_items checklist_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.checklist_items
-    ADD CONSTRAINT checklist_items_pkey PRIMARY KEY (id);
-
-
---
--- Name: checklists checklists_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.checklists
-    ADD CONSTRAINT checklists_pkey PRIMARY KEY (id);
 
 
 --
@@ -1368,14 +1152,6 @@ ALTER TABLE ONLY public.one_time_tasker_task_attempts
 
 
 --
--- Name: ordered_list_entries ordered_list_entries_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.ordered_list_entries
-    ADD CONSTRAINT ordered_list_entries_pkey PRIMARY KEY (id);
-
-
---
 -- Name: payments payments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1424,22 +1200,6 @@ ALTER TABLE ONLY public.uploaded_files
 
 
 --
--- Name: user_checklist_items user_checklist_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.user_checklist_items
-    ADD CONSTRAINT user_checklist_items_pkey PRIMARY KEY (id);
-
-
---
--- Name: user_checklists user_checklists_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.user_checklists
-    ADD CONSTRAINT user_checklists_pkey PRIMARY KEY (id);
-
-
---
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1480,20 +1240,6 @@ CREATE INDEX index_addresses_on_region_id ON public.addresses USING btree (regio
 --
 
 CREATE UNIQUE INDEX index_app_configurations_on_singleton_guard ON public.app_configurations USING btree (singleton_guard);
-
-
---
--- Name: index_checklist_items_on_checklist_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_checklist_items_on_checklist_id ON public.checklist_items USING btree (checklist_id);
-
-
---
--- Name: index_checklists_on_ancestry; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_checklists_on_ancestry ON public.checklists USING btree (ancestry);
 
 
 --
@@ -1574,20 +1320,6 @@ CREATE INDEX index_on_categories ON public.business_categories_shf_applications 
 
 
 --
--- Name: index_ordered_list_entries_on_ancestry; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_ordered_list_entries_on_ancestry ON public.ordered_list_entries USING btree (ancestry);
-
-
---
--- Name: index_ordered_list_entries_on_name; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_ordered_list_entries_on_name ON public.ordered_list_entries USING btree (name);
-
-
---
 -- Name: index_payments_on_company_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1637,34 +1369,6 @@ CREATE INDEX index_uploaded_files_on_shf_application_id ON public.uploaded_files
 
 
 --
--- Name: index_user_checklist_items_on_checklist_item_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_user_checklist_items_on_checklist_item_id ON public.user_checklist_items USING btree (checklist_item_id);
-
-
---
--- Name: index_user_checklist_items_on_user_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_user_checklist_items_on_user_id ON public.user_checklist_items USING btree (user_id);
-
-
---
--- Name: index_user_checklists_on_checklist_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_user_checklists_on_checklist_id ON public.user_checklists USING btree (checklist_id);
-
-
---
--- Name: index_user_checklists_on_user_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_user_checklists_on_user_id ON public.user_checklists USING btree (user_id);
-
-
---
 -- Name: index_users_on_email; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1686,27 +1390,11 @@ CREATE UNIQUE INDEX index_users_on_reset_password_token ON public.users USING bt
 
 
 --
--- Name: user_checklist_items fk_rails_0281416dc9; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.user_checklist_items
-    ADD CONSTRAINT fk_rails_0281416dc9 FOREIGN KEY (user_id) REFERENCES public.users(id);
-
-
---
 -- Name: payments fk_rails_081dc04a02; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.payments
     ADD CONSTRAINT fk_rails_081dc04a02 FOREIGN KEY (user_id) REFERENCES public.users(id);
-
-
---
--- Name: user_checklist_items fk_rails_0d1849390b; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.user_checklist_items
-    ADD CONSTRAINT fk_rails_0d1849390b FOREIGN KEY (checklist_item_id) REFERENCES public.checklist_items(id);
 
 
 --
@@ -1734,27 +1422,11 @@ ALTER TABLE ONLY public.uploaded_files
 
 
 --
--- Name: checklist_items fk_rails_3605ca8e4d; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.checklist_items
-    ADD CONSTRAINT fk_rails_3605ca8e4d FOREIGN KEY (checklist_id) REFERENCES public.checklists(id);
-
-
---
 -- Name: shf_applications fk_rails_3ee395b045; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shf_applications
     ADD CONSTRAINT fk_rails_3ee395b045 FOREIGN KEY (member_app_waiting_reasons_id) REFERENCES public.member_app_waiting_reasons(id);
-
-
---
--- Name: user_checklists fk_rails_4ff2e06edf; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.user_checklists
-    ADD CONSTRAINT fk_rails_4ff2e06edf FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
 --
@@ -1787,14 +1459,6 @@ ALTER TABLE ONLY public.shf_documents
 
 ALTER TABLE ONLY public.shf_applications
     ADD CONSTRAINT fk_rails_be394644c4 FOREIGN KEY (user_id) REFERENCES public.users(id);
-
-
---
--- Name: user_checklists fk_rails_c563d9eddd; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.user_checklists
-    ADD CONSTRAINT fk_rails_c563d9eddd FOREIGN KEY (checklist_id) REFERENCES public.checklists(id);
 
 
 --
@@ -1911,10 +1575,6 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20190514172102'),
 ('20190601004310'),
 ('20190815215041'),
-('20191114184425'),
-('20191114205334'),
-('20191127221113'),
-('20191127225414'),
-('20191130225826');
+('20190830212208');
 
 

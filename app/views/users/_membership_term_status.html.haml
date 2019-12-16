@@ -1,0 +1,13 @@
+#user-member-status
+  = render partial: 'payor/term_status',
+   locals: { entity: user,
+  status_text: user.member? ? t('users.show.is_a_member') : t('users.show.not_a_member'),
+  fee_name_payment: t('users.show.membership_fee_payment'),
+  term_name: t('users.show.membership_term'),
+  term_end: user.membership_expire_date,
+  next_term_end: User.next_payment_dates(user.id).last,
+  can_make_payment: current_user.allowed_to_pay_member_fee?,
+  payment_text: t('users.show.pay_membership'),
+  payment_action_path: payments_path(user_id: current_user.id, type: user.class::THIS_PAYMENT_TYPE),
+  admin_edit_status_text: t('users.show.edit_member_status'),
+  admin_edit_target_id: '#edit-status-modal' }

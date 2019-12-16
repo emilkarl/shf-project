@@ -20,57 +20,61 @@ $indent-amount: 2rem;
   }
 }
 
-.section {
-  margin: 0 0 1.5em 3em;
-  min-height: 300px;
-  padding: 10px;
+.dashboard {
 
-  p {
-    margin-bottom: 0.5em;
-  }
+  .section {
+    margin: 0 0 1.5em 3em;
+    min-height: 300px;
+    padding: 10px;
 
-  .section-title {
-    padding-top: 1rem;
-  }
+    p {
+      margin-bottom: 0.5em;
+    }
 
-  .row {
-    margin-top: 0;
-  }
+    .section-title {
+      padding-top: 1rem;
+    }
 
-  .total,
-  .subtotal {
-    font-weight: bold;
-  }
+    .row {
+      margin-top: 0;
+    }
 
-  .total {
-    color: $total-color;
-    display: inline-block;
-    margin-left: -35px;
-    min-width: 35px;
-    text-align: right;
-  }
+    .total,
+    .subtotal {
+      font-weight: bold;
+    }
 
-  .sub-info-line {
-    font-size: 85%;
-  }
+    .total {
+      color: $total-color;
+      display: inline-block;
+      margin-left: -35px;
+      min-width: 35px;
+      text-align: right;
+    }
 
-  .detail-line {
-    font-size: smaller;
-    margin-left: $indent-amount;
-  }
+    .sub-info-line {
+      font-size: 85%;
+    }
 
-  .recent-activity,
-  .current-items-of-note {
-    margin-left: $indent-amount;
-  }
+    .detail-line {
+      font-size: smaller;
+      margin-left: $indent-amount;
+    }
 
-  .timeframe-options {
-    font-size: smaller;
-  }
+    .recent-activity,
+    .current-items-of-note {
+      margin-left: $indent-amount;
+    }
 
-  .not-working {
-    color: $not-working-color;
-    font-style: italic;
+    .timeframe-options {
+      font-size: smaller;
+    }
+
+    .not-working {
+      color: $not-working-color;
+      font-style: italic;
+    }
+
   }
 
 }

@@ -1,7 +1,7 @@
 module CompaniesHelper
 
   def payment_visible_for_user?(user, company)
-    user.in_company_numbered?(company.company_number) || user.admin?
+    user.admin? || user.in_company_numbered?(company.company_number)
   end
 
   def list_categories company, separator=' '
@@ -58,15 +58,6 @@ module CompaniesHelper
     end
   end
 
-  def pay_branding_fee_link(company_id, user_id)
-    # Returns link styled as a button
-
-    link_to("#{t('menus.nav.company.pay_branding_fee')}",
-            payments_path(user_id: user_id,
-                          company_id: company_id,
-                          type: Payment::PAYMENT_TYPE_BRANDING),
-            { method: :post, class: 'btn btn-secondary btn-sm' })
-  end
 
   def company_number_selection_field(company_id=nil)
     select_tag :company_id,

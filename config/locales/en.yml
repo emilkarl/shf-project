@@ -37,10 +37,15 @@ en:
   save: &save Save
   back: &back Back
   search: &search Search
+  close: Close
+  lastupdated: &last_updated Last Updated
+
   'yes': &yes 'Yes'
   'no': &no 'No'
   'Yes': *yes
   'No': *no
+
+
   application: &application Application
   user_activity: User Activity
   none: &none None
@@ -67,6 +72,8 @@ en:
   info:
     logged_in_as_admin: You are logged in as an admin.
     under_construction: This page is under construction.  More information and features are coming.
+
+  membership: &membership membership
 
   apply_for_membership: 'Apply for membership'
 
@@ -189,9 +196,12 @@ en:
 
       payment:
         payment_type: Payment Type
+        status: Status
         start_date: Start Date
         expire_date: &expire_date Expire Date
         notes: Notes
+        created: *created
+        last_updated: *last_updated
 
       shf_application:
         company_number: &company_number "Company number"
@@ -273,6 +283,7 @@ en:
         og_type: &site_og_type OG type
         twitter_card_type: &site_twitter_card_type Twitter card type
         facebook_app_id: &site_facebook_app_id Facebook Application ID
+        payment_too_soon_days: &payment_too_soon_days Number of days that a user will be warned that a payment is 'too soon'
 
       task_attempt:
         task_name: Task name
@@ -389,6 +400,24 @@ en:
     kommun: *kommun
     none: *none
 
+
+  payors:
+    status: Status
+    no_payment_due_now: &no_payment_due_now No payment is due now.
+    due: Payment is due now.
+    past_due: Payment is past due!
+    due_by: Payment is due by %{due_date}.
+    too_early: *no_payment_due_now
+    term_paid_through: &term_paid_through Paid through
+    you_are_paid_until: You are already paid until
+    you_dont_owe_until_then: You do not owe a payment until then.
+    paying_now_extends_until: "Making a %{fee_name_payment} now will extend your %{term_name} to %{extended_end_date}."
+    do_you_want_to_pay_now: Do you really want to make a payment now?
+    yes_pay_answer: 'Yes, make a payment'
+    no_pay_answer: 'No. Nevermind. Do not make a payment'
+    admin_cant_edit: Membership status can't be updated. (Perhaps no payments have been made.)
+
+
   payment:
     payment_type:
       member_fee: Member Fee
@@ -396,6 +425,16 @@ en:
     status:
       paid: &paid Paid
       never_paid: &never_paid Never Paid
+    processor_status: Processor Status
+    status_from_payment_processor:
+      skapad: created
+      avvaktan: pending
+      betald: successful
+      utgånget: expired
+      väntar_på_betalning: awaiting payments
+    term_start_date: Term Start Date
+    term_expiry_date: Term Expiry Date
+    no_payment_due_now: *no_payment_due_now
 
 
   # Automatic and manual lookup for views:
@@ -669,15 +708,23 @@ en:
       confirm_are_you_sure: *are_you_sure_confirm
       add_address: 'Add address'
       click_to_edit: 'click to edit'
+      hbrand_status_paid: Can use the H-Brand image. (License fee is paid)
+      hbrand_status_not_paid: Cannot use the H-Brand image. (License fee is not paid)
+      term_paid_through: *term_paid_through
+      no_payment_due_now: *no_payment_due_now
+      hbrand_term_payment: H-Brand license fee payment
+      hbrand_fee: H-Brand license fee
+      hbrand_term: H-Brand license term
       edit_branding_status: Edit Branding Status
       branding_license: H-Branding License
-      pay_branding_fee_tooltip: Paying H-Branding fee will extend your branding
-                                license for one year
-      branding_fee_expire_date_tooltip: Branding license expires after this date
+      payment_tooltip: Paying the H-Branding fee will extend the branding license for one year.
+      branding_fee_expire_date_tooltip: &branding_fee_expire_date_tooltip Branding license expires after this date
+      term_expire_date_tooltip : *branding_fee_expire_date_tooltip
       members: Company Members
       dinkurs_fetch_events: Get Dinkurs Events
       dinkurs_fetching: Fetching events ... please wait
       dinkurs_key: *dinkurs_company_key
+      pay_branding_fee: &pay_branding_fee Pay H-Branding Fee
 
     index:
       title: Find H-labeled companies
@@ -829,9 +876,17 @@ en:
       please_note_new_password: Please record this in a safe and secure place. Once you press the Save button below you will not be able to see the password again and there is no way to display it again.
       submit_new_password: Save the New Password
       member: *member
-      pay_membership_tooltip: Paying membership fee will extend your membership
-                              for one year
-      membership_expire_date_tooltip: Membership expires after this date
+      membership_status: Membership Status
+      not_a_member: Not a member
+      is_a_member: Member in good standing
+      term_paid_through: *term_paid_through
+      no_payment_due_now: *no_payment_due_now
+      membership_fee_payment: membership payment
+      membership_fee: membership fee
+      membership_term: membership term
+      payment_tooltip: Paying the membership fee will extend your membership for one year.
+      membership_expire_date_tooltip: &membership_expire_date_tooltip Membership expires after this date
+      term_expire_date_tooltip : *membership_expire_date_tooltip
       proof_of_membership: Proof of Membership
       proof_of_membership_describe: This image is your proof of membership in SHF.
       proof_of_membership_photo_needed: 'If you see "Photo Unavailable" then please
@@ -857,6 +912,8 @@ en:
       member_packet: &member_packet member packet
       sent: sent
       not_sent: not sent
+      edit_member_status: &edit_member_status Edit Member Status
+      pay_membership: &pay_membership Pay Membership Fee
 
     update:
       passwords_dont_match: "The two passwords entered don't match."
@@ -884,7 +941,7 @@ en:
       user_has_never_signed_in: has never logged in.
       'yes': *yes # https://coderwall.com/p/ld65tq/rails-i18n-yes-no-translation
       'no': *no
-      edit_member_status: Edit Member Status
+      edit_member_status: *edit_member_status
       submit_button_label: Update Status
 
     users_list:
@@ -1152,6 +1209,7 @@ en:
         twitter_card_type: *site_twitter_card_type
         facebook_app_id: *site_facebook_app_id
         missing: *missing
+        payment_too_soon_days: *payment_too_soon_days
 
       show:
         title: *application_configuration
@@ -1169,6 +1227,7 @@ en:
         twitter_card_type: *site_twitter_card_type
         facebook_app_id: *site_facebook_app_id
         missing: *missing
+        payment_too_soon_days: *payment_too_soon_days
 
       update:
         success: Application data updated successfully
@@ -1509,10 +1568,10 @@ en:
           view_company: View Company
           edit_company: Edit My Company
         my_application: *my_application
-        pay_membership: Pay Membership Fee
+        pay_membership: *pay_membership
 
       company:
-        pay_branding_fee: Pay H-Branding Fee
+        pay_branding_fee: *pay_branding_fee
 
       admin:
         shf_main_site: *shf_main_site

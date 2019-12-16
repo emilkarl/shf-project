@@ -97,6 +97,11 @@ margin-bottom:0;
   outline: 0;
 }
 
+a.btn.disabled, {
+  border-color: $lightgray;
+  color: $gray;
+}
+
 .btco-menu li > a {
   color: $black;
   padding: 10px 15px;
@@ -230,7 +235,7 @@ margin: 5px 0 0 0;
 }
 
 .infotext p {
-  margin: 0.5rem 0 0.5rem 0;
+  margin-bottom: 1rem; // margin: 0.5rem 0 0.5rem 0;
 }
 
 .login {
@@ -299,6 +304,8 @@ margin: 5px 0 0 0;
 
 .post-categories li {
   display: inline-block;
+  font-size: larger;
+  font-weight: bold;
   list-style: none;
 }
 
@@ -337,6 +344,10 @@ margin-top:20px;
 .table th {
   border-top:none;
   padding: .15rem .75rem;
+}
+
+.table-sm th {
+  padding: 0.3rem;
 }
 
 .text-nicelabel {

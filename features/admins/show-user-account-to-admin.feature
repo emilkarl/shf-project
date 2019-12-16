@@ -1,8 +1,8 @@
-Feature: Admin sees additional user details information
+Feature: Admin sees additional user details that only they can see
 
   As an admin
-  So that I can see and update the details for a user
-  Show me additional info about a user (in addition to all of the the user details information)
+  So that I have all of the information about a user (membership, payments, application, etc.)
+  Show me additional info on the user details page beyond what a normal user/member can see
 
   PT:  https://www.pivotaltracker.com/story/show/140358959
 
@@ -102,7 +102,6 @@ Feature: Admin sees additional user details information
     Then I should see t("users.show.is_an_admin")
     And I should see t("users.show.user_has_never_signed_in")
     And I should not see t("users.show.last_login")
-
 
 
   Scenario: Show an admin that is currently logged in

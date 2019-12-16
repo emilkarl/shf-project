@@ -1,25 +1,169 @@
+# Common behavior for payments:
+#   the most recent completed payment,
+#      notes for the most recent payment,
+#   start and expiration dates
+#   has the term expired, is a payment due, etc.
+#
+# Using self.class::THIS_PAYMENT_TYPE as the default for a payment type
+# means that the payment type for a Payor (e.g. the class that is using this module)
+# does not have explictly pass the payment type every single time a method is called.
+# Ex:  a User does not have to specify a Membership payment every time; the default
+#   payment type for a User is a Membership payment, so that is used as the default
+#   (unless a payment type is explicitly given, of course).
+#   Likewise, the default payment type for a Company is an H-branding fee payment,
+#   so when a Company uses these methods, that does not have to be specified every time.
+#
+#
 module PaymentUtility
   extend ActiveSupport::Concern
 
   included do
 
-    def most_recent_payment(payment_type)
+    def most_recent_payment(payment_type = self.class::THIS_PAYMENT_TYPE)
       payments.completed.send(payment_type).order(:created_at).last
     end
 
-    def payment_start_date(payment_type)
+
+    def has_successful_payments?(payment_type = self.class::THIS_PAYMENT_TYPE)
+      payments.completed.send(payment_type).any?
+    end
+
+
+    def payment_start_date(payment_type = self.class::THIS_PAYMENT_TYPE)
       most_recent_payment(payment_type)&.start_date
     end
 
-    def payment_expire_date(payment_type)
+
+    def payment_expire_date(payment_type = self.class::THIS_PAYMENT_TYPE)
       most_recent_payment(payment_type)&.expire_date
     end
 
-    def payment_notes(payment_type)
+
+    def payment_notes(payment_type = self.class::THIS_PAYMENT_TYPE)
       most_recent_payment(payment_type)&.notes
     end
-  end
 
+
+    # Has the term expired for this payment type?
+    # true only if there have been successful payments (= there was a term)
+    #    AND the expiration date is _not_ in the future ( == it is in the past)
+    #
+    # @return [Boolean] - if there was a term and it has expired
+    def term_expired?(payment_type = self.class::THIS_PAYMENT_TYPE)
+      expires = payment_expire_date(payment_type)
+      has_successful_payments? && !expires.future?
+    end
+
+
+    # A payment 'should' be made if the payment term has expired
+    #      OR
+    # there have never been and successful payments
+    #      OR
+    # the today is within the "should pay cutoff" number of days of the expiration date.
+    #   This is the same as calculating
+    #      if today is _after_ the (expiration date - should pay cutoff number of days)
+    #
+    #        let cutoff_date = expiration date - should pay cutoff number of days
+    #
+    #      so if today is on or after the cutoff date, a payment should be made. (Assuming the term has not expired)
+    #
+    #  "today" is based on Time.zone.now (@see https://github.com/AgileVentures/shf-project/wiki/Dates-and-Times-and-Timezones-(oh-my!) in the project wiki
+    #
+    # How close it should be = the "should_pay_cutoff" - this AppConfiguration.config_to_use.payment_too_soon_days
+    #   Must convert this to a Duration by using the .days method
+    #
+    #  Ex: today before the cutoff date, so should_pay_now? will be false
+    #    Today is December 1
+    #    expiration date is December 31
+    #    should_pay_cutoff is 20 days
+    #    cutoff_date = Dec 11
+    #
+    #        Dec. 1    Dec. 11                Dec. 31
+    #     -----|---------.--------------------|--------...-->
+    #          |         ^                    |
+    #        Today       |                expire date
+    #                    |
+    #            cutoff_date = expired_date - should_pay_cutoff = Dec.11
+    #
+    #
+    # Ex: today is after the cutoff date, so should_pay_now? will be true:
+    #    Today is December 18
+    #    expiration date is December 31
+    #    should_pay_cutoff is 20 days
+    #    cutoff_date = Dec 11
+    #
+    #                 Dec. 11                Dec. 31
+    #     ---------------.------|-.---------.|-------...-->
+    #                    ^      |            |
+    #                    |    Today          expire date
+    #                    |
+    #            cutoff_date = expired_date - should_pay_cutoff = Dec.10
+    #
+    # Also see the RSpecs for more examples
+    #
+    # @param [String] payment_type - the type of payment this is (used to get the expiration date)
+    # @param [Duration] should_pay_cutoff - the number of days before a payment
+    #    due date that defines when it is "too soon" to pay. Default is from the Application configuration
+    #
+    # @return [Boolean] - true if the term has expired OR Today is after the cutoff day
+    def should_pay_now?(payment_type: self.class::THIS_PAYMENT_TYPE,
+                        should_pay_cutoff: AdminOnly::AppConfiguration.config_to_use.payment_too_soon_days.days)
+
+      cutoff_date = has_successful_payments?(payment_type) ? payment_expire_date(payment_type) - should_pay_cutoff : Time.zone.now
+      term_expired?(payment_type) || Time.zone.now >= cutoff_date
+    end
+
+
+    # Is it "too early" to pay now?  "too early" is determined by the Application Configuration
+    #
+    # @param [String] payment_type - the type of payment this is
+    # @param [Duration] should_pay_cutoff - Duration (number of days)
+    # @return [Boolean] - true only if no payment should be made now
+    def too_early_to_pay?(payment_type: self.class::THIS_PAYMENT_TYPE,
+                          should_pay_cutoff: AdminOnly::AppConfiguration.config_to_use.payment_too_soon_days.days)
+      !should_pay_now?(payment_type: payment_type, should_pay_cutoff: should_pay_cutoff)
+    end
+
+
+    # Logic for determining the payment due status.
+    # This puts the logic here in one place, and
+    # the symbols returned can then easily be used in switch statements (ex: to display different messages, etc.)
+    #
+    #  :due = a payment is due now
+    #  :past_due = a payment was due by a certain date and that date has passed
+    #  :due_by = a payment due on a date that is in the future
+    #  :too_early = a payment is due on a date that is in the future AND is more than the 'should pay cutoff date'
+    #
+    #   See too_early_to_pay? and should_pay_now? and term_expired? for more details
+    #
+    # @return [Symbol] -  :due | :past_due | :due_by | :too_early
+    def payment_due_status(payment_type: self.class::THIS_PAYMENT_TYPE,
+                           should_pay_cutoff: AdminOnly::AppConfiguration.config_to_use.payment_too_soon_days.days)
+      if has_successful_payments?
+        if term_expired?(payment_type)
+          :past_due
+        else
+          if too_early_to_pay?(payment_type: payment_type, should_pay_cutoff: should_pay_cutoff)
+            :too_early
+          else
+            # term has not expired, and it's not too early to pay.  So there is an upcoming date they need to pay by (= the term expiration date)
+            :due_by
+          end
+        end
+
+      else
+        # No successful payments yet, so expiration date is now.  (since the payments hold the expiration date info)
+        :due
+      end
+    end
+
+
+    # This is our current rule:  an admin cannot edit the  status if there are no payments [2019-12-05]
+    def admin_can_edit_status?
+      has_successful_payments?
+    end
+
+  end
 
   #   - FIXME how to store this date if/when the member is no longer a current member?
   #
@@ -34,7 +178,7 @@ module PaymentUtility
     # @param payment_type [Payment::PAYMENT_TYPE_MEMBER | Payment::PAYMENT_TYPE_BRANDING] - the specific type of the payment to look for
     #
     # @return [Array] - the start_date _and_ expire_date for the next payment
-    def next_payment_dates(entity_id, payment_type)
+    def next_payment_dates(entity_id, payment_type = self::THIS_PAYMENT_TYPE)
       entity = find(entity_id)
 
       expire_date = entity.payment_expire_date(payment_type)
@@ -42,7 +186,7 @@ module PaymentUtility
       if expire_date && expire_date.future?
         start_date = expire_date + 1.day
       else
-        start_date = Time.zone.today  # can't use this to determine how many days OVERDUE the membership payment is!
+        start_date = Time.zone.today # can't use this to determine how many days OVERDUE the membership payment is!
       end
 
       expire_date = expire_date_for_start_date(start_date)
@@ -82,7 +226,7 @@ module PaymentUtility
     # @return [Date] - the resulting Date that was calculated
     def other_date_for_given_date(given_date, is_start_date: true)
       multiplier = is_start_date ? 1 : -1
-      (given_date + (multiplier * 1.year) - (multiplier * 1.day) )
+      (given_date + (multiplier * 1.year) - (multiplier * 1.day))
     end
 
   end

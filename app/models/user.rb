@@ -68,31 +68,34 @@ class User < ApplicationRecord
   scope :current_members, -> { User.joins(:payments).where("payments.status = '#{Payment::SUCCESSFUL}' AND payments.payment_type = ? AND  payments.expire_date > ?", Payment::PAYMENT_TYPE_MEMBER, Date.current).joins(:shf_application).where(shf_applications: {state: 'accepted'}) }
 
 
+  THIS_PAYMENT_TYPE = Payment::PAYMENT_TYPE_MEMBER
+
   def most_recent_membership_payment
-    most_recent_payment(Payment::PAYMENT_TYPE_MEMBER)
+    most_recent_payment(THIS_PAYMENT_TYPE)
   end
 
 
   # TODO this should not be the responsibility of the User class.
   def membership_start_date
-    payment_start_date(Payment::PAYMENT_TYPE_MEMBER)
+    payment_start_date(THIS_PAYMENT_TYPE)
   end
 
 
   # TODO this should not be the responsibility of the User class.
   def membership_expire_date
-    payment_expire_date(Payment::PAYMENT_TYPE_MEMBER)
+    payment_expire_date(THIS_PAYMENT_TYPE)
   end
 
 
   # TODO this should not be the responsibility of the User class.
   def membership_payment_notes
-    payment_notes(Payment::PAYMENT_TYPE_MEMBER)
+    payment_notes(THIS_PAYMENT_TYPE)
   end
 
 
   # TODO this should not be the responsibility of the User class.
   def membership_current?
+    # TODO can use term_expired?(THIS_PAYMENT_TYPE)
     membership_expire_date&.future?
   end
 
@@ -129,22 +132,39 @@ class User < ApplicationRecord
 
   # TODO this should not be the responsibility of the User class.
   def self.next_membership_payment_dates(user_id)
-    next_payment_dates(user_id, Payment::PAYMENT_TYPE_MEMBER)
+    next_payment_dates(user_id, THIS_PAYMENT_TYPE)
   end
 
 
+  # Business rule: user can pay membership fee if:
+  # 1. the user is not the admin (an admin cannot make a payment for a member or user)
+  #      AND
+  # 2. the user is a member
+  #     OR
+  #    user has at least one application with status == :accepted
+  # What if a payment has already been made?  any check for that?
   # TODO this should not be the responsibility of the User class.
-  def allow_pay_member_fee?
-    # Business rule: user can pay membership fee if:
-    # 1. user == member, or
-    # 2. user has at least one application with status == :accepted
-    # What if a payment has already been made?  any check for that?
+  def allowed_to_pay_member_fee?
+    # TODO use membership_current? instead of member?
+    !admin? && (member? || shf_application&.accepted? )
+  end
 
-    member? || shf_application&.accepted?
+
+  # Business rule: user can pay h-brand license fee if:
+  # 1. user is an admin
+  # OR
+  # 2. user is a member AND user is in the company
+  #
+  # TODO this should not be the responsibility of the User class.
+  #
+  # @return [Boolean]
+  def allowed_to_pay_hbrand_fee?(company)
+    admin? || in_company?(company) #|| has_approved_app_for_company?(company)
   end
 
 
   def member_fee_payment_due?
+    # TODO should member? be used here?
     member? && !membership_current?
   end
 
@@ -164,8 +184,57 @@ class User < ApplicationRecord
   end
 
 
+  def in_company?(company)
+    in_company_numbered?(company.company_number)
+  end
+
+
   def in_company_numbered?(company_num)
-    member? && shf_application&.companies&.where(company_number: company_num)&.any?
+    member? && has_approved_app_for_company_number?(company_num)
+  end
+
+
+  def has_approved_app_for_company?(company)
+    has_approved_app_for_company_number?(company.company_number)
+  end
+
+
+  def has_approved_app_for_company_number?(company_num)
+    has_app_for_company_number?(company_num) && apps_for_company_number(company_num).first.accepted?
+  end
+
+
+  def has_app_for_company?(company)
+    has_app_for_company_number?(company.company_number)
+  end
+
+
+  def has_app_for_company_number?(company_num)
+    apps_for_company_number(company_num)&.any?
+  end
+
+
+  # @return [Array] all shf_applications that contain the company, sorted by the application with the expire_date furthest in the future
+  def apps_for_company(company)
+    apps_for_company_number(company.company_number)
+  end
+
+
+  # @return [Array] all shf_applications that contain a company with the company_num, sorted by the application with the expire_date furthest in the future
+  #   Note that right now a User can have only 1 ShfApplication, but in the future
+  #   if a User can have more than 1, we want to be sure they are sorted by expire_date with the
+  #    expire_date in the future as the first one and the expire_date in the past as the last one
+  def apps_for_company_number(company_num)
+    result = shf_application&.companies&.find_by(company_number: company_num)
+    result.nil? ? [] : [shf_application].sort(&sort_apps_by_when_approved)
+  end
+
+
+  SORT_BY_MOST_RECENT_APPROVED_DATE = lambda { | app1, app2 | app2.when_approved <=> app1.when_approved }
+
+  # @return [Lambda] - the block (lambda) to use to sort shf_applications by the when_approved date
+  def sort_apps_by_when_approved
+    SORT_BY_MOST_RECENT_APPROVED_DATE
   end
 
 

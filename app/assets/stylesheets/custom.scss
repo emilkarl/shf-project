@@ -1,4 +1,5 @@
-@import 'shf-custom-colors';
+@import "shf-custom-colors";
+
 
 .yes,
 .Yes,
@@ -55,3 +56,30 @@
   cursor: not-allowed;
 }
 // ======================================
+
+.grayed-btn-colors {
+  background-color: $grayed-button-background;
+  border-color: $grayed-button-background;
+  color: $grayed-button-text;
+}
+
+.modal-content {
+  p {
+    line-height: 1.5em;
+  }
+}
+
+
+.section {
+  margin-bottom: 1em;
+  margin-left: 1em;
+}
+
+.section-title {
+  margin-top: 1em;
+}
+
+.admin-only {
+  background-color: $admin-only-background;
+}
+

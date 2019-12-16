@@ -2,138 +2,140 @@
   = stylesheet_link_tag 'custom-menu', media: 'all'
 %header.entry-header
   - user_name = @user.full_name
-  %h1.entry-title.is-admin
+  %h1{ class: with_admin_css_class_if_needed(@current_user, ['entry-title']) }
     = user_name.empty? ? @user.email : user_name
     - if @user.admin?
       %span.small
-        (#{t('.is_an_admin')})
+        (#{ t('.is_an_admin') })
 
 .entry-content.container
-  .row
-    .col-md-6
-      = field_or_none("#{t('.email')}", mail_to(@user.email),
-                      label_class: 'standard-label')
-    .col-md-4
-      = field_or_none("#{t('.membership_number')}", @user.membership_number,
-                      label_class: 'standard-label')
 
-  = render partial: 'member_payment_status', locals: { user: @user }
+  .login-name
+    .row
+      .col
+        = field_or_none("#{ t('.email') }", mail_to(@user.email),
+                        label_class: 'standard-label',
+                        value_class: 'login-email')
 
-  .row
-    .col.mt-2
-      - unless @user.shf_application
-        = field_or_none("#{t('application')}", t('none_n'), label_class: 'standard-label')
-      - else
-        %h3 #{t('application')}:
-        %table.table.table-hover.table-sm.table-md-responsive
-          %thead
-            %tr
-              %th
-                = t('activerecord.attributes.shf_application.contact_email')
-              %th
-                = t('activerecord.attributes.shf_application.state')
-              %th
-                = t('activerecord.attributes.shf_application.company_number')
-              %th
-                = t('activerecord.attributes.company.name')
-          %tbody
-            - app = @user.shf_application
-            %tr.shf_application
-              %td= mail_to(app.contact_email)
-              %td
-                - i18n_state = t("shf_applications.state.#{app.state}")
-                - if app.accepted?
-                  %span.yes= i18n_state
-                - else
-                  %span.maybe= i18n_state
-              - if app.companies.any?
-                %td= link_to(app.company_numbers, shf_application_path(app))
-                %td= app.company_names
+  .membership
+    .row.section-title
+      .col.mt-2
+        %h3.section-title= t("membership").capitalize
+    .row
+      .col
+        = field_or_none(t('.membership_number'), @user.membership_number,
+                        label_class: 'standard-label',
+                        value_class: 'membership-number')
+
+    = render partial: 'membership_term_status', locals: { user: @user }
+
+
+  .applications
+    .row.section-title
+      .col.mt-2
+        - has_none = @user.shf_application.blank? ? t('none_n') : ''
+        %h3= "#{ t('application') }: #{ has_none }"
+
+    - unless @user.shf_application.blank?
+      .row
+        .col.mt-2
+          = render partial: 'shf_applications/shf_application_min_info_as_table', locals: { application: @user.shf_application }
+
 
   - if current_user.admin?
-    .row
-      .col.admin-note
+    .admin-only
 
-        %p{class: "membership-packet #{ @user.membership_packet_sent? ? 'sent' : 'not-sent'}",
-        id: 'date-membership-packet-sent'}
-          = membership_packet_str(@user)
+      .user-info
+        .row.section-title
+          .col.mt-2
+            %h3.section-title User Info
 
-        %p
-          #{t('.created')} #{i18n_time_ago_in_words(@user.created_at)}.
-        - if @user.last_sign_in_at.blank? && @user.current_sign_in_at.blank?
-          %p
-            #{@user.email} #{t('.user_has_never_signed_in')}
-        - else
-          %p
-            #{t('.last_login')}:
-            #{most_recent_login_time @user}
-            (#{i18n_time_ago_in_words(most_recent_login_time @user)})
-          %p
-            #{t('.logged_in_count')}:
-            = @user.sign_in_count
-        - if @user.reset_password_sent_at.blank?
-          %p
-            = t('.password_never_reset')
-        - else
-          %p
-            %b #{t('.reset_password_sent_at')}:
-            #{@user.reset_password_sent_at}
-            #{i18n_time_ago_in_words(@user.reset_password_sent_at)})
+        .row
+          .col.admin-note
 
-    %hr
+            %p{ class: "membership-packet #{ @user.membership_packet_sent? ? 'sent' : 'not-sent' }",
+            id: 'date-membership-packet-sent' }
+              = membership_packet_str(@user)
+
+            %p
+              #{ t('.created') } #{ i18n_time_ago_in_words(@user.created_at) }.
+            - if @user.last_sign_in_at.blank? && @user.current_sign_in_at.blank?
+              %p
+                #{ @user.email } #{ t('.user_has_never_signed_in') }
+            - else
+              %p
+                #{ t('.last_login') }:
+                #{ most_recent_login_time @user }
+                (#{ i18n_time_ago_in_words(most_recent_login_time @user) })
+              %p
+                #{ t('.logged_in_count') }:
+                = @user.sign_in_count
+            - if @user.reset_password_sent_at.blank?
+              %p= t('.password_never_reset')
+            - else
+              %p
+                %b #{ t('.reset_password_sent_at') }:
+                #{ @user.reset_password_sent_at }
+                #{ i18n_time_ago_in_words(@user.reset_password_sent_at) })
+
+      %hr
+
+
   - if @user.member?
-    .row.mt-3
-      .col-md-5
-        = render partial: 'proof_of_membership',
-                 locals: { app_config: @app_configuration, user: @user,
-                           context: :user_show }
-      .col-md-7.infotext
-        %h3= t('.proof_of_membership')
-        %p= t('.proof_of_membership_describe')
-        = link_to(t('.download_image'),
-                                   proof_of_membership_path(@user, render_to: :jpg),
-                                   class: 'btn btn-sm btn-primary download_proof_of_membership')
-        = link_to(t('.copy_image_url'), proof_of_membership_url(@user.id), class: 'btn btn-sm btn-primary link_for_proof_of_membership copy-to-clipboard', "data-original-title" => t('.copied'))
-        = link_to(t('.show_image'),
-                                 proof_of_membership_path(@user, context: :internal),
-                                 class: 'btn btn-sm btn-primary preview_proof_of_membership')
-        %p= t('.image_how_to_use_html')
-
-        %p
-          = t('.proof_of_membership_photo_needed')
-          = link_to(t('devise.registrations.edit.title'), edit_user_registration_path,
-                  class: 'underlined_link')
-        %p= t('.image_use_guidelines_html', use_guidelines_link: link_to(t('.use_guidelines'),
-            'https://hitta.sverigeshundforetagare.se/dokument/innehall/hmarket',
-            class: 'underlined_link'))
-
-    - @user.companies.all.each do |company|
-      - next unless company.branding_license?
-      .row
-        .col-sm-12
-          %hr
+    .membership_images
+      .row.mt-3
         .col-md-5
-          = render partial: 'companies/company_h_brand',
-                   locals: { app_config: @app_configuration, company: company,
-                             context: :user_show, user: @user }
-
+          = render partial: 'proof_of_membership',
+                   locals: { app_config: @app_configuration, user: @user,
+                             context: :user_show }
         .col-md-7.infotext
-          %h3= t('.company_h_brand', company: company.name)
-          %p= t('.company_h_brand_describe')
+          %h3= t('.proof_of_membership')
+          %p= t('.proof_of_membership_describe')
           = link_to(t('.download_image'),
-                                     company_h_brand_path(company,
-                                                           render_to: :jpg),
-                                     class: 'btn btn-sm btn-primary download_h_mark')
-          = link_to(t('.copy_image_url'), company_h_brand_url(company), class: 'btn btn-sm btn-primary link_for_h_brand copy-to-clipboard', "data-original-title" => t('.copied'))
+                                     proof_of_membership_path(@user, render_to: :jpg),
+                                     class: 'btn btn-sm btn-primary download_proof_of_membership')
+          = link_to(t('.copy_image_url'), proof_of_membership_url(@user.id), class: 'btn btn-sm btn-primary link_for_proof_of_membership copy-to-clipboard', "data-original-title" => t('.copied'))
           = link_to(t('.show_image'),
-                                 company_h_brand_path(company,
-                                                      context: :internal),
-                                     class: 'btn btn-sm btn-primary preview_h_brand')
+                                   proof_of_membership_path(@user, context: :internal),
+                                   class: 'btn btn-sm btn-primary preview_proof_of_membership')
           %p= t('.image_how_to_use_html')
+
+          %p
+            = t('.proof_of_membership_photo_needed')
+            = link_to(t('devise.registrations.edit.title'), edit_user_registration_path,
+                    class: 'underlined_link')
           %p= t('.image_use_guidelines_html', use_guidelines_link: link_to(t('.use_guidelines'),
               'https://hitta.sverigeshundforetagare.se/dokument/innehall/hmarket',
               class: 'underlined_link'))
 
+      - @user.companies.all.each do |company|
+        - next unless company.branding_license?
+        .row
+          .col-sm-12
+            %hr
+          .col-md-5
+            = render partial: 'companies/company_h_brand',
+                     locals: { app_config: @app_configuration, company: company,
+                               context: :user_show, user: @user }
+
+          .col-md-7.infotext
+            %h3= t('.company_h_brand', company: company.name)
+            %p= t('.company_h_brand_describe')
+            = link_to(t('.download_image'),
+                                       company_h_brand_path(company,
+                                                           render_to: :jpg),
+                                     class: 'btn btn-sm btn-primary download_h_mark')
+            = link_to(t('.copy_image_url'), company_h_brand_url(company), class: 'btn btn-sm btn-primary link_for_h_brand copy-to-clipboard', "data-original-title" => t('.copied'))
+            = link_to(t('.show_image'),
+                                   company_h_brand_path(company,
+                                                        context: :internal),
+                                       class: 'btn btn-sm btn-primary preview_h_brand')
+            %p= t('.image_how_to_use_html')
+            %p= t('.image_use_guidelines_html', use_guidelines_link: link_to(t('.use_guidelines'),
+                'https://hitta.sverigeshundforetagare.se/dokument/innehall/hmarket',
+                class: 'underlined_link'))
+
 = render partial: 'edit_status_modal', locals: { user: @user }
+
 - if "#proof-of-membership"
   = render partial: 'companies/custom_context_menu'

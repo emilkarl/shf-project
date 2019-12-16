@@ -58,6 +58,8 @@ RSpec.describe AdminOnly::AppConfiguration, type: :model do
     it { is_expected.to have_db_column :site_meta_image_updated_at }
     it { is_expected.to have_db_column :site_meta_image_height }
     it { is_expected.to have_db_column :site_meta_image_width }
+    it { is_expected.to have_db_column :singleton_guard }
+    it { is_expected.to have_db_column :payment_too_soon_days }
   end
 
 

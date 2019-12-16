@@ -9,6 +9,8 @@ $success:         #7ca059 !default;
 
 $white: #fff;
 $black: #000;
+$gray: #808080;       // gray
+$lightgray: #d3d3d3; //lightgray;
 
 
 // Colors uses in our SCSS files:
@@ -25,6 +27,8 @@ $black: #000;
 
 $body-text: #333;
 $body-background: #f7f7f2;
+
+$secondary-lighter: lighten($secondary, 45%);
 
 $toggler-hide-color: #1a1a1a;
 $dark-gray-text: #6c757d;
@@ -59,6 +63,12 @@ $social-media-instagram-gray: #6e644b;
 $social-media-youtube-red: #c00;
 
 $disabled-icon-gray: #808080;
+
+
+$admin-only-background: #f0f8ff;
+
+$grayed-button-background: #dadada;
+$grayed-button-text: #565656;
 
 
 // -----------------------------------------------------

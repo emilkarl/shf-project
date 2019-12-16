@@ -4,60 +4,83 @@
 .entry-content
 
   .row
-    .col-sm-10
-      = field_or_none(t('.site_name'),
-      @app_configuration.site_name,
-      tag_options: {class: 'site-name'})
-
-  .row
-    .col-sm-10
-      = field_or_none(t('.site_meta_title'),
-      @app_configuration.site_meta_title,
-      tag_options: {class: 'site-meta-title'})
-
-  .row
-    .col-sm-12
-      = field_or_none(t('.site_meta_description'),
-      @app_configuration.site_meta_description,
-      tag_options: {class: 'site-meta-description'})
-
-  .row
-    .col-sm-12
-      = field_or_none(t('.site_meta_keywords'),
-      @app_configuration.site_meta_keywords,
-      tag_options: {class: 'site-meta-keywords'})
-
-  .row
-    .col-sm-3
-      = field_or_none(t('.og_type'),
-      @app_configuration.og_type,
-      tag_options: {class: 'site-og-type'})
     .col-sm-4
-      = field_or_none(t('.twitter_card_type'),
-          @app_configuration.twitter_card_type,
-          tag_options: {class: 'site-twitter-card-type'})
+      %h2 Site Meta Information
+
+  .section
+    .row
+      .col-sm-10
+        = field_or_none(t('.site_name'),
+        @app_configuration.site_name,
+        tag_options: {class: 'site-name'})
+
+    .row
+      .col-sm-10
+        = field_or_none(t('.site_meta_title'),
+        @app_configuration.site_meta_title,
+        tag_options: {class: 'site-meta-title'})
+
+    .row
+      .col-sm-12
+        = field_or_none(t('.site_meta_description'),
+        @app_configuration.site_meta_description,
+        tag_options: {class: 'site-meta-description'})
+
+    .row
+      .col-sm-12
+        = field_or_none(t('.site_meta_keywords'),
+        @app_configuration.site_meta_keywords,
+        tag_options: {class: 'site-meta-keywords'})
+
+    .row
+      .col-sm-3
+        = field_or_none(t('.og_type'),
+        @app_configuration.og_type,
+        tag_options: {class: 'site-og-type'})
+      .col-sm-4
+        = field_or_none(t('.twitter_card_type'),
+            @app_configuration.twitter_card_type,
+            tag_options: {class: 'site-twitter-card-type'})
+
+    .row
+      .col-sm-7
+        = field_or_none(t('.facebook_app_id'),
+        @app_configuration.facebook_app_id,
+        tag_options: {class: 'site-facebook-app-id'})
+
 
   .row
-    .col-sm-7
-      = field_or_none(t('.facebook_app_id'),
-      @app_configuration.facebook_app_id,
-      tag_options: {class: 'site-facebook-app-id'})
+    .col-sm-4
+      %h2 Settings
 
-  .row
-    .col-sm-10
-      %p.email_enabled_setting
-        %span.field-label
-          = t('.admin_email_new_apps_enabled')
-          ?
-        = yes_no_span( @app_configuration.email_admin_new_app_received_enabled )
+  .section
+    .row
+      .col-sm-10
+        %p.email_enabled_setting
+          %span.field-label
+            = t('.admin_email_new_apps_enabled')
+            ?
+          = yes_no_span( @app_configuration.email_admin_new_app_received_enabled )
+
+    .row
+      .col-sm-10
+        = field_or_none(t('.payment_too_soon_days'),
+            @app_configuration.payment_too_soon_days,
+            tag_options: {class: 'payment-too-soon-days'})
+
 
   %hr
 
   .row
-    - @app_configuration.image_attributes.sort.each do | image_attribute |
-      .card
-        = render 'image_show', app_config: @app_configuration,
-                               image_title: image_attribute.to_s
+    .col-sm-4
+      %h2 Images
+
+  .section
+    .row
+      - @app_configuration.image_attributes.sort.each do | image_attribute |
+        .card
+          = render 'image_show', app_config: @app_configuration,
+                                 image_title: image_attribute.to_s
 
 
   = render 'application/required_fields'

@@ -14,7 +14,7 @@
   %td.expire_date
     - expire_date = user.most_recent_membership_payment&.expire_date
     - if expire_date
-      %span{ class: expire_date_css_class(expire_date) }
+      %span{ class: expires_soon_hint_css_class(expire_date) }
         = expire_date
   %td.edit
     = link_to icon('fas', 'edit'), admin_only_user_profile_edit_path(user)

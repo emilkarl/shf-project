@@ -1,0 +1,31 @@
+-# Display a minimal amount of information for a ShfApplication as a table row
+-#
+-# This partial expects the following local(s):
+-#   application - the application that is being displayed as a table row
+-#
+%table.table.table-hover.table-sm.table-md-responsive.shf-applications-minimal-info
+  %thead
+    %tr
+      %th
+        = t('activerecord.attributes.shf_application.contact_email')
+      %th
+        = t('activerecord.attributes.shf_application.state')
+      %th
+        = t('activerecord.attributes.shf_application.company_number')
+      %th
+        = t('activerecord.attributes.company.name')
+  %tbody
+    %tr.shf-application-minimal-info
+      - if application.nil?
+        %td ---
+      - else
+        %td.contact-email= mail_to(application.contact_email)
+        %td.state
+          - i18n_state = t("shf_applications.state.#{application.state}")
+          - if application.accepted?
+            %span.yes= i18n_state
+          - else
+            %span.maybe= i18n_state
+        - if application.companies.any?
+          %td.company-numbers= link_to(application.company_numbers, shf_application_path(application))
+          %td.company-names= application.company_names

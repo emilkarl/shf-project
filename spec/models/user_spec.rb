@@ -1,11 +1,12 @@
 require 'rails_helper'
 require 'email_spec/rspec'
 require 'shared_context/unstub_paperclip_all_run_commands'
+require 'shared_context/users'
 require 'shared_context/named_dates'
 
+# TODO use the users already defined/created in the shared_context/users
+
 # ================================================================================
-
-
 RSpec.shared_examples 'it finds the right number of membership expires for date' do |x_days, num_found, on_date |
 
   it "expires in #{x_days} days (#{on_date}) finds #{num_found}" do
@@ -14,10 +15,9 @@ RSpec.shared_examples 'it finds the right number of membership expires for date'
     expect(expire_today.uniq.count).to eq 1
     expect(expire_today.uniq.first).to eq( on_date )
   end
-
 end
 
-
+# ================================================================================
 RSpec.shared_examples 'it finds the right number of branding fee expires for date' do |x_days, num_found, on_date |
 
   it "expires in #{x_days} days (#{on_date}) finds #{num_found}" do
@@ -26,11 +26,8 @@ RSpec.shared_examples 'it finds the right number of branding fee expires for dat
     expect(expire_today.uniq.count).to eq 1
     expect(expire_today.uniq.first).to eq( on_date )
   end
-
 end
-
-
-
+# ================================================================================
 # ================================================================================
 
 RSpec.describe User, type: :model do
@@ -38,6 +35,7 @@ RSpec.describe User, type: :model do
   # These are required to get the content type and validate it
   include_context 'unstub Paperclip all run commands'
 
+  include_context 'create users'
   include_context 'named dates'
 
   before(:each) do
@@ -101,6 +99,28 @@ RSpec.describe User, type: :model do
            start_date:     start_date,
            expire_date:    expire_date)
   end
+
+  # --------
+  # These are used to test if a user belongs to a company and if a user has an application with a company
+  given_co_num = '5562728336'
+  other_co_num1 = '7532246258'
+  other_co_num2 = '8681197987'
+
+  # Create these companies if they don't already exist:
+  #   (Helps to keep tests faster; don't have to keep creating and deleting)
+  let(:given_co) do
+    (co = Company.find_by(company_number: given_co_num)).nil? ? create(:company, company_number: given_co_num) : co
+  end
+
+  let(:other_co1) do
+    (co = Company.find_by(company_number: other_co_num1)).nil? ? create(:company, company_number: other_co_num1) : co
+  end
+
+  let(:other_co2) do
+    (co = Company.find_by(company_number: other_co_num2)).nil? ? create(:company, company_number: other_co_num2) : co
+  end
+  # --------
+
 
   describe 'Factory' do
     it 'has valid factories' do
@@ -601,31 +621,54 @@ RSpec.describe User, type: :model do
   end
 
 
-  describe '#member_or_admin?' do
+  describe '#member_fee_payment_due?' do
 
-    describe 'user: no application' do
-      subject { create(:user) }
-      it { expect(subject.member_or_admin?).to be_falsey }
+    describe 'is a member' do
+
+      it 'true if membership is not current' do
+        expect(member_expired.member_fee_payment_due?).to be_truthy
+      end
+
+      it 'false if membership is current' do
+        expect(member_paid_up.member_fee_payment_due?).to be_falsey
+      end
     end
 
-    describe 'user: 1 saved application' do
-      subject { create(:user_with_membership_app) }
-      it { expect(subject.member_or_admin?).to be_falsey }
-    end
-
-    describe 'member with 1 app' do
-      let(:member) { create(:member_with_membership_app) }
-      it { expect(member.member_or_admin?).to be_truthy }
-    end
-
-    describe 'member with 0 apps (should not happen)' do
-      let(:member) { create(:user) }
-      it { expect(member.member_or_admin?).to be_falsey }
+    describe 'is not a member' do
+      it 'is always false' do
+        expect(create(:user).member_fee_payment_due?).to be_falsey
+        expect(create(:user_with_membership_app).member_fee_payment_due?).to be_falsey
+      end
     end
 
     describe 'admin' do
-      subject { create(:user, admin: true) }
-      it { expect(subject.member_or_admin?).to be_truthy }
+      it 'is always false' do
+        expect(create(:admin).member_fee_payment_due?).to be_falsey
+      end
+    end
+  end
+
+
+  describe '#member_or_admin?' do
+
+    it 'false for user: no application' do
+       expect(create(:user).member_or_admin?).to be_falsey
+    end
+
+    it 'false for user: 1 saved application' do
+      expect(create(:user_with_membership_app).member_or_admin?).to be_falsey
+    end
+
+    it 'true for member with 1 app' do
+      expect(create(:member_with_membership_app).member_or_admin?).to be_truthy
+    end
+
+    it 'false for member with 0 apps (should not happen)' do
+      expect(create(:user).member_or_admin?).to be_falsey
+    end
+
+    it 'true for admin' do
+      expect(create(:admin).member_or_admin?).to be_truthy
     end
   end
 
@@ -667,6 +710,331 @@ RSpec.describe User, type: :model do
     end
   end
 
+
+  describe '#allowed_to_pay_hbrand_fee?' do
+
+    it 'true if the admin' do
+      admin = create(:admin)
+      expect(admin.allowed_to_pay_hbrand_fee?(given_co)).to be_truthy
+    end
+
+    describe 'is a member' do
+
+      it 'false if company number not in the app with 2 other companies' do
+        member = create(:member_with_membership_app,
+                        email: 'member-app-does-not-have-given-company@example.com',
+                        company_number: other_co_num1)
+        member.shf_application.companies << other_co2
+
+        expect(member.allowed_to_pay_hbrand_fee?(given_co)).to be_falsey
+      end
+
+      it 'true if company number is in the app with 2 other companies' do
+        member = create(:member_with_membership_app,
+                        email: 'member-app-does-not-have-given-company@example.com',
+                        company_number: other_co_num1)
+        member.shf_application.companies << other_co2
+        member.shf_application.companies << given_co
+
+        expect(member.allowed_to_pay_hbrand_fee?(given_co)).to be_truthy
+      end
+
+    end
+
+
+    describe 'not a member' do
+
+      it 'false if no applications' do
+        expect(build(:user).allowed_to_pay_hbrand_fee?(given_co)).to be_falsey
+      end
+
+      describe 'always false even if company_number in the app, no matter the state of the application' do
+
+        let(:user_with_app) { create(:user, email: 'user-app-doesnt-have-given-co@example.com') }
+
+        ShfApplication.all_states.each do | app_state |
+
+          it "#{app_state} application state" do
+            create(:shf_application,
+                      user: user_with_app,
+                      state: app_state,
+                      company_number: given_co.company_number)
+
+            expect(user_with_app.allowed_to_pay_hbrand_fee?(given_co)).to be_falsey
+          end
+        end
+      end
+    end
+  end
+
+
+  describe '#has_approved_app_for_company?' do
+
+    describe 'not a member' do
+
+      it 'false if no applications' do
+        expect(build(:user).has_approved_app_for_company?(given_co)).to be_falsey
+      end
+
+      it 'false if company number not in accepted application (with 2 other companies)' do
+        user_with_app = create(:user, email: 'user-app-doesnt-have-given-co@example.com')
+        app1 = create(:shf_application,
+                        :accepted,
+                        user: user_with_app,
+                        company_number: other_co_num1)
+        app1.companies << other_co2
+
+        expect(user_with_app.has_approved_app_for_company?(given_co)).to be_falsey
+      end
+
+      describe 'false if company in app but app not approved' do
+        # TODO refactor:DRY up with the other loop that uses not_accepted_states
+        # all states except ACCEPTED
+        not_accepted_states = ShfApplication.all_states.reject{|state| state == ShfApplication::STATE_ACCEPTED }
+        not_accepted_states.each do | app_state |
+
+          it "false for state = #{app_state}" do
+            user_with_app = create(:user, email: "user-#{app_state}@example.com")
+            build(:shf_application,
+                  user: user_with_app,
+                  state: app_state,
+                  company_number: given_co_num)
+            expect(user_with_app.has_approved_app_for_company?(given_co)).to be_falsey
+          end
+        end
+      end
+
+      it 'true if company in app and most recent app is approved' do
+        user_with_app = create(:user, email: 'user-app-approved-has-given-co@example.com')
+        app1 = create(:shf_application,
+                      :accepted,
+                      user: user_with_app,
+                      company_number: other_co_num1,
+                      when_approved: jan_1)
+        app1.companies << given_co
+
+        expect(user_with_app.has_approved_app_for_company?(given_co)).to be_truthy
+      end
+    end
+
+
+    describe 'is a member' do
+
+      it 'false if company number not in the approved app with 2 other companies' do
+        member = create(:member_with_membership_app,
+                        email: 'member-app-does-not-have-given-company@example.com',
+                        company_number: other_co_num1)
+        member.shf_application.companies << other_co2
+
+        expect(member.has_approved_app_for_company?(given_co)).to be_falsey
+      end
+
+      it 'false if company not in most recent approved app' do
+        skip 'this test will be needed if/when a user has more than 1 application'
+      end
+
+      it 'true if company in most recent approved app' do
+        member = create(:user, email: 'user-app-approved-has-given-co@example.com')
+        app1 = create(:shf_application,
+                      :accepted,
+                      user: member,
+                      company_number: other_co_num1,
+                      when_approved: jan_1)
+        app1.companies << given_co
+
+        expect(member.has_approved_app_for_company?(given_co)).to be_truthy
+      end
+    end
+
+  end
+
+
+
+  describe '#has_app_for_company?' do
+
+    describe 'not a member' do
+
+      it 'false if no applications' do
+        expect(build(:user).has_app_for_company?(given_co)).to be_falsey
+      end
+
+      describe 'false if company not in application (with 2 other companies)' do
+        let(:user_with_app) { create(:user, email: 'user-app-doesnt-have-given-co@example.com') }
+
+        ShfApplication.all_states.each do | app_state |
+          it "#{app_state} application state" do
+            app1 = create(:shf_application,
+                          user: user_with_app,
+                          state: app_state,
+                          company_number: other_co_num1)
+            app1.companies << other_co2
+
+            expect(user_with_app.has_app_for_company?(given_co)).to be_falsey
+          end
+        end
+      end
+
+
+      describe 'true if company not in application (with 2 other companies)' do
+        let(:user_with_app) { create(:user, email: 'user-app-has-given-company@example.com') }
+
+        ShfApplication.all_states.each do | app_state |
+          it "#{app_state} application state" do
+            app1 = create(:shf_application,
+                          user: user_with_app,
+                          state: app_state,
+                          company_number: given_co_num)
+            app1.companies << other_co1
+            app1.companies << other_co2
+
+            expect(user_with_app.has_app_for_company?(given_co)).to be_truthy
+          end
+        end
+      end
+
+    end
+
+    describe 'is a member' do
+
+      it 'false if company not in the app with 2 other companies' do
+        member = create(:member_with_membership_app,
+                        email: 'member-app-does-not-have-given-company@example.com',
+                        company_number: other_co_num1)
+        member.shf_application.companies << other_co2
+
+        expect(member.has_app_for_company?(given_co)).to be_falsey
+      end
+
+      it 'true if company is in the app with 2 other companies' do
+        member = create(:member_with_membership_app,
+                        email: 'member-app-does-not-have-given-company@example.com',
+                        company_number: other_co_num1)
+        member.shf_application.companies << other_co2
+        member.shf_application.companies << given_co
+
+        expect(member.has_app_for_company?(given_co)).to be_truthy
+      end
+    end
+
+  end
+
+
+  describe '#has_app_for_company_number?' do
+
+    describe 'not a member' do
+
+      it 'false if no applications' do
+        expect(build(:user).has_app_for_company_number?(given_co_num)).to be_falsey
+      end
+
+      describe 'false if company number not in application (with 2 other companies)' do
+        let(:user_with_app) { create(:user, email: 'user-app-doesnt-have-given-co@example.com') }
+
+        ShfApplication.all_states.each do | app_state |
+          it "#{app_state} application state" do
+            app1 = create(:shf_application,
+                          user: user_with_app,
+                          state: app_state,
+                          company_number: other_co_num1)
+            app1.companies << other_co2
+
+            expect(user_with_app.has_app_for_company_number?(given_co_num)).to be_falsey
+          end
+        end
+      end
+
+
+      describe 'true if company number not in application (with 2 other companies)' do
+        let(:user_with_app) { create(:user, email: 'user-app-has-given-company@example.com') }
+
+        ShfApplication.all_states.each do | app_state |
+          it "#{app_state} application state" do
+            app1 = create(:shf_application,
+                          user: user_with_app,
+                          state: app_state,
+                          company_number: given_co_num)
+            app1.companies << other_co1
+            app1.companies << other_co2
+
+            expect(user_with_app.has_app_for_company_number?(given_co_num)).to be_truthy
+          end
+        end
+      end
+
+    end
+
+    describe 'is a member' do
+
+      it 'false if company number not in the app with 2 other companies' do
+        member = create(:member_with_membership_app,
+                      email: 'member-app-does-not-have-given-company@example.com',
+                      company_number: other_co_num1)
+        member.shf_application.companies << other_co2
+
+        expect(member.has_app_for_company_number?(given_co_num)).to be_falsey
+      end
+
+      it 'true if company number is in the app with 2 other companies' do
+        member = create(:member_with_membership_app,
+                        email: 'member-app-does-not-have-given-company@example.com',
+                        company_number: other_co_num1)
+        member.shf_application.companies << other_co2
+        member.shf_application.companies << given_co
+
+        expect(member.has_app_for_company_number?(given_co_num)).to be_truthy
+      end
+    end
+
+  end
+
+
+  describe '#apps_for_company' do
+
+  end
+
+
+  describe '#apps_for_company_number' do
+
+    it 'empty list if no application' do
+      expect(build(:user).apps_for_company_number(given_co_num)).to be_empty
+    end
+
+    it 'empty list if no applications have the company number' do
+      user_with_app = create(:user, email: 'user-app-doesnt-have-given-co@example.com')
+      app1 = create(:shf_application,
+                    user: user_with_app,
+                    state: :new,
+                    company_number: other_co_num1)
+      app1.companies << other_co2
+      expect(user_with_app.apps_for_company_number(given_co_num)).to be_empty
+    end
+
+    it 'list of applications with the company number' do
+      user_with_app = create(:user, email: 'user-app-doesnt-have-given-co@example.com')
+      app1 = create(:shf_application,
+                    user: user_with_app,
+                    state: :new,
+                    company_number: other_co_num1)
+      app1.companies << given_co
+      expect(user_with_app.apps_for_company_number(given_co_num).to_a).to match_array([app1])
+    end
+  end
+
+
+  describe '#sort_apps_by_when_approved' do
+
+    it 'apps are sorted by when_approved date, furthest in the future is first' do
+      app_approved_jan1 = create(:shf_application, :accepted, when_approved: jan_1)
+      app_approved_jan2 = create(:shf_application, :accepted, when_approved: jan_2)
+      app_approved_jan3 = create(:shf_application, :accepted, when_approved: jan_3)
+
+      apps = [app_approved_jan1, app_approved_jan2, app_approved_jan3]
+      sorted_apps = apps.sort(&subject.sort_apps_by_when_approved)
+      expect(sorted_apps.first.when_approved).to eq jan_3
+      expect(sorted_apps.last.when_approved).to eq jan_1
+    end
+  end
+
   describe '#admin?' do
     describe 'user: no application' do
       subject { create(:user) }
@@ -688,6 +1056,24 @@ RSpec.describe User, type: :model do
     let(:user) { build(:user, first_name: 'first', last_name: 'last') }
     context '@first_name=first @last_name=last' do
       it { expect(user.full_name).to eq('first last') }
+    end
+  end
+
+
+  describe '#has_full_name?' do
+
+    it 'true if both first and last name are present' do
+      expect(build(:user, first_name: 'First', last_name: 'Last').has_full_name?).to be_truthy
+    end
+
+    it 'false if first name is blank or nil' do
+      expect(build(:user, first_name: '', last_name: 'Last').has_full_name?).to be_falsey
+      expect(build(:user, first_name: nil, last_name: 'Last').has_full_name?).to be_falsey
+    end
+
+    it 'false if last name is blank or nil' do
+      expect(build(:user, first_name: 'First', last_name: '').has_full_name?).to be_falsey
+      expect(build(:user, first_name: 'First', last_name: nil).has_full_name?).to be_falsey
     end
   end
 
@@ -826,19 +1212,41 @@ RSpec.describe User, type: :model do
       end
     end
 
-    describe '#allow_pay_member_fee?' do
-      it 'returns true if user is a member' do
-        user.member = true
-        user.save
-        expect(user.allow_pay_member_fee?).to eq true
-      end
+  end
 
-      it 'returns true if user has app in "accepted" state' do
-        application
-        expect(user.allow_pay_member_fee?).to eq true
-      end
+
+  describe '#allowed_to_pay_member_fee?' do
+
+    it 'false if the user is an admin' do
+      expect(create(:admin).allowed_to_pay_member_fee?).to be_falsey
     end
 
+    describe 'not an admin' do
+
+      it 'true if is a member' do
+        user.member = true
+        user.save
+        expect(user.allowed_to_pay_member_fee?).to be_truthy
+      end
+
+      describe 'not a member == is a user' do
+        it 'true if user has app in "accepted" state' do
+          application
+          expect(user.allowed_to_pay_member_fee?).to be_truthy
+        end
+
+        describe 'false for an application in any other state' do
+
+          ShfApplication.all_states.reject{ |s| s == ShfApplication::STATE_ACCEPTED }.each do |app_state|
+            it "#{app_state} is false" do
+              app = create(:shf_application, state: app_state)
+              expect(app.user.allowed_to_pay_member_fee?).to be_falsey
+            end
+          end
+        end
+      end
+
+    end
   end
 
 

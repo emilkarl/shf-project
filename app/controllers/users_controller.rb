@@ -58,19 +58,23 @@ class UsersController < ApplicationController
   end
 
 
+  # Change the membership status
   def edit_status
     raise 'Unsupported request' unless request.xhr?
     authorize User
 
     payment = @user.most_recent_membership_payment
 
+    # Note: If there are not any payments (payment is nil),
+    # but the status has been changed (ex: admin changes status from 'not a member' to is a member),
+    # this will not update the information.
     @user.update!(user_params) && (payment ?
                                        payment.update!(payment_params) : true)
 
-    render partial: 'member_payment_status', locals: { user: @user }
+    render partial: 'membership_term_status', locals: { user: @user }
 
   rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotSaved
-    render partial: 'member_payment_status',
+    render partial: 'membership_term_status',
            locals: { user: @user, error: t('users.update.error') }
   end
 

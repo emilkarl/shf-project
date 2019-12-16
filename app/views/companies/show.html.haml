@@ -7,7 +7,7 @@
 
   %header.entry-header
     %h1.entry-title= @company.name
-  .entry-content
+  .entry-content.container
     .row
       .col
         - if @company.categories
@@ -16,7 +16,11 @@
               categories: @company.business_categories
         - if payment_visible_for_user?(current_user, @company)
           %hr
-          = render partial: 'branding_payment_status', locals: { company: @company }
+            .branding-license
+              -# FIXME I18n
+              %h3.section-title H-markt License
+              .section
+                = render partial: 'branding_term_status', locals: { company: @company }
           %hr
 
     .row
@@ -46,8 +50,8 @@
       .col-md-7
         - if @company.any_visible_addresses?
           = render partial: 'map_companies',
-                  locals: { markers: location_and_markers_for([@company],
-                  link_name: false )}
+                   locals: { markers: location_and_markers_for([@company],
+                   link_name: false )}
 
     - user_can_edit = policy(@company).update?
 
@@ -56,7 +60,8 @@
     = render 'company_addresses', company: @company, user_can_edit: user_can_edit
 
     - if user_can_edit
-      = link_to t('.add_address'),
+
+      = link_to "#{t('.add_address')}",
                 new_company_address_path(@company),
                 class: 'btn btn-info btn-sm ml-2 add-company-address'
 
@@ -71,26 +76,27 @@
         - elsif @company.show_dinkurs_events && ! @company.dinkurs_company_id.blank?
 
           - if user_can_edit
-            = button_to t('.dinkurs_fetch_events'),
+
+            = button_to "#{t('.dinkurs_fetch_events')}",
                         fetch_from_dinkurs_company_path(@company),
                         remote: true,
                         class: 'btn btn-info btn-sm dinkurs-fetch-button float-right',
                         form_class: 'dinkurs-fetch-events',
-                        data: { disable_with: t('.dinkurs_fetching') }
+                        data: { disable_with: "#{t('.dinkurs_fetching')}" }
 
           = render 'events/teaser_list', events: @events, company: @company,
-                                        items_count: @items_count
+                                         items_count: @items_count
 
 
     %hr
     .text-center
       - if user_can_edit
-        = link_to t('companies.edit_company'),
+        = link_to "#{t('companies.edit_company')}",
                   edit_company_path(@company), class: 'btn btn-secondary btn-sm edit-company'
 
       - if current_user.admin?
-        = link_to t('.delete'), @company, method: :delete,
+        = link_to "#{t('.delete')}", @company, method: :delete,
                   class:'btn btn-danger btn-sm delete-company',
-                  data: { confirm: t('.confirm_are_you_sure') }
+                  data: { confirm: "#{t('.confirm_are_you_sure')}" }
 
-= render 'edit_branding_modal', company: @company
+= render('edit_branding_modal', company: @company) if current_user.admin?

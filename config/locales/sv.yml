@@ -37,10 +37,15 @@ sv:
   save: &save Spara
   back: &back Tillbaks
   search: &search Sök
+  close: Stänga
+  lastupdated: &last_updated Senast uppdaterad
+
   'yes': &yes Ja
   'no': &no Nej
   'Yes': *yes
   'No': *no
+
+
   application: &application Ansökan
   user_activity: Användaraktivitet
   none: Ingen eller Inget
@@ -67,6 +72,8 @@ sv:
   info:
     logged_in_as_admin: Du är inloggad som admin
     under_construction: Sidan är under uppbyggnad, mer information och funktioner kommer att komma efterhand.
+
+  membership: &membership medlemskap
 
   apply_for_membership: Ansök om medlemskap
 
@@ -189,9 +196,12 @@ sv:
 
       payment:
         payment_type: Betalningstyp
+        status: Status
         start_date: Startdatum
         expire_date: &expire_date Utgångsdatum
         notes: Anteckningar
+        created: *created
+        last_updated: *last_updated
 
       shf_application:
         company_number: &company_number Organisationsnummer
@@ -279,6 +289,7 @@ sv:
         og_type: &site_og_type OG type
         twitter_card_type: &site_twitter_card_type Twitter card type
         facebook_app_id: &site_facebook_app_id Facebook Application ID
+        payment_too_soon_days: &payment_too_soon_days Number of days that a user will be warned that a payment is 'too soon'
 
       checklist_item:
         name: *name
@@ -389,6 +400,23 @@ sv:
     kommun: *kommun
     none: *none_n
 
+
+  payors:
+    status: Status
+    no_payment_due_now: &no_payment_due_now Ingen betalning behöver göras nu.
+    due: Betalning behöver göras.
+    past_due: Betalning är förfallen!
+    due_by: Betalning behöver göras före %{due_date}.
+    too_early: *no_payment_due_now
+    term_paid_through: &term_paid_through Betald till och med
+    you_are_paid_until: Du har betalt till och med
+    you_dont_owe_until_then: "Du är inte skyldig en betalning förrän:"
+    paying_now_extends_until: "Att göra en %{fee_name_payment} nu kommer att förlänga din %{term_name} till %{extended_end_date}."
+    do_you_want_to_pay_now: Vill du verkligen göra en betalning nu?
+    yes_pay_answer: 'Ja, gör en betalning'
+    no_pay_answer: 'Nej.'
+    admin_cant_edit: "Medlemsstatus kan inte uppdateras. (Kanske har inga betalningar gjorts.)"
+
   payment:
     payment_type:
       member_fee: Medlemsavgift
@@ -396,7 +424,16 @@ sv:
     status:
       paid: &paid Betald
       never_paid: &never_paid Aldrig betald
-
+    processor_status: Processor Status
+    status_from_payment_processor:
+      skapad: skapad
+      avvaktan: avvaktan
+      betald: betald
+      utgånget: utgånget
+      väntar_på_betalning: "Väntar på betalning"
+    term_start_date: startdatum
+    term_expiry_date: slutdatum
+    no_payment_due_now: *no_payment_due_now
 
   company_locator:
     error:
@@ -679,14 +716,23 @@ sv:
       confirm_are_you_sure: *are_you_sure_confirm
       add_address: 'Lägg till adress'
       click_to_edit: 'klicka för att redigera'
+      hbrand_status_paid: Får använda H-märkesbilden. (H-märkespremie betalad)
+      hbrand_status_not_paid: Får inte använda H-märkesbilden. (H-märkespremie ej betad)
       edit_branding_status: Redigera Status
       branding_license: Betald H-märkespremie
-      pay_branding_fee_tooltip: Betald avgift förlänger H-märkningen i ett år.
-      branding_fee_expire_date_tooltip: Efter detta datum går perioden för din H-märkning ut.
+      term_paid_through: *term_paid_through
+      no_payment_due_now: *no_payment_due_now
+      hbrand_term_payment: H-märkespremiebetalning
+      hbrand_fee: H-märkespremie
+      hbrand_term: H-märkespremieperiod
+      payment_tooltip: Betald avgift förlänger H-märkningen i ett år.
+      branding_fee_expire_date_tooltip: &branding_fee_expire_date_tooltip Efter detta datum går perioden för din H-märkning ut.
+      term_expire_date_tooltip: *branding_fee_expire_date_tooltip
       members: Företagsmedlemmar
       dinkurs_fetch_events: Hämta Dinkurs Events
       dinkurs_fetching: Hämtar händelser ... vänligen vänta
       dinkurs_key: *dinkurs_company_key
+      pay_branding_fee: &pay_branding_fee Betala H-märkespremie
 
     index:
       title:  Hitta H-märkt företag
@@ -840,8 +886,17 @@ sv:
       please_note_new_password: Spara detta på ett säkert ställe. När du klickar på spara nedan kommer du inte att kunna se lösenordet igen och det finns ingen möjlighet att åter visa det.
       submit_new_password: Spara det nya lösenordet
       member: *member
-      pay_membership_tooltip: När du betalar din medlemsavgift förlängs ditt medlemskap i ett år.
-      membership_expire_date_tooltip: Efter detta datum går perioden för ditt medlemskap ut.
+      membership_status: Medlemsstatus
+      not_a_member: Är inte medlem
+      is_a_member: Är medlem
+      term_paid_through: *term_paid_through
+      no_payment_due_now: *no_payment_due_now
+      membership_fee_payment: betalning av medlemskap
+      membership_fee: medlemskapsavgift
+      membership_term: medlemperiod
+      payment_tooltip: När du betalar din medlemsavgift förlängs ditt medlemskap i ett år.
+      membership_expire_date_tooltip: &membership_expire_date_tooltip Efter detta datum går perioden för ditt medlemskap ut.
+      term_expire_date_tooltip: *membership_expire_date_tooltip
       proof_of_membership: Behörighetsbevis
       proof_of_membership_describe: Detta är ditt behörighetsbevis.
       proof_of_membership_photo_needed: 'Om du saknar profilbild (ser "Photo
@@ -870,6 +925,8 @@ sv:
       member_packet: &member_packet pkt
       sent: skickat
       not_sent: inte skickat
+      edit_member_status: &edit_member_status Redigera medlemsstatus
+      pay_membership: &pay_membership Betala medlemsavgift
 
     update:
       passwords_dont_match: De två lösenord du angivit matchar inte.
@@ -893,10 +950,11 @@ sv:
       all_users: Alla användare
 
     user:
+      # is this entry used anywhere?  (the entry in .show above is, and follows rails convention)
       user_has_never_signed_in: har aldrig loggat in.
       'yes': *yes # https://coderwall.com/p/ld65tq/rails-i18n-yes-no-translation
       'no': *no
-      edit_member_status: Redigera medlemsstatus
+      edit_member_status: *edit_member_status
       submit_button_label: Uppdatera status
 
     users_list:
@@ -1160,6 +1218,7 @@ sv:
         twitter_card_type: *site_twitter_card_type
         facebook_app_id: *site_facebook_app_id
         missing: *missing
+        payment_too_soon_days: *payment_too_soon_days
 
       show:
         title: *application_configuration
@@ -1177,6 +1236,7 @@ sv:
         twitter_card_type: *site_twitter_card_type
         facebook_app_id: *site_facebook_app_id
         missing: *missing
+        payment_too_soon_days: *payment_too_soon_days
 
       update:
         success: Programdata uppdaterades framgångsrikt
@@ -1515,10 +1575,10 @@ sv:
           view_company: Visa företagssida
           edit_company: Redigera företag
         my_application: *my_application
-        pay_membership: Betala medlemsavgift
+        pay_membership: *pay_membership
 
       company:
-        pay_branding_fee: Betala H-märkespremie
+        pay_branding_fee: *pay_branding_fee
 
       admin:
         shf_main_site: *shf_main_site

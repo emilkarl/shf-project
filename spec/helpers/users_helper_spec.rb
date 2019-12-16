@@ -40,23 +40,6 @@ RSpec.describe UsersHelper, type: :helper do
 
   end
 
-  describe 'pay_member_fee_link' do
-
-    it 'returns nil if user is not enabled to pay fee' do
-      expect(pay_member_fee_link(user)).to be_nil
-    end
-
-    it 'returns pay-fee link if a member' do
-      user.member = true
-      expect(pay_member_fee_link(user)).to match expected_path
-    end
-
-    it 'returns pay-fee link if user has app in "accepted" state' do
-      user.shf_application = app
-      user.save
-      expect(pay_member_fee_link(user)).to match expected_path
-    end
-  end
 
   describe 'paperclip_path_str' do
 

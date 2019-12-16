@@ -141,18 +141,6 @@ RSpec.describe CompaniesHelper, type: :helper do
     end
   end
 
-  describe '#pay_branding_fee_link' do
-    let(:expected_path) do
-      payments_path(user_id: user.id, company_id: company.id,
-                    type: Payment::PAYMENT_TYPE_BRANDING)
-    end
-
-    it 'returns pay-fee link with company and user id' do
-      expect(pay_branding_fee_link(company.id, user.id))
-        .to match Regexp.new(Regexp.escape(expected_path))
-    end
-  end
-
   describe '#company_number_selection_field' do
     4.times do |n|
       let!("cmpy_#{n+1}".to_sym) { create(:company) }

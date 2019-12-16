@@ -1,0 +1,42 @@
+// Styles for Payors
+@import "shf-custom-colors";
+
+.status {
+  .value {
+    font-weight: bold;
+  }
+}
+
+.status-details {
+  padding-left: 15px; // same as .col
+
+  .paid-through {
+    p {
+      line-height: 1.2em;
+      margin-bottom: 0;
+    }
+  }
+
+  .note {
+    font-size: smaller;
+    padding-left: 1em;
+  }
+
+  .payment-status-hint {
+    font-size: smaller;
+  }
+}
+
+
+.is-admin {
+  color: $is-admin-color;
+  font-weight: bold;
+}
+
+.modal-content {
+  .payment-not-due {
+    .end-date {
+      font-weight: bold;
+    }
+  }
+}

@@ -73,3 +73,35 @@ When(/^I choose an application configuration "([^"]*)" file named "([^"]*)" to u
                              'app_configuration', filename), visible: false)
   # ^^ selenium won't find the upload button without visible: false
 end
+
+
+Then("the user is paid through {capture_string}") do | expected_expire_date_str |
+  expect(@user.membership_expire_date.to_s).to eq expected_expire_date_str
+end
+
+
+Then("user {capture_string} is paid through {capture_string}") do | user_email, expected_expire_datestr |
+  user = User.find_by(email: user_email)
+  expect_user_has_expire_date(user, expected_expire_datestr)
+end
+
+Then("user {capture_string} has no payments") do | user_email |
+  user = User.find_by(email: user_email)
+  expect(user.payments).to be_empty
+  expect_user_has_expire_date(user, '')
+end
+
+def expect_user_has_expire_date(user, expected_expire_date_str)
+  user.reload  # ensure the the object has the latest info from the db
+  expect(user.membership_expire_date.to_s).to eq expected_expire_date_str
+end
+
+
+Then("I should{negate} see membership status is {capture_string}") do | negate, membership_status |
+
+  status_xpath = "//div[contains(@class,'status')]/span[contains(@class,'value')]"
+  expect(page).send (negate ? :not_to : :to), have_xpath(status_xpath)
+
+  actual_status_element = page.find(:xpath, status_xpath)
+  expect(actual_status_element).to have_text(membership_status)
+end

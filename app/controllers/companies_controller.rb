@@ -223,10 +223,10 @@ class CompaniesController < ApplicationController
     payment = @company.most_recent_branding_payment
     payment.update!(payment_params) if payment
 
-    render partial: 'branding_payment_status', locals: { company: @company }
+    render partial: 'branding_term_status', locals: { company: @company }
 
   rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotSaved
-    render partial: 'branding_payment_status',
+    render partial: 'branding_term_status',
            locals: { company: @company, error: t('companies.update.error') }
   end
 

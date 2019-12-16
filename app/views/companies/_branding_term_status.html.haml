@@ -1,0 +1,19 @@
+-# FIXME how is the company id used in payments_path below? is it a parameter or argument?
+  It does not appear in the list of routes (rake routes)) but is used as an argument by the PaymentsController
+- payment_action_path = payments_path(user_id: current_user.id,
+  company_id: company.id,
+  type: company.class::THIS_PAYMENT_TYPE)
+
+#company-branding-status
+  = render partial: 'payor/term_status',
+   locals: { entity: company,
+  status_text: company.branding_license? ? t('companies.show.hbrand_status_paid') : t('companies.show.hbrand_status_not_paid'),
+  fee_name_payment: t('companies.show.hbrand_term_payment'),
+  term_name: t('companies.show.hbrand_term'),
+  term_end: company.branding_expire_date,
+  next_term_end: Company.next_branding_payment_dates(company.id).last,
+  can_make_payment: current_user.allowed_to_pay_hbrand_fee?(company),
+  payment_text: t('menus.nav.company.pay_branding_fee'),
+  payment_action_path: payment_action_path,
+  admin_edit_status_text: t('companies.show.edit_branding_status'),
+  admin_edit_target_id: '#edit-branding-modal' }

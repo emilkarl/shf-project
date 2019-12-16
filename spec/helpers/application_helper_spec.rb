@@ -429,4 +429,84 @@ RSpec.describe ApplicationHelper, type: :helper do
     end
   end
 
+
+  describe '#with_admin_css_class_if_needed' do
+
+    describe 'user is not an admin: always returns the list of CSS classes given' do
+
+      let(:not_admin) { create(:user) }
+
+      it 'no list given' do
+        expect(helper.with_admin_css_class_if_needed(not_admin)). to eq([])
+      end
+
+      it 'empty list given' do
+        expect(helper.with_admin_css_class_if_needed(not_admin, [])). to eq([])
+      end
+
+      it 'given a list of CSS classes' do
+        given_list_of_classes = ['this-css-class', 'that-css-class']
+        expect(helper.with_admin_css_class_if_needed(not_admin, given_list_of_classes)). to eq(given_list_of_classes)
+      end
+    end
+
+    describe 'user is an admin' do
+
+      let(:admin) { create(:admin) }
+
+      it 'no list given' do
+        expect(helper.with_admin_css_class_if_needed(admin)). to match_array([helper.admin_css_class])
+      end
+
+      it 'empty list given' do
+        expect(helper.with_admin_css_class_if_needed(admin, [])). to match_array([helper.admin_css_class] )
+      end
+
+      it 'given a list of CSS classes' do
+        given_list_of_classes = ['this-css-class', 'that-css-class']
+        expected_list_of_classes = given_list_of_classes + [helper.admin_css_class]
+        expect(helper.with_admin_css_class_if_needed(admin, given_list_of_classes)). to match_array(expected_list_of_classes )
+      end
+    end
+
+  end
+
+
+  describe '#yes_no_span' do
+
+    describe "text is t('yes') or t('no')" do
+
+      it "t('yes') if boolean is true" do
+        expect(helper.yes_no_span(true)).to match(/<span(.*)>#{I18n.t('yes')}<\/span>/)
+      end
+
+      it "t('no') if boolean is false" do
+        expect(helper.yes_no_span(false)).to match(/<span(.*)>#{I18n.t('no')}<\/span>/)
+      end
+    end
+
+    it 'calls span_with_yes_no_css_class to set the span css class, also based on the boolean value' do
+      boolean_value = false
+      expect(helper).to receive(:span_with_yes_no_css_class).with(anything, boolean_value)
+
+      helper.yes_no_span(boolean_value)
+    end
+  end
+
+
+  describe '#span_with_yes_no_css_class' do
+
+    it 'text is surrounded with a span tag' do
+      expect(helper.span_with_yes_no_css_class('text', true)).to match(/<span(.*)>text<\/span>/)
+    end
+
+    it 'css class is set to the yes css class if boolean is true' do
+      expect(helper.span_with_yes_no_css_class('text', true)).to match(/<(.*)class=.#{helper.yes_css_class}(.*)>text<\/span>/)
+    end
+
+    it 'css class is set to the no css class if boolean is false' do
+      expect(helper.span_with_yes_no_css_class('text', false)).to match(/<(.*)class=.#{helper.no_css_class}(.*)>text<\/span>/)
+    end
+  end
+
 end

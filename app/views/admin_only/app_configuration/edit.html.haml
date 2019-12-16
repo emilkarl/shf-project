@@ -6,56 +6,77 @@
   = form_for(@app_configuration, url: admin_only_app_configuration_path,
                                  html: { method: :put }) do |f|
 
-    .row
-      .col-4.form-group.site-name
-        = f.label :site_name, "#{t('.site_name')}:", class: 'field-label'
-        = f.text_field :site_name, class: 'form-control inline'
 
     .row
-      .col-12.form-group.site-meta-title
-        = f.label :site_meta_title, "#{t('.site_meta_title')}:", class: 'control-label field-label'
-        = f.text_field :site_meta_title, class: 'form-control'
+      .col
+        %h2 Site Meta Information
+
+    .section
+      .form-row
+        .col-auto.form-group.site-name
+          = f.label :site_name, "#{t('.site_name')}:", class: 'field-label'
+          = f.text_field :site_name, class: 'form-control inline'
+
+      .form-row
+        .col-12.form-group.site-meta-title
+          = f.label :site_meta_title, "#{t('.site_meta_title')}:", class: 'control-label field-label'
+          = f.text_field :site_meta_title, class: 'form-control'
+
+      .form-row
+        .col-12.form-group.site-meta-description
+          = f.label :site_meta_description, "#{t('.site_meta_description')}:", class: 'control-label field-label'
+          = f.text_field :site_meta_description, class: 'form-control'
+
+      .form-row
+        .col-12.form-group.site-meta-keywords
+          = f.label :site_meta_keywords, "#{t('.site_meta_keywords')}:", class: 'control-label field-label'
+          = f.text_field :site_meta_keywords, class: 'form-control'
+
+      .form-row
+        .col-sm-2.form-group.site-twitter-card-type
+          = f.label :og_type, "#{t('.og_type')}:", class: 'control-label field-label'
+          = f.text_field :og_type, class: 'form-control'
+
+        .col-sm-3.form-group.site-twitter-card-type
+          = f.label :twitter_card_type, "#{t('.twitter_card_type')}:", class: 'control-label field-label'
+          = f.text_field :twitter_card_type, class: 'form-control'
+
+      .form-row
+        .col-sm-4.form-group.site-twitter-card-type
+          = f.label :facebook_app_id, "#{t('.facebook_app_id')}:", class: 'control-label field-label'
+          = f.text_field :facebook_app_id, class: 'form-control'
+
 
     .row
-      .col-12.form-group.site-meta-description
-        = f.label :site_meta_description, "#{t('.site_meta_description')}:", class: 'control-label field-label'
-        = f.text_field :site_meta_description, class: 'form-control'
+      .col
+        %h2 Settings
 
-    .row
-      .col-12.form-group.site-meta-keywords
-        = f.label :site_meta_keywords, "#{t('.site_meta_keywords')}:", class: 'control-label field-label'
-        = f.text_field :site_meta_keywords, class: 'form-control'
+    .section
+      .form-row
+        .col-auto.email-admin-new-app-received-enabled
+          .form-check
+            = f.check_box :email_admin_new_app_received_enabled, class: 'form-check-input'
+            = f.label :admin_email_new_apps_enabled, "#{t('.admin_email_new_apps_enabled')}?", class: 'form-check-label field-label'
 
-    .row
-      .col-sm-2.form-group.site-twitter-card-type
-        = f.label :og_type, "#{t('.og_type')}:", class: 'control-label field-label'
-        = f.text_field :og_type, class: 'form-control'
+      .form-row
+        .col-sm-12.payment-too-soon-days
+          .form-inline
+            = f.label :payment_too_soon_days, "#{t('.payment_too_soon_days')}:", class: 'control-label field-label'
+            = f.number_field :payment_too_soon_days, class: 'form-control payment-too-soon-days', min: 0
 
-      .col-sm-3.form-group.site-twitter-card-type
-        = f.label :twitter_card_type, "#{t('.twitter_card_type')}:", class: 'control-label field-label'
-        = f.text_field :twitter_card_type, class: 'form-control'
-
-    .row
-      .col-sm-4.form-group.site-twitter-card-type
-        = f.label :facebook_app_id, "#{t('.facebook_app_id')}:", class: 'control-label field-label'
-        = f.text_field :facebook_app_id, class: 'form-control'
-
-
-    .row
-      .col-12.form-group.email_enabled_setting
-        %span.standard-label
-          = t('.admin_email_new_apps_enabled')
-          ?
-        = f.check_box :email_admin_new_app_received_enabled
 
     %hr
-
     .row
-      - @app_configuration.image_attributes.sort.each do | image_attribute |
-        .card
-          = render 'image_edit', app_config: @app_configuration,
-                               image_title: image_attribute,
-                               f: f
+      .col
+        %h2 Images
+
+    .section
+      .row
+        - @app_configuration.image_attributes.sort.each do | image_attribute |
+          .card
+            = render 'image_edit', app_config: @app_configuration,
+                                 image_title: image_attribute,
+                                 f: f
 
     = f.submit t('submit'), class: 'btn btn-primary form-control mt-4'
 

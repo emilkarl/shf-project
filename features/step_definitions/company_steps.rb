@@ -113,3 +113,9 @@ end
 And "I should see {capture_string} {digits} time(s) in the list of companies" do | expected_string, num_times|
   step %{I should see "#{expected_string}" #{num_times} time in the div with id "#{COMPANIES_LIST_ID}"}
 end
+
+
+Then("company number {capture_string} is paid through {capture_string}") do | company_number, expected_branding_expire_datestr |
+  company = Company.find_by_company_number(company_number)
+  expect(company.branding_expire_date.to_s).to eq expected_branding_expire_datestr
+end

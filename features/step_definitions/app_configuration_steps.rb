@@ -56,3 +56,10 @@ And("the {capture_string} file is missing from the application configuration") d
   # update_attribute skips validations, which we must do because an ApplicationConfiguration validates_attachment_presence
   app_config.update_attribute(missing_attachment.to_sym, nil) #  send("#{missing_attachment}=".to_sym, nil)
 end
+
+
+And("I should see the number of days that it is too early to pay is {digits}") do |num_days_too_soon|
+  too_soon_info = "#{I18n.t('admin_only.app_configuration.show.payment_too_soon_days')}: #{num_days_too_soon}"
+  step "I should see \"#{too_soon_info}\""
+
+end

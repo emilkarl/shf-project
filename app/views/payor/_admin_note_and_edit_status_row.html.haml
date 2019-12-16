@@ -1,0 +1,26 @@
+-# Expected locals:
+-#   entity - the entity (e.g. user, company) that is the subject of this partial and controller action
+-#   button_text - text for the button that opens the modal
+-#   target_id - id string, including the '#', for the data-target   ex: #editUserStatusModal
+
+.row.mt-2.admin-only
+  .col.d-flex.pt-2
+    .flex.pr-3.admin-note
+      = payment_notes_label_and_value(entity)
+
+.row.mt-2
+  .col.d-flex.pt-2.pr-3
+    - btn_classes = ''
+    - aria_disabled_state = 'false'
+
+    - can_edit_status = entity.admin_can_edit_status?
+    - unless can_edit_status
+      - btn_classes = 'disabled'
+      - aria_disabled_state = 'true'
+
+    -# NOTE: Capybara cannot find link without 'href' attribute
+    %a.btn.btn-outline-success.btn-sm{ href: '#', class: btn_classes, 'data-toggle': 'modal', 'data-target': "#{target_id}", 'aria-disabled': "#{aria_disabled_state}" }
+      = button_text
+
+    - unless can_edit_status
+      %p.small.admin-cant-edit-status= t('payors.admin_cant_edit')

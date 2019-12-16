@@ -41,6 +41,7 @@ FactoryBot.define do
     status { Payment::PENDING }
   end
 
+  # This means that the HIPS status is 'expired', not the payment term status
   trait :expired do
     status { Payment::EXPIRED }
   end

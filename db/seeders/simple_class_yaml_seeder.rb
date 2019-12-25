@@ -65,7 +65,7 @@ module Seeders
     end
 
 
-    # @return [Array[Hash]] - all of serialized objects as a serialzed Hash (YAML)
+    # @return [Array[Hash]] - all of serialized objects as a serialized Hash (YAML)
     #
     def self.serialized_objects
       seeded_class.all.map(&:serializable_hash)

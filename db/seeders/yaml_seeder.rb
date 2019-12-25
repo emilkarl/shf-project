@@ -12,7 +12,7 @@ module Seeders
   # @desc Responsibility: Provide the basic implementation to
   #   read data from a YML file and write data to a YML file for seeding.
   #
-  # Subclasses classes MUST:
+  # Subclasses MUST:
   #   1. define the base YAML filename to read the data from (and write to)
   #      this is the YAML_FILENAME constant
   #
@@ -103,6 +103,7 @@ module Seeders
 
     # Subclasses can override this as needed, especially if creating objects from the yaml is complex.
     #
+    #  FIXME use map?
     # @return [Array<Object>] - list of objects successfully created
     def self.create_objects(yaml_entries)
       created_objects = []
@@ -232,7 +233,7 @@ module Seeders
     #
     # @param [String] output_str - the string to write to the file
     # @param [Path | String] output_filename - the path of the file to write out to
-    def self.write_to_yaml_source(output_str = '', output_filename = YAML_FILENAME)
+    def self.write_to_yaml_source(output_str = '', output_filename = yaml_filename)
       File.open(output_filename, "a") { |file| file.write(output_str) }
     end
 

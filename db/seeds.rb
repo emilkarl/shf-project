@@ -5,9 +5,15 @@
 
 require 'ffaker'
 require 'rake'
-require_relative 'seed_helpers'
-require_relative 'seed_helpers/app_configuration_seeder'
-require_relative 'seed_helpers/ordered_list_entries_seeder'
+
+
+# require all *.rb files in these subdirectories
+required_subdirs = %w(seed_helpers seeders)
+required_subdirs.each do | required_subdir |
+  Dir[File.join(__dir__, required_subdir, '**','*.rb')].each do |file|
+    require file
+  end
+end
 
 
 include SeedHelper

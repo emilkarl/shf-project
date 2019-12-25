@@ -2,11 +2,40 @@ require 'rails_helper'
 
 RSpec.describe UserChecklist, type: :model do
 
+  let(:all_complete_list) { create(:user_checklist, :completed, num_completed_children: 3) }
+
+  let(:three_complete_two_uncomplete_list) {
+    checklist_3done_2unfinished = create(:user_checklist, :completed, num_completed_children: 2)
+    list_user = checklist_3done_2unfinished.user
+
+    last_item = checklist_3done_2unfinished.children.last
+    not_complete1 = create(:user_checklist, user: list_user, list_position: 200, parent: not_complete1)
+    last_item.insert(not_complete1)
+
+    not_complete1_child1 = create(:user_checklist, user: list_user, list_position: 201, parent: not_complete1)
+    not_complete1.insert(not_complete1_child1)
+    checklist_3done_2unfinished
+  }
+
+
   describe 'Factory' do
 
-    it 'has a valid factory' do
-      skip 'to be done'
-      #expect(build(:user_checklist)).to be_valid
+    it 'default factory is valid' do
+      expect(build(:user_checklist)).to be_valid
+    end
+
+    it 'traits are valid' do
+      expect(create(:user_checklist, :completed)).to be_valid
+    end
+
+    it 'arguments passed in are valid' do
+      parent_item = create(:user_checklist)
+
+      expect(build(:user_checklist, parent: parent_item)).to be_valid
+      expect(create(:user_checklist, num_children: 3)).to be_valid
+      expect(create(:user_checklist, num_completed_children: 2)).to be_valid
+
+      expect(create(:user_checklist, parent: parent_item, num_children: 2, num_completed_children: 3)).to be_valid
     end
   end
 
@@ -16,110 +45,123 @@ RSpec.describe UserChecklist, type: :model do
     it { is_expected.to belong_to(:checklist) }
   end
 
-  describe 'Scope' do
+
+  describe 'Scopes (including those as class methods)' do
 
     describe 'completed' do
-      skip 'to be done'
+      it 'empty if no UserChecklist is completed' do
+        create(:user_checklist)
+        expect(described_class.completed).to be_empty
+      end
+
+      it 'all where date_completed is NOT NULL (not nil)' do
+        3.times { create(:user_checklist, :completed) }
+        create(:user_checklist)
+        expect(described_class.completed.count).to eq 3
+      end
     end
 
-    describe 'not_completed' do
-      skip 'to be done'
+    describe 'uncompleted' do
+      it 'empty if all UserChecklists are completed' do
+        create(:user_checklist, :completed)
+        expect(described_class.uncompleted).to be_empty
+      end
+
+      it 'all where date_completed is NULL (nil)' do
+        3.times { create(:user_checklist) }
+        create(:user_checklist, :completed)
+        expect(described_class.uncompleted.count).to eq 3
+      end
+    end
+
+    it 'completed_by_user' do
+      checklist_1 =  create(:user_checklist, :completed)
+      user_1 = checklist_1.user
+      2.times { create(:user_checklist, :completed, user: user_1) }
+
+      checklist_last = create(:user_checklist, :completed)
+
+      expect(described_class.completed_by_user(user_1).count).to eq 3
+    end
+
+    it 'not_completed_by_user' do
+      checklist_1 =  create(:user_checklist)
+      user_1 = checklist_1.user
+      2.times { create(:user_checklist, user: user_1) }
+
+      create(:user_checklist, :completed, user: user_1)
+
+      2.times { create(:user_checklist, :completed) }
+
+      expect(described_class.not_completed_by_user(user_1).count).to eq 3
     end
   end
 
 
   describe 'completed?' do
 
-    it 'false if there are no items (emtpy)' do
-      #expect(build(:user_checklist).completed?).to be_falsey
-      skip 'to be done'
+    it 'false if self is not completed' do
+      expect(build(:user_checklist).completed?).to be_falsey
     end
 
-    it 'true if all items are complete' do
-      #all_complete_list = build(:user_checklist, name: 'all_completed', num_completed_items: 3)
-      #expect(all_complete_list.completed?).to be_truthy
-      skip 'to be done'
+    it 'true if self and all children are complete' do
+      all_complete_list = create(:user_checklist, :completed, num_completed_children: 3)
+      expect(all_complete_list.completed?).to be_truthy
     end
 
-    it 'false if 1 or more items are not complete' do
-      #expect(three_completed_two_not_completed_list.completed?).to be_falsey
-      skip 'to be done'
+    it 'false if 1 or more children are not complete' do
+      expect(three_complete_two_uncomplete_list.completed?).to be_falsey
     end
   end
 
 
-  describe 'time_completed' do
+  describe 'completed' do
 
-    let(:user) { create(:user) }
-
-
-    it 'is nil if there are no items (empty)' do
-      #expect(build(:user_checklist).time_completed).to be_nil
-      skip 'to be done'
+    it 'empty list if no items are complete' do
+      expect(create(:user_checklist).completed).to be_empty
     end
 
-    it 'is nil if the list is not completed' do
-      skip 'to be done'
-      #three_item_checklist = build(:user_checklist)
+    it 'returns a list of all items that are completed, including descendents, in order by list_position' do
+      result = three_complete_two_uncomplete_list.completed
 
-      #item_1_incomplete = build(:user_checklist_item, :not_completed, user: user)
-      #three_item_checklist.checklist_items << item_1_incomplete
-      #item_2_incomplete = build(:user_checklist_item, :not_completed)
-      #three_item_checklist.checklist_items << item_2_incomplete
-      #item_3_incomplete = build(:user_checklist_item, :not_completed)
-      #three_item_checklist.checklist_items << item_3_incomplete
+      expect(result).to include(three_complete_two_uncomplete_list) # includes the root of the tree
+      expect(result).to include(three_complete_two_uncomplete_list.children.first)
+      expect(result).to include(three_complete_two_uncomplete_list.children.last)
+      expect(result).not_to include(three_complete_two_uncomplete_list.children.last.children.first)
+      expect(result).not_to include(three_complete_two_uncomplete_list.children.last.children.last)
 
-      #expect(three_item_checklist.time_completed).to be_falsey
-    end
-
-    it 'is the latest (last) completed date of all list items' do
-      skip 'to be done'
-      #three_item_checklist = build(:user_checklist)
-
-      #item_1_complete = build(:user_checklist_item, :completed, time_completed: DateTime.new(2020, 11, 11))
-      #three_item_checklist.checklist_items << item_1_complete
-      #
-      #item_2_complete = build(:user_checklist_item, :completed, time_completed: DateTime.new(1900, 1, 1))
-      #three_item_checklist.checklist_items << item_2_complete
-      #
-      #item_3_complete = build(:user_checklist_item, :completed, time_completed: DateTime.new(2020, 11, 11))
-      #three_item_checklist.checklist_items << item_3_complete
-      #
-      #expect(three_item_checklist.time_completed).to eq DateTime.new(2020, 11, 11)
-    end
-
-  end
-
-
-  let(:five_item_checklist) { build(:checklist, name: '5 items checklist')}
-
-  let(:five_item_user_checklist) { build(:user_checklist, checklist: five_item_checklist, user: user )}
-
-  describe 'completed_items' do
-
-    it 'empty list if checklist_items is emmpty' do
-      #expect(build(:checklist).completed_items).to be_empty
-      skip 'to be done'
-    end
-
-
-    it 'returns a list of all items that are completed, in their order' do
-      #expect(three_completed_two_not_completed_list.completed_items.map(&:name)).to match_array(["checklist item completed 0", "checklist item completed 1", "checklist item completed 2"])
-      skip 'to be done'
+      result_list_positions = result.map(&:list_position)
+      expect(result_list_positions).to match_array([0, 0, 1])
     end
   end
 
 
-  describe 'not_completed_items' do
+  describe 'uncompleted' do
 
-    #let(:three_completed_two_not_completed_list) { build(:user_checklist, name: '3 completed 2 not completed_list', num_completed_items: 3, num_not_completed_items: 2) }
-
-    it 'returns a list of all items NOT completed, in their order' do
-      #expect(three_completed_two_not_completed_list.not_completed_items.map(&:name)).to match_array(["checklist item not complete 0", "checklist item not complete 1"])
-      skip 'to be done'
+    it 'empty list if all items are completed' do
+      all_complete = create(:user_checklist, :completed, num_completed_children: 1)
+      expect(all_complete.uncompleted).to be_empty
     end
 
+    it 'returns a list of all items NOT completed, including descendents, in order by list_position' do
+      undone_root = create(:user_checklist)
+      list_user = undone_root.user
+      done_item = create(:user_checklist, :completed, user: list_user, list_position: 9, parent: undone_root)
+      done_sub1_not_complete = create(:user_checklist, user: list_user, list_position: 5, parent: done_item)
+
+      result = undone_root.uncompleted
+
+      expect(result).to include(undone_root)
+      expect(result).to include(done_sub1_not_complete)
+      expect(result).not_to include(done_item)
+
+      result_list_positions = result.map(&:list_position)
+      expect(result_list_positions).to match_array([0, 5])
+    end
   end
 
 
+  it 'size = completed items + uncompleted items' do
+    expect(three_complete_two_uncomplete_list.completed.size + three_complete_two_uncomplete_list.uncompleted.size).to eq(5)
+  end
 end

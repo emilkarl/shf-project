@@ -1,4 +1,4 @@
-.custom-menu {
+.image-actions-custom-menu {
   list-style-type: none;
   padding: 0 !important;
   display: none;
@@ -15,16 +15,16 @@
 box-shadow:         2px 2px 7px 0 rgba(50, 50, 50, 0.5);
 }
 
-.custom-menu li {
+.image-actions-custom-menu li {
   padding: 2px 10px;
 }
 
-.custom-menu li:hover {
+.image-actions-custom-menu li:hover {
   background-color: #013b78;
   color: #fff;
   cursor: pointer;
 }
-.custom-context {
+.custom-context-menu {
   -webkit-user-select:none;
   -khtml-user-select:none;
   -moz-user-select:none;

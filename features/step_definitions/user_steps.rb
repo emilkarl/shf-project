@@ -85,10 +85,10 @@ Then("user {capture_string} is paid through {capture_string}") do | user_email, 
   expect_user_has_expire_date(user, expected_expire_datestr)
 end
 
-Then("user {capture_string} has no payments") do | user_email |
+Then("user {capture_string} has no completed payments") do | user_email |
   user = User.find_by(email: user_email)
-  expect(user.payments).to be_empty
-  expect_user_has_expire_date(user, '')
+  expect(user.payments.completed).to be_empty
+  #expect_user_has_expire_date(user, '')
 end
 
 def expect_user_has_expire_date(user, expected_expire_date_str)
@@ -104,4 +104,17 @@ Then("I should{negate} see membership status is {capture_string}") do | negate, 
 
   actual_status_element = page.find(:xpath, status_xpath)
   expect(actual_status_element).to have_text(membership_status)
+end
+
+
+And("my profile picture filename is {capture_string}") do | filename |
+  @user.reload # ensure we have the latest from the db
+  expect(@user.member_photo.original_filename).to eq(filename), "The profile picture filename was expected to be '#{filename}' but instead is '#{@user.member_photo.original_filename}'"
+end
+
+
+And("the profile picture filename is {capture_string} for {capture_string}") do | filename, user_email |
+  user = User.find_by_email(user_email)
+  expect(user).not_to be_nil, "The user #{user_email} could not be found."
+  expect(user.member_photo.original_filename).to eq(filename), "The profile picture filename was expected to be '#{filename}' but instead is '#{user.member_photo.original_filename}'"
 end

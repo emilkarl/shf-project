@@ -64,7 +64,7 @@ Feature: Membership chair gets an email when a new membership has been granted.
     And I am on the "user details" page for "emma-approved@happymutts.se"
     And I should see t("menus.nav.members.pay_membership")
     Then I click on t("menus.nav.members.pay_membership")
-    And I abandon the payment
+    And I abandon the payment by going back to the previous page
     And I should not see t("payments.success.success")
     Then "medlem@sverigeshundforetagare.se" should receive no emails
 

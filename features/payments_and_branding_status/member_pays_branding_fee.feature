@@ -98,7 +98,7 @@ Feature: Member pays branding license fee for a company
     And I am logged in as "emma@mutts.com"
     And I am the page for company number "2120000142"
     When I click on t("menus.nav.company.pay_branding_fee")
-    And I abandon the payment
+    And I abandon the payment by going back to the previous page
     Then I should not see t("payments.success.success")
     And company number "2120000142" is paid through "2018-12-31"
 

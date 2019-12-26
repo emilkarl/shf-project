@@ -852,7 +852,7 @@ en:
       title: All Users
       no_search_results: No records matched your search criteria.
 
-    delete_user: Delete %{user}
+    delete_user: &delete_user "Delete %{user}"
 
     show:
       membership_number: *membership_number
@@ -1276,13 +1276,15 @@ en:
     user_profile:
       edit:
         title: 'Edit profile: %{user}'
-        become_this_user: Become this User
+        become_this_user: &become_this_user Become this User
+        delete_this_user: *delete_user
       update:
         success: User profile updated successfully
         error: One or more problems prevented the profile from being updated.
       become:
         have_become: "You are now acting as user %{user_name} (id: %{user_id}). Log out then log back in as the admin if you need to administrate again."
-
+      become_user_button:
+        become_this_user: *become_this_user
 
 
   mailers:
@@ -1457,7 +1459,9 @@ en:
         submit_button_label: Sign up
         success: You have signed up successfully
       edit:
-        title: Edit your profile
+        my_profile_title: &my_profile_title Edit your profile
+        title: *my_profile_title
+        edit_profile_for_title: 'Edit profile: %{user}'
         unconfirmed_email_for: 'Unconfirmed email address for: %{unconfirmed_email}'
         confirm_password: *confirm_password
         current_password: Current password

@@ -88,7 +88,7 @@ Feature: Member pays membership fee
     And I am on the "user account" page for "emma@mutts.com"
     And I should see "1001"
     Then I click on t("menus.nav.members.pay_membership")
-    And I abandon the payment
+    And I abandon the payment by going back to the previous page
     And I should not see t("payments.success.success")
     Then the user is paid through "2018-12-31"
 

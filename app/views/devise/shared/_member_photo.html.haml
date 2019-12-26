@@ -1,4 +1,4 @@
-- if user.member?
+- if local_assigns[:user].member?
   %h3
     = t('devise.registrations.edit.member_photo.pic_header') unless current_user.admin?
   .row

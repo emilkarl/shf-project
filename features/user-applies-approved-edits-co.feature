@@ -1,13 +1,15 @@
 Feature: Whole process of a new user creating a login, applying, being approved, editing their company
-  This exercises the entire process to ensure that data we are creating in the features and/or factories is not somehow masking any problems.
+
+  This exercises the entire process to ensure that data we are creating in the
+  features and/or factories is not somehow masking any problems.
 
   Background:
     Given the App Configuration is not mocked and is seeded
 
     Given the following users exist:
-      | email                | admin | first_name | last_name |
-      | new_user@example.com |       | NewUser1   | Lastname  |
-      | admin@shf.se         | true  |            |           |
+      | email                | admin | first_name | last_name | password       |
+      | new_user@example.com |       | NewUser1   | Lastname  | password       |
+      | admin@shf.se         | true  |            |           | admin_password |
 
     And the application file upload options exist
 
@@ -71,6 +73,7 @@ Feature: Whole process of a new user creating a login, applying, being approved,
     And I am on the "all users" page
     Then I click the icon with CSS class "edit" for the row with "new_user@example.com"
     And I fill in t("activerecord.attributes.user.membership_number") with "10101"
+    And I fill in t("devise.registrations.edit.current_password") with "admin_password"
     Then I click on t("devise.registrations.edit.submit_button_label") button
     And I should see t("admin_only.user_profile.update.success")
 

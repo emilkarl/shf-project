@@ -24,7 +24,7 @@ module MetaOgTagsHelper
   # more languages and/or regions, this can be made more complex.
   LOCALES_TO_IETF = { sv: 'sv_SE',
                       en: 'en_US'
-  }
+  } unless defined?(LOCALES_TO_IETF)
 
 
   # @return [Hash] - hash with key :og and value = the tags for Facebook OpenGraph (og)

@@ -1,4 +1,5 @@
 %html
+  -# NOTE: this does not use the application layout, so the stylesheet link tag must explicitly be in the head section
   %head
     = stylesheet_link_tag 'https://fonts.googleapis.com/css?family=Open+Sans:400,700'
     = stylesheet_link_tag 'proof-of-membership', media: 'all'
@@ -6,7 +7,7 @@
 
     - render_to = :html unless local_assigns[:render_to]
 
-    .custom-context#proof-of-membership
+    .custom-context-menu#proof-of-membership
       - if app_config.shf_logo
         = image_tag(paperclip_path_str(app_config.shf_logo, :standard, render_to),
                     class: 'shf-logo')

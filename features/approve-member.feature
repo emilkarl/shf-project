@@ -1,4 +1,6 @@
-Feature: As an admin
+Feature: Admin approves a member
+
+  As an admin
   so that a new member gets notified that they have been approved and can then fill out their info,
   when I change their status to approved,
   send them email notifying them,
@@ -11,11 +13,11 @@ Feature: As an admin
     Given the App Configuration is not mocked and is seeded
 
     Given the following users exist:
-      | email                 | admin |
-      | emma@happymutts.se    |       |
-      | hans@happymutts.se    |       |
-      | anna@nosnarkybarky.se |       |
-      | admin@shf.com         | true  |
+      | email                 | admin |  password       |
+      | emma@happymutts.se    |       |  password       |
+      | hans@happymutts.se    |       |  password       |
+      | anna@nosnarkybarky.se |       |  password       |
+      | admin@shf.com         | true  |  admin_password |
 
     Given the following business categories exist
       | name         | description                     |
@@ -98,6 +100,8 @@ Feature: As an admin
     Then I click the icon with CSS class "edit" for the row with "anna@nosnarkybarky.se"
 
     And I fill in t("activerecord.attributes.user.membership_number") with "902"
+
+    And I fill in t("devise.registrations.edit.current_password") with "admin_password"
     Then I click on t("devise.registrations.edit.submit_button_label") button
     And I should see t("admin_only.user_profile.update.success")
 
@@ -129,6 +133,7 @@ Feature: As an admin
     Then I click the icon with CSS class "edit" for the row with "emma@happymutts.se"
 
     And I fill in t("activerecord.attributes.user.membership_number") with "901"
+    And I fill in t("devise.registrations.edit.current_password") with "admin_password"
     Then I click on t("devise.registrations.edit.submit_button_label") button
     And I should see t("admin_only.user_profile.update.success")
 

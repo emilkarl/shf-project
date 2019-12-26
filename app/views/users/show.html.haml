@@ -1,5 +1,6 @@
-%head
-  = stylesheet_link_tag 'custom-menu', media: 'all'
+- content_for :stylesheet_for_view do
+  = stylesheet_link_tag 'image-actions-custom-menu', media: 'all'
+
 %header.entry-header
   - user_name = @user.full_name
   %h1{ class: with_admin_css_class_if_needed(@current_user, ['entry-title']) }
@@ -44,6 +45,7 @@
 
   - if current_user.admin?
     .admin-only
+      = render partial: 'edit_status_modal', locals: { user: @user }
 
       .user-info
         .row.section-title
@@ -82,6 +84,8 @@
 
 
   - if @user.member?
+    = render partial: 'image_actions_context_menu'
+
     .membership_images
       .row.mt-3
         .col-md-5
@@ -134,8 +138,3 @@
             %p= t('.image_use_guidelines_html', use_guidelines_link: link_to(t('.use_guidelines'),
                 'https://hitta.sverigeshundforetagare.se/dokument/innehall/hmarket',
                 class: 'underlined_link'))
-
-= render partial: 'edit_status_modal', locals: { user: @user }
-
-- if "#proof-of-membership"
-  = render partial: 'companies/custom_context_menu'

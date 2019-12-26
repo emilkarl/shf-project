@@ -1,0 +1,85 @@
+-# This partial expects these locals:
+-#  user - the User that this profile is for
+=#  current_user - the User viewing this (might be an admin, for example)
+-#  form_submit_url - the url used by the form when it is submitted
+
+- i18n_scope = 'devise.registrations.edit'
+- editor_is_current_user = user == current_user
+- admin_is_editting_their_profile = current_user.admin? && editor_is_current_user
+- admin_is_editting_another_profile = current_user.admin? && !editor_is_current_user
+
+%header.entry-header
+  -#%h1.entry-title= t('.title')
+  - title_t_key = (editor_is_current_user ? 'my_profile_title' : 'edit_profile_for_title')
+  - title = t(title_t_key, scope: i18n_scope, user: user.full_name)
+  %h1.entry-title{ class: with_admin_css_class_if_needed(current_user, ['entry-title']) }= title
+
+.entry-content.container
+
+  = form_for(user, as: :user, url: form_submit_url, html: { method: :put }) do |f|
+    != model_errors_helper(user)
+
+    = render partial: 'devise/shared/member_photo', locals: { user: user, f: f }
+
+    %h3= t('info_header', scope: i18n_scope )
+    .row
+      .form-group.col-sm
+        = f.label :first_name
+        = f.text_field :first_name, placeholder: "#{t('activerecord.attributes.user.first_name')}", class: 'form-control'
+      .form-group.col-sm
+        = f.label :last_name
+        = f.text_field :last_name, placeholder: "#{t('activerecord.attributes.user.last_name')}", class: 'form-control'
+    .row
+      .form-group.col-sm
+        = f.label :email
+        = f.email_field :email, placeholder: "#{t('activerecord.attributes.user.email')}", class: 'form-control'
+        -#- if devise_mapping.confirmable? && user.pending_reconfirmation?
+        -#  %div
+        -#    "#{t('.unconfirmed_email_for', unconfirmed_email: user.unconfirmed_email, scope: i18n_scope)}"
+
+      .form-group.col-sm
+        = f.fields_for :shf_application do |app_form|
+          = app_form.label :contact_email
+          = app_form.email_field :contact_email, placeholder: "#{t('activerecord.attributes.shf_application.contact_email')}", class: 'form-control'
+
+    - if admin_is_editting_another_profile
+      .row
+        .form-group.col-sm
+          = f.label :membership_number
+          = f.text_field :membership_number,  class: 'form-control'
+
+      %br
+      %br
+    %h3= t('password_header', scope: i18n_scope)
+    %small.form-text.text-muted= t('leave_blank_if_no_change', scope: i18n_scope)
+
+    .row
+      .form-group.col-sm
+        = f.label :password
+        = f.password_field :password, autocomplete: 'off', placeholder: "#{t('new_password', scope: i18n_scope)}", class: 'form-control'
+        %small= render 'devise/shared/min_password_length_info'
+      .form-group.col-sm
+        = f.label :password_confirmation
+        = f.password_field :password_confirmation, autocomplete: 'off', placeholder: "#{t('confirm_password', scope: i18n_scope)}", class: 'form-control'
+
+    %hr
+    .row
+      .form-group.col-sm
+        = f.label :current_password, "#{t('current_password', scope: i18n_scope)}" + " #{t('required_to_save_changes', scope: i18n_scope)}", class: 'required current-password'
+        = f.password_field :current_password, autocomplete: 'off', placeholder: "#{t('current_password', scope: i18n_scope)}", class: 'form-control'
+        -#%small.form-text.text-muted= t('required_to_save_changes', scope: i18n_scope)
+
+    .row
+      .col
+        %p= render 'application/required_fields'
+
+    .row
+      .col
+        = f.submit "#{t('submit_button_label', scope: i18n_scope)}", class: 'btn btn-primary form-control m-2'
+
+
+  -if editor_is_current_user
+    %hr
+      .text-center
+        %p
+          #{button_to t('delete_my_account', scope: i18n_scope), registration_path('user'), class:'btn btn-sm btn-danger',  data: { confirm: t('confirm_are_you_sure', scope: i18n_scope) }, method: :delete}

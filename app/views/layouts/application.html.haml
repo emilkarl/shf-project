@@ -26,6 +26,7 @@
 
     = stylesheet_link_tag 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/css/select2.min.css'
     = stylesheet_link_tag 'application', media: 'all'
+    = yield :stylesheet_for_view  # stylesheet markup specificc for a view
 
     = javascript_include_tag 'application'
     = javascript_include_tag 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/select2.full.min.js'
@@ -36,7 +37,7 @@
 
     = yield :javascript_for_view  # javascript markup specific to a view
 
-    = yield :head_content
+    = yield :head_content  # head content specific to a view
 
     - if Rails.env.test?
       -#

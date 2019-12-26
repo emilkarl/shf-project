@@ -51,8 +51,9 @@ And(/^I complete the branding payment for "([^"]*)"$/) do |company_name|
   visit payment_success_path(user_id: @user.id, id: payment.id)
 end
 
-And(/^I abandon the payment$/) do
-  page.evaluate_script('window.history.back()')
+And(/^I abandon the payment by going back to the previous page$/) do
+  #page.evaluate_script('window.history.back()')
+  page.go_back
 end
 
 And(/^I incur an error in payment processing$/) do

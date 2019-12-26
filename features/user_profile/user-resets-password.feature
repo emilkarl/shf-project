@@ -1,4 +1,6 @@
-Feature: As a user
+Feature: User resets password
+
+  As a user
   If I forget my password
   I need to be able to reset my password
 

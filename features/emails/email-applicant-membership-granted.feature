@@ -68,7 +68,7 @@ Feature: Applicant gets an email when membership has been granted. (They are now
     And I am on the "user details" page for "emma@happymutts.se"
     And I should see t("menus.nav.members.pay_membership")
     Then I click on t("menus.nav.members.pay_membership")
-    And I abandon the payment
+    And I abandon the payment by going back to the previous page
     And I should not see t("payments.success.success")
     Then "emma@happymutts.se" should receive no emails
 
@@ -81,6 +81,6 @@ Feature: Applicant gets an email when membership has been granted. (They are now
     And I am on the "user details" page for "emma@happymutts.se"
     And I should see t("menus.nav.members.pay_membership")
     Then I click on t("menus.nav.members.pay_membership")
-    And I abandon the payment
+    And I abandon the payment by going back to the previous page
     And I should not see t("payments.success.success")
     Then "emma@happymutts.se" should receive no emails

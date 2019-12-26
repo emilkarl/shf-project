@@ -1,11 +1,12 @@
 %html
+  -# NOTE: this does not use the application layout, so the stylesheet link tag must explicitly be in the head section
   %head
     = stylesheet_link_tag 'https://fonts.googleapis.com/css?family=Open+Sans:400,700'
     = stylesheet_link_tag 'company-h-brand', media: 'all'
-    = stylesheet_link_tag 'custom-menu', media: 'all'
+
   %body
 
-    .custom-context#company-h-brand
+    .custom-context-menu#company-h-brand
       - render_to = :html unless local_assigns[:render_to]
 
       - if app_config.h_brand_logo

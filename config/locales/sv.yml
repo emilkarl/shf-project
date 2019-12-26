@@ -862,7 +862,7 @@ sv:
       title: Alla Användare
       no_search_results: Din sökning gav inget resultat, prova att ta bort något av dina val.
 
-    delete_user: Radera %{user}
+    delete_user: &delete_user "Radera %{user}"
 
     show:
       membership_number: *membership_number
@@ -1285,12 +1285,15 @@ sv:
     user_profile:
       edit:
         title: 'Redigera profil: %{user}'
-        become_this_user: Bli den här användaren
+        become_this_user: &become_this_user Bli den här användaren
+        delete_this_user: *delete_user
       update:
         success: Användarprofil uppdaterad framgångsrikt
         error: Ett eller flera problem hindrade profilen från att uppdateras.
       become:
         have_become: "Du fungerar nu som användare %{user_name} (id: %{user_id}). Logga ut och logga sedan in som administratör om du behöver administrera igen."
+      become_user_button:
+        become_this_user: *become_this_user
 
 
   mailers:
@@ -1464,7 +1467,9 @@ sv:
         submit_button_label: Skapa användare
         success: Ett nytt konto har skapats
       edit:
-        title: Redigera din profil
+        my_profile_title: &my_profile_title Redigera din profil
+        title: *my_profile_title
+        edit_profile_for_title: 'Redigera profile: %{user}'
         unconfirmed_email_for: 'Obekräftad mailadress för: %{unconfirmed_email}'
         leave_blank_if_no_change: lämna tomt om du inte vill byta
         confirm_password: *confirm_password

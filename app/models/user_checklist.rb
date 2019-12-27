@@ -50,7 +50,7 @@ class UserChecklist < ApplicationRecord
   # --------------------------------------------------------------------------
 
   def completed?
-    !date_completed.blank? && descendants.reduce(:true) { |is_completed, descendant| descendant.completed? && is_completed }
+    !date_completed.blank? && descendants.inject(:true) { |is_completed, descendant| descendant.completed? && is_completed }
   end
 
 

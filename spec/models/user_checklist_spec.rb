@@ -79,7 +79,7 @@ RSpec.describe UserChecklist, type: :model do
       user_1 = checklist_1.user
       2.times { create(:user_checklist, :completed, user: user_1) }
 
-      checklist_last = create(:user_checklist, :completed)
+      create(:user_checklist, :completed)
 
       expect(described_class.completed_by_user(user_1).count).to eq 3
     end

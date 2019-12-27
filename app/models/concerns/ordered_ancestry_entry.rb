@@ -3,7 +3,7 @@ require 'active_support/concern'
 
 #--------------------------
 #
-# @module OrderedNestedListEntry
+# @module OrderedAncestryEntry
 #
 # @desc Responsibility: Abstract class for objects with _ordered_ nested
 # descendents using the ancestry gem.``

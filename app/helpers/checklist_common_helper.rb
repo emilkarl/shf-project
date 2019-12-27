@@ -23,12 +23,12 @@ module ChecklistCommonHelper
     end
 
     date_complete_div = if item.complete?
-      tag.div(class: date_complete_col_class) do
-        tag.b(I18n.t('checklist_common.date_completed')) + ' ' + item.date_completed
-      end
-    else
-      ''
-    end
+                          tag.div(class: date_complete_col_class) do
+                            tag.b(I18n.t('checklist_common.date_completed')) + ' ' + item.date_completed
+                          end
+                        else
+                          ''
+                        end
 
     is_complete_div + date_complete_div
   end

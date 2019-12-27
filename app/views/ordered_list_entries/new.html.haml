@@ -2,7 +2,7 @@
   %h1.entry-title= t('.title')
 
 .entry-content
-  = render 'form', all_allowable_parents: @all_allowable_parents
+  = render 'form', locals: {ordered_list_entry: @ordered_list_entry,   all_allowable_parents: @all_allowable_parents }
   %hr
   .text-center
     = link_to 'All list entries', ordered_list_entries_path, class: 'btn btn-sm btn-light'

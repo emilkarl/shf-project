@@ -1,7 +1,8 @@
-- all_allowable_parents = local_assigns.fetch(:all_allowable_parents, [])
-= form_for @ordered_list_entry, html: { class: "#{local_assigns.fetch(:class_name, '')}" }   do |f|
+- ordered_list_entry = locals.fetch(:ordered_list_entry, nil)
+- all_allowable_parents = locals.fetch(:all_allowable_parents, [])
+= form_for ordered_list_entry, html: { class: "#{locals.fetch(:class_name, '')}" }   do |f|
 
-  != model_errors_helper(@ordered_list_entry)
+  != model_errors_helper(ordered_list_entry)
 
   .container
     .row
@@ -25,14 +26,14 @@
       .col
         .form-group
           = f.label :parent
-          = f.collection_select :parent_id, @all_allowable_parents, :id, :display_name_with_depth, include_blank: true
+          = f.collection_select :parent_id, all_allowable_parents, :id, :display_name_with_depth, include_blank: true
 
     .row
       .col
         .form-group
           -# order in list is ZERO based
-          - max_position =  @ordered_list_entry.parent.nil? ? 0 : (@ordered_list_entry.parent.children.size - 1)
-          -# max_position = max_position + 1 if @ordered_list_entry.new_record?
+          - max_position =  ordered_list_entry.parent.nil? ? 0 : (ordered_list_entry.parent.children.size - 1)
+          -# max_position = max_position + 1 if ordered_list_entry.new_record?
           = f.label :list_position
           = f.number_field :list_position, in: 0..max_position, step: 1
       .col
@@ -47,7 +48,7 @@
 :javascript
 
   window.onload = function(){
-    let maxPosition =  #{@ordered_list_entry.parent.nil? ? 0 : (@ordered_list_entry.parent.children.size - 1)};
+    let maxPosition =  #{ordered_list_entry.parent.nil? ? 0 : (ordered_list_entry.parent.children.size - 1)};
     updateListPositionMax(maxPosition);
   }
 
@@ -66,7 +67,7 @@
           } else {
             max_position = 0;
 
-            if (#{@ordered_list_entry.new_record?}) {
+            if (#{ordered_list_entry.new_record?}) {
               max_position = data.max_position + 1;
             }
             else {
@@ -89,7 +90,7 @@
 
 
   window.onload = function(){
-    let maxPosition =  #{@ordered_list_entry.parent.nil? ? 0 : (@ordered_list_entry.parent.children.size - 1)};
+    let maxPosition =  #{ordered_list_entry.parent.nil? ? 0 : (ordered_list_entry.parent.children.size - 1)};
     updateListPositionMax(maxPosition);
   }
 
@@ -108,7 +109,7 @@
           } else {
             max_position = 0;
 
-            if (#{@ordered_list_entry.new_record?}) {
+            if (#{ordered_list_entry.new_record?}) {
               max_position = data.max_position + 1;
             }
             else {
@@ -131,7 +132,7 @@
 
 
   window.onload = function(){
-    let maxPosition =  #{@ordered_list_entry.parent.nil? ? 0 : (@ordered_list_entry.parent.children.size - 1)};
+    let maxPosition =  #{ordered_list_entry.parent.nil? ? 0 : (ordered_list_entry.parent.children.size - 1)};
     updateListPositionMax(maxPosition);
   }
 
@@ -150,7 +151,7 @@
 
           } else {
 
-            if (#{@ordered_list_entry.new_record?}) {
+            if (#{ordered_list_entry.new_record?}) {
               maxPosition = data.max_position + 1;
             }
             else {

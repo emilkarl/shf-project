@@ -6,6 +6,7 @@
 require 'ffaker'
 require 'rake'
 
+require_relative './seed_helpers'
 
 # require all *.rb files in these subdirectories
 required_subdirs = %w(seed_helpers seeders)
@@ -84,7 +85,7 @@ end
 
 if Rails.env.development? || Rails.env.staging? || ENV['HEROKU_STAGING']
 
-  OrderedListEntriesSeeder.seed
+  Seeders::OrderedListEntriesSeeder.seed
 
   #
   # === USERS ===

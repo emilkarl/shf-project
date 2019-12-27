@@ -25,6 +25,7 @@ RSpec.shared_examples 'admin, business categories, kommuns, and regions are seed
                                              ENV_ADMIN_PASSWORD_KEY => admin_pwd}) )
 
         allow(SeedHelper::AppConfigurationSeeder).to receive(:seed).and_return(true)
+        allow(Seeders::OrderedListEntriesSeeder).to receive(:seed).and_return([])
 
         SHFProject::Application.load_tasks
         SHFProject::Application.load_seed
@@ -77,6 +78,7 @@ RSpec.shared_examples 'admin, business categories, kommuns, and regions are seed
       RSpec::Mocks.with_temporary_scope do
         allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new("#{rails_env}"))
         allow_any_instance_of(ActivityLogger).to receive(:show).and_return(false)
+        allow(Seeders::OrderedListEntriesSeeder).to receive(:seed).and_return([])
 
         # must stub this way so the rest of ENV is preserved
         stub_const('ENV', ENV.to_hash.merge({ENV_ADMIN_EMAIL_KEY => admin_email,
@@ -126,6 +128,7 @@ RSpec.shared_examples 'it calls geocode min max times with csv file' do |num_use
 
       allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new('development'))
       allow_any_instance_of(ActivityLogger).to receive(:show).and_return(false)
+      allow(Seeders::OrderedListEntriesSeeder).to receive(:seed).and_return([])
 
       stub_const('ENV', ENV.to_hash.merge({ ENV_NUM_SEEDED_USERS_KEY => num_users }))
       stub_const('ENV', ENV.to_hash.merge({ ENV_SEED_FAKE_CSV_FNAME_KEY => csv_filename }))

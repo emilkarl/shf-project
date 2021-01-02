@@ -26,7 +26,9 @@ module SeedHelper
                                                    site_meta_keywords:    'hund, hundägare, hundinstruktör, hundentreprenör, Sveriges Hundföretagare, svenskt hundföretag, etisk, H-märkt, hundkurs',
                                                    og_type:               'website',
                                                    twitter_card_type:     'summary',
-                                                   facebook_app_id:       ENV.fetch('SHF_FB_APPID', nil).to_i
+                                                   facebook_app_id:       ENV.fetch('SHF_FB_APPID', nil).to_i,
+                                                   payment_too_soon_days: 45,
+                                                   membership_expired_grace_period: 90
       )
 
       meta_image_file            = File.open(File.join(__dir__, SITE_DEFAULT_IMAGE))

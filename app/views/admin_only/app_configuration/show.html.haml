@@ -67,6 +67,11 @@
         = field_or_none(t('.payment_too_soon_days'),
             @app_configuration.payment_too_soon_days,
             tag_options: {class: 'payment-too-soon-days'})
+    .row
+      .col-sm-10
+        = field_or_none(t('.membership_expired_grace_period'),
+            @app_configuration.membership_expired_grace_period,
+            tag_options: {class: 'membership-expired-grace-period'})
 
   %hr
   .row

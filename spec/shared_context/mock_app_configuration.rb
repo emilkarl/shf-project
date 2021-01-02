@@ -123,6 +123,10 @@ class MockAppConfig
     60
   end
 
+  def self.membership_expired_grace_period
+    90
+  end
+
   # ----------------------------------------------------
   #  Default results to use to stub methods
 

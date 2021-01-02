@@ -610,6 +610,33 @@ RSpec.describe ShfApplication, type: :model do
   end
 
 
+  describe 'applicant_can_upload_files?' do
+    it 'true if can edit the application' do
+      app = create(:shf_application)
+      allow(app).to receive(:applicant_can_edit?).and_return(true)
+
+      expect(app.applicant_can_upload_files?).to be_truthy
+    end
+
+    it 'true if accepted and member is current' do
+      app = create(:shf_application, :accepted)
+      allow(app.user).to receive(:membership_app_and_payments_current?).and_return(true)
+
+      expect(app.applicant_can_upload_files?).to be_truthy
+    end
+
+    it 'false otherwise' do
+      rejected_app = create(:shf_application, :rejected)
+      allow(rejected_app.user).to receive(:membership_app_and_payments_current?).and_return(true)
+      expect(rejected_app.applicant_can_upload_files?).to be_falsey
+
+      accepted_app = create(:shf_application, :accepted)
+      allow(accepted_app.user).to receive(:membership_app_and_payments_current?).and_return(false)
+      expect(accepted_app.applicant_can_upload_files?).to be_falsey
+    end
+  end
+
+
   describe 'possibly_waiting_for_upload?' do
     # Only these states can be waiting for file uploads
     STATES_CAN_BE_WAITING = %w(new under_review waiting_for_applicant)
@@ -678,7 +705,7 @@ RSpec.describe ShfApplication, type: :model do
   end
 
 
-  context 'Business Subcategories' do
+  describe 'Business Subcategories' do
 
     let(:parent) { create(:business_category, name: 'parent') }
     let(:unassociated_category) { create(:business_category) }

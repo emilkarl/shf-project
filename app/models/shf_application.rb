@@ -9,6 +9,9 @@ class ShfApplication < ApplicationRecord
   include AASM
   include UpdatedAtRange
 
+
+  before_destroy :before_destroy_checks
+
   after_initialize :add_observers
   after_update :clear_image_caches
   before_destroy :before_destroy_checks
@@ -113,7 +116,7 @@ class ShfApplication < ApplicationRecord
     where(state: app_state).count
   end
 
-  # Have to guard agains the condition where there are no uploaded files in the system
+  # Have to guard against the condition where there are no uploaded files in the system
   def self.no_uploaded_files
     return not_decided if UploadedFile.count == 0
 
@@ -195,6 +198,18 @@ class ShfApplication < ApplicationRecord
   end
 
 
+  # @return [boolean] - is the application in a state where the applicant can edit it?
+  def applicant_can_edit?
+    CAN_EDIT_STATES.include? state.to_sym
+  end
+
+
+  # @return [Boolean] - can the applicant upload files for this application?
+  def applicant_can_upload_files?
+    applicant_can_edit? || (accepted? && user.membership_app_and_payments_current?)
+  end
+
+
   def upload_files_will_be_delivered_later?
     file_delivery_method&.email? || file_delivery_method&.mail?
   end
@@ -244,11 +259,8 @@ class ShfApplication < ApplicationRecord
   end
 
   def before_destroy_checks
-
     destroy_uploaded_files
-
     destroy_associated_companies
-
   end
 
 
@@ -261,7 +273,6 @@ class ShfApplication < ApplicationRecord
   private
 
   def destroy_uploaded_files
-
     uploaded_files.each do |uploaded_file|
       uploaded_file.actual_file = nil
       uploaded_file.destroy

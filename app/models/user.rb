@@ -1,10 +1,11 @@
 # @class User
 #
-# @responsibilty  A user that can log in.  Knows membership _payment_ status,
+# @responsibility  A user that can log in.  Knows membership _payment_ status,
 #  application status.
 #
 # FIXME only the class RequirementsForMembership should respond to questions
 #   about whether a user is current member. (Ex: RequirementsForMembership.requirements_met?({ user: approved_and_paid }) )
+#
 #
 class User < ApplicationRecord
   include PaymentUtility
@@ -51,24 +52,22 @@ class User < ApplicationRecord
   # FIXME: this is not accurate; DO NOT USE. (Need to carefully remove any use.)  Other checks may need to be done.
   scope :members, -> { where(member: true) }
 
-
   successful_payment_with_type_and_expire_date = "payments.status = '#{Payment::SUCCESSFUL}' AND" +
     " payments.payment_type = ? AND payments.expire_date = ?"
 
   scope :membership_expires_in_x_days, -> (num_days) { includes(:payments)
-    .where(successful_payment_with_type_and_expire_date,
-           Payment::PAYMENT_TYPE_MEMBER,
-           (Date.current + num_days))
-    .order('payments.expire_date')
-    .references(:payments) }
+                                                         .where(successful_payment_with_type_and_expire_date,
+                                                                Payment::PAYMENT_TYPE_MEMBER,
+                                                                (Date.current + num_days))
+                                                         .order('payments.expire_date')
+                                                         .references(:payments) }
 
   scope :company_hbrand_expires_in_x_days, -> (num_days) { includes(:payments)
-    .where(successful_payment_with_type_and_expire_date,
-           Payment::PAYMENT_TYPE_BRANDING,
-           (Date.current + num_days))
-    .order('payments.expire_date')
-    .references(:payments) }
-
+                                                             .where(successful_payment_with_type_and_expire_date,
+                                                                    Payment::PAYMENT_TYPE_BRANDING,
+                                                                    (Date.current + num_days))
+                                                             .order('payments.expire_date')
+                                                             .references(:payments) }
 
   scope :application_accepted, -> { joins(:shf_application).where(shf_applications: { state: 'accepted' }) }
 
@@ -78,7 +77,6 @@ class User < ApplicationRecord
 
   scope :current_members, -> { application_accepted.membership_payment_current }
 
-
   # -----------------------------------
 
   # TODO this should not be the responsibility of the User class. Need a MembershipManager class for this.
@@ -87,20 +85,22 @@ class User < ApplicationRecord
     next_membership_payment_dates(user_id).first
   end
 
-
   # TODO this should not be the responsibility of the User class. Need a MembershipManager class for this.
   def self.next_membership_payment_dates(user_id)
     next_payment_dates(user_id, THIS_PAYMENT_TYPE)
   end
 
-
-  # ----------------------------------
+  def self.clear_all_proof_of_membership_jpg_caches
+    all.each do |user|
+      user.clear_proof_of_membership_jpg_cache
+    end
+  end
 
   after_update :clear_proof_of_membership_jpg_cache,
                if: Proc.new { saved_change_to_member_photo_file_name? ||
-                              saved_change_to_first_name? ||
-                              saved_change_to_last_name? ||
-                              saved_change_to_membership_number? }
+                 saved_change_to_first_name? ||
+                 saved_change_to_last_name? ||
+                 saved_change_to_membership_number? }
 
   def cache_key(type)
     "user_#{id}_cache_#{type}"
@@ -118,12 +118,6 @@ class User < ApplicationRecord
     Rails.cache.delete(cache_key('pom'))
   end
 
-  def self.clear_all_proof_of_membership_jpg_caches
-    all.each do |user|
-      user.clear_proof_of_membership_jpg_cache
-    end
-  end
-
   def updating_without_name_changes
     # Not a new record and not saving changes to either first or last name
 
@@ -134,29 +128,25 @@ class User < ApplicationRecord
       will_save_change_to_attribute?('last_name'))
   end
 
-
   def most_recent_membership_payment
     most_recent_payment(THIS_PAYMENT_TYPE)
   end
-
 
   # TODO this should not be the responsibility of the User class. Need a MembershipManager class for this.
   def membership_start_date
     payment_start_date(THIS_PAYMENT_TYPE)
   end
 
-
   # TODO this should not be the responsibility of the User class. Need a MembershipManager class for this.
+  # FIXME what if no payment has been made?
   def membership_expire_date
     payment_expire_date(THIS_PAYMENT_TYPE)
   end
-
 
   # TODO this should not be the responsibility of the User class. Need a MembershipManager class for this.
   def membership_payment_notes
     payment_notes(THIS_PAYMENT_TYPE)
   end
-
 
   # TODO this should not be the responsibility of the User class. Need a MembershipManager class for this.
   # FIXME - this is ONLY about the payments, not the membership status as a whole.
@@ -184,13 +174,11 @@ class User < ApplicationRecord
     has_approved_shf_application? && membership_current?
   end
 
-
   # User has an approved membership application and
   # is up to date (current) on membership payments
   def membership_app_and_payments_current_as_of?(this_date)
     has_approved_shf_application? && membership_current_as_of?(this_date)
   end
-
 
   # Business rule: user can pay membership fee if:
   # 1. the user is not the admin (an admin cannot make a payment for a member or user)
@@ -222,63 +210,51 @@ class User < ApplicationRecord
     admin? || in_company?(company) #|| has_approved_app_for_company?(company)
   end
 
-
   def member_fee_payment_due?
     # FIXME: should member? be used here?
     member? && !membership_current?
   end
 
-
   def has_shf_application?
     shf_application&.valid?
   end
-
 
   def has_approved_shf_application?
     shf_application&.accepted?
   end
 
-
   def member_or_admin?
     admin? || member?
   end
-
 
   def in_company?(company)
     in_company_numbered?(company.company_number)
   end
 
-
   def in_company_numbered?(company_num)
     member? && has_approved_app_for_company_number?(company_num)
   end
-
 
   def has_approved_app_for_company?(company)
     has_approved_app_for_company_number?(company.company_number)
   end
 
-
   def has_approved_app_for_company_number?(company_num)
     has_app_for_company_number?(company_num) && apps_for_company_number(company_num).first.accepted?
   end
-
 
   def has_app_for_company?(company)
     has_app_for_company_number?(company.company_number)
   end
 
-
   def has_app_for_company_number?(company_num)
     apps_for_company_number(company_num)&.any?
   end
-
 
   # @return [Array] all shf_applications that contain the company, sorted by the application with the expire_date furthest in the future
   def apps_for_company(company)
     apps_for_company_number(company.company_number)
   end
-
 
   # @return [Array] all shf_applications that contain a company with the company_num, sorted by the application with the expire_date furthest in the future
   #   Note that right now a User can have only 1 ShfApplication, but in the future
@@ -289,7 +265,6 @@ class User < ApplicationRecord
     result.nil? ? [] : [shf_application].sort(&sort_apps_by_when_approved)
   end
 
-
   SORT_BY_MOST_RECENT_APPROVED_DATE = lambda { |app1, app2| app2.when_approved <=> app1.when_approved }
 
   # @return [Lambda] - the block (lambda) to use to sort shf_applications by the when_approved date
@@ -297,26 +272,21 @@ class User < ApplicationRecord
     SORT_BY_MOST_RECENT_APPROVED_DATE
   end
 
-
   def membership_guidelines_checklist_done?
     RequirementsForMembership.membership_guidelines_checklist_done?(self)
   end
-
 
   def full_name
     "#{first_name} #{last_name}"
   end
 
-
   def has_full_name?
     first_name.present? && last_name.present?
   end
 
-
   ransacker :padded_membership_number do
     Arel.sql("lpad(membership_number, 20, '0')")
   end
-
 
   def get_short_proof_of_membership_url(url)
     found = self.short_proof_of_membership_url
@@ -330,11 +300,9 @@ class User < ApplicationRecord
     end
   end
 
-
   def membership_packet_sent?
     !date_membership_packet_sent.nil?
   end
-
 
   # Toggle whether or not a membership package was sent to this user.
   #
@@ -354,7 +322,6 @@ class User < ApplicationRecord
     self.membership_number = self.membership_number.blank? ? get_next_membership_number : self.membership_number
   end
 
-
   def adjust_related_info_for_destroy
     remove_photo_from_filesystem
     record_deleted_payorinfo_in_payment_notes(self.class, email)
@@ -364,18 +331,15 @@ class User < ApplicationRecord
   # ===============================================================================================
   private
 
-
   # TODO this should not be the responsibility of the User class. Need a MembershipManager class for this.
   def get_next_membership_number
     self.class.connection.execute("SELECT nextval('membership_number_seq')").getvalue(0, 0).to_s
   end
 
-
   # remove the associated member photo from the file system by setting it to nil
   def remove_photo_from_filesystem
     member_photo = nil
   end
-
 
   def destroy_uploaded_files
     uploaded_files.each do |uploaded_file|

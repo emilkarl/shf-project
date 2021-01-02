@@ -302,6 +302,7 @@ en:
         twitter_card_type: &site_twitter_card_type Twitter card type
         facebook_app_id: &site_facebook_app_id Facebook Application ID
         payment_too_soon_days: &payment_too_soon_days Number of days that a user will be warned that a payment is 'too soon'
+        membership_expired_grace_period: &membership_expired_grace_period 'Number of days a member can pay without penalty after their membership expires'
 
       task_attempt:
         task_name: Task name
@@ -1394,6 +1395,7 @@ en:
         payment_too_soon_days: *payment_too_soon_days
         membership_guideline_list: &membership_guideline_list Membership Guideline List
         membership_guideline_list_tooltip: &membership_guideline_list_tooltip Choose a top level list that will be used as the Membership Guidelines list. (Only top level lists that are in use are shown.)
+        membership_expired_grace_period: *membership_expired_grace_period
         required_field: &required_field required field
 
       show:
@@ -1413,6 +1415,7 @@ en:
         facebook_app_id: *site_facebook_app_id
         missing: *missing
         payment_too_soon_days: *payment_too_soon_days
+        membership_expired_grace_period: *membership_expired_grace_period
         membership_guideline_list: *membership_guideline_list
         required_field: *required_field
 

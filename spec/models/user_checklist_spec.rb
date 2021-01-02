@@ -137,8 +137,8 @@ RSpec.describe UserChecklist, type: :model do
 
       it 'is ordered so the most recently created one is last' do
         second_list = create(:user_checklist, :completed, user: user1,
-               master_checklist: guideline_master,
-               num_completed_children: 2)
+                             master_checklist: guideline_master,
+                             num_completed_children: 2)
         second_list.update(created_at: Time.zone.now + 1.day)
 
         expect(described_class.membership_guidelines_for_user(user1).count).to eq 2
@@ -203,11 +203,13 @@ RSpec.describe UserChecklist, type: :model do
       result_list_positions = result.map(&:list_position)
       expect(result_list_positions).to match_array([0, 5])
     end
+
+    it 'size = completed items + uncompleted items' do
+      # The root of the list is also uncomplete, so it is counted, too
+      expect(three_complete_two_uncomplete_list.all_that_are_completed.size + three_complete_two_uncomplete_list.all_that_are_uncompleted.size).to eq(6)
+    end
   end
 
-  it 'size = completed items + uncompleted items (uncompleted includes root)' do
-    expect(three_complete_two_uncomplete_list.all_that_are_completed.size + three_complete_two_uncomplete_list.all_that_are_uncompleted.size).to eq(6)
-  end
 
   describe 'percent_complete' do
     context 'no children' do
@@ -248,7 +250,6 @@ RSpec.describe UserChecklist, type: :model do
           create(:user_checklist, parent: top3)
           create(:user_checklist, :completed, parent: top3)
           expect(top3.percent_complete).to eq 33
-
 
           top4 = create(:user_checklist)
           c4_1 = create(:user_checklist, :completed, parent: top4)
@@ -364,6 +365,7 @@ RSpec.describe UserChecklist, type: :model do
       end
     end
   end
+
 
   describe 'all_changed_by_completion_toggle' do
     describe 'is set to completed if it is not complete' do
@@ -739,6 +741,7 @@ RSpec.describe UserChecklist, type: :model do
     end
   end
 
+
   describe 'set_complete_including_children' do
     # Would be good to stub things so these tests don't hit the db so much
     it 'sets self to complete' do
@@ -805,6 +808,7 @@ RSpec.describe UserChecklist, type: :model do
     end
   end
 
+
   describe 'set_uncomplete_including_children' do
     # Would be good to stub things so these tests don't hit the db so much
     it 'sets self to uncomplete' do
@@ -843,6 +847,7 @@ RSpec.describe UserChecklist, type: :model do
     end
   end
 
+
   describe 'set_complete_update_parent' do
     let(:given_date_completed) { Time.parse("2020-10-31") }
 
@@ -875,6 +880,7 @@ RSpec.describe UserChecklist, type: :model do
       end
     end
   end
+
 
   describe 'set_uncomplete_update_parent' do
     it 'returns empty list if the checklist is already uncomplete' do

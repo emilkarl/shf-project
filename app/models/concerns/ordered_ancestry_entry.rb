@@ -74,11 +74,10 @@ module OrderedAncestryEntry
     # @param new_position [Integer] - the 0-based position for the new entry.
     #  Default = the size of the list of children,  which will place the new_entry at the end
     #
-    # @return [Array] - children with the new entry inserted
+    # @return [OrderedAncestryEntry] - children with the new entry inserted
     def insert(new_entry, new_position = children.size)
       increment_child_positions(new_position)
       new_entry.update(list_position: new_position, parent: self)
-      new_entry
     end
 
     alias_method :insert_in_children, :insert
@@ -87,7 +86,7 @@ module OrderedAncestryEntry
 
 
     def sorted_siblings
-      siblings.order(:list_position)
+      siblings.order(list_position: :asc)
     end
 
 

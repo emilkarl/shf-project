@@ -95,6 +95,7 @@ class UserChecklist < ApplicationRecord
   # Add .includes to the query used to get all descendants to help reduce N+1 queries
   def children
     # super.includes(:master_checklist).includes(:user)
+    save! unless persisted? # Ancestry gem requires that the object be saved before performing any ancestry queries
     super #.includes(:user)
   end
 

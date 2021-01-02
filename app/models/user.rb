@@ -183,6 +183,45 @@ class User < ApplicationRecord
     !membership_payment_expire_date.nil? && (membership_payment_expire_date > this_date)
   end
 
+  # The membership term has expired, but are they  still within a 'grace period'?
+  def membership_expired_in_grace_period?(this_date = Time.zone.now)
+    return false if this_date.nil?
+
+    term_expired? && date_within_grace_period?(this_date,
+                                               membership_expire_date,
+                                               membership_expired_grace_period)
+  end
+
+  def date_within_grace_period?(this_date = Date.current,
+                                start_date = membership_expire_date,
+                                grace_period = membership_expired_grace_period)
+    this_date.to_date <= (start_date + grace_period).to_date
+  end
+
+  def membership_expired_grace_period
+    self.class.membership_expired_grace_period
+  end
+
+  # @return [ActiveSupport::Duration]
+  def days_can_renew_early
+    self.class.days_can_renew_early
+  end
+
+
+  def can_renew_today?
+    can_renew_on?(Date.current)
+  end
+
+  # This just checks the dates about renewal, not any requirements for renewing a membership.
+  def can_renew_on?(this_date = Date.current)
+    return false if membership_expire_date.nil?
+
+    if this_date <= membership_expire_date
+      this_date >= (membership_expire_date - days_can_renew_early)
+    else
+      membership_expired_in_grace_period?(this_date)
+    end
+  end
 
   # User has an approved membership application and
   # is up to date (current) on membership payments
@@ -199,20 +238,36 @@ class User < ApplicationRecord
   # Business rule: user can pay membership fee if:
   # 1. the user is not the admin (an admin cannot make a payment for a member or user)
   #      AND
-  # 2. the user is a member
-  #     OR
-  #    ( user has at least one application with status == :accepted
-  #       AND
-  #       ( user has checked all ethical guidelines if they have to)
-  #    )
+  # 2. the user is a current member OR user was a current member and is still in the grace period for renewing)
+  #       and they are allowed to pay the renewal membership fee
+  #    OR
+  #    the user has is allowed to pay the new membership fee
   #
-  # What if a payment has already been made?  any check for that?
-  # TODO this should not be the responsibility of the User class. Need a MembershipManager class for this.
   def allowed_to_pay_member_fee?
-    # FIXME: use membership_current? instead of member?
-    !admin? && (member? || (shf_application&.accepted? && UserChecklistManager.completed_membership_guidelines_checklist?(self)))
+    return false if admin?
+
+    if membership_current? || membership_expired_in_grace_period?
+      allowed_to_pay_renewal_member_fee?
+    else
+      allowed_to_pay_new_membership_fee?
+    end
   end
 
+  # A user can pay a renewal membership fee if they have met all of the requirements for renewing,
+  #  excluding any payment required.
+  def allowed_to_pay_renewal_member_fee?
+    return false if admin?
+
+    RequirementsForRenewal.requirements_excluding_payments_met? self
+  end
+
+  # A user can pay a (new) membership fee if they have met all of the requirements for membership,
+  #  excluding any payment required.
+  def allowed_to_pay_new_membership_fee?
+    return false if admin?
+
+    RequirementsForMembership.requirements_excluding_payments_met? self
+  end
 
   # Business rule: user can pay h-brand license fee if:
   # 1. user is an admin

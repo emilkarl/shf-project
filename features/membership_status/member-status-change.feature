@@ -12,14 +12,15 @@ Feature: Membership status updated due to payments or expiration
   Background:
 
     Given the App Configuration is not mocked and is seeded
+
     And the Membership Ethical Guidelines Master Checklist exists
 
     Given the following users exist
-      | email               | admin | member | membership_number |
-      | emma@mutts.com      |       | true   | 1001              |
-      | bob@snarkybarky.com |       | true   | 1002              |
-      | lars@newapp.com     |       | false  |                   |
-      | admin@shf.se        | true  | false  |                   |
+      | email               | admin | member | membership_number | agreed_to_membership_guidelines |
+      | emma@mutts.com      |       | true   | 1001              | true                            |
+      | bob@snarkybarky.com |       | true   | 1002              | true                            |
+      | lars@newapp.com     |       | false  |                   | true                            |
+      | admin@shf.se        | true  | false  |                   |                                 |
 
     Given the following companies exist:
       | name                 | company_number | email                  | region    |
@@ -43,6 +44,10 @@ Feature: Membership status updated due to payments or expiration
       | bob@snarkybarky.com | 2018-03-01 | 2019-02-28  | member_fee   | betald | none    | 5560360793     |
       | bob@snarkybarky.com | 2018-03-02 | 2019-03-01  | branding_fee | betald | none    | 5560360793     |
 
+    Given these files have been uploaded:
+      | user_email     | file name | description                               |
+      | emma@mutts.com | image.png | Image of a class completion certification |
+
 
 
   # TODO should these be put into already existing .feature files?
@@ -50,8 +55,8 @@ Feature: Membership status updated due to payments or expiration
   # --- MEMBERSHIP PAYMENTS -------------
 
   @time_adjust
-  Scenario: Membership payment made before membership expires
-    Given the date is set to "2018-11-01"
+  Scenario: Membership payment made before membership expires (but not too early)
+    Given the date is set to "2018-11-30"
     And I am logged in as "emma@mutts.com"
     And I am on the "user details" page for "emma@mutts.com"
     Then I should be a member
@@ -69,7 +74,6 @@ Feature: Membership status updated due to payments or expiration
   Scenario: Membership payment made 1 day after membership expires
     Given the date is set to "2019-01-01"
     And I am logged in as "emma@mutts.com"
-    And I have agreed to all of the Membership Guidelines
     And I am on the "user details" page for "emma@mutts.com"
     And I should not be a member
     Then I click on t("menus.nav.members.pay_membership")
@@ -84,7 +88,6 @@ Feature: Membership status updated due to payments or expiration
   Scenario: Membership payment is made on expiration date
     Given the date is set to "2018-12-31"
     And I am logged in as "emma@mutts.com"
-    And I have agreed to all of the Membership Guidelines
     And I am on the "user details" page for "emma@mutts.com"
     And I should not be a member
     Then I click on t("menus.nav.members.pay_membership")
@@ -93,6 +96,34 @@ Feature: Membership status updated due to payments or expiration
     And I should see "2019-12-30"
     And I should be a member
     And My membership expiration date is 2019-12-30
+
+
+  @time_adjust
+  Scenario: Membership payment within grace period to renew after expiration
+    Given the date is set to "2019-01-01"
+    And I am logged in as "emma@mutts.com"
+    And I am on the "user details" page for "emma@mutts.com"
+    And I should not be a member
+    Then I click on t("menus.nav.members.pay_membership")
+    And I complete the membership payment
+    And I should see t("payments.success.success")
+    And I should see "2019-12-31"
+    And I should be a member
+    And My membership expiration date is 2019-12-31
+
+
+  @time_adjust
+  Scenario: Membership payment after grace period (after expiration)
+    Given the date is set to "2020-01-01"
+    And I am logged in as "emma@mutts.com"
+    And I am on the "user details" page for "emma@mutts.com"
+    And I should not be a member
+    Then I click on t("menus.nav.members.pay_membership")
+    And I complete the membership payment
+    And I should see t("payments.success.success")
+    And I should see "2020-12-31"
+    And I should be a member
+    And My membership expiration date is 2020-12-31
 
 
 

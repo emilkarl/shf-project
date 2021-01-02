@@ -172,6 +172,8 @@ class User < ApplicationRecord
     !!membership_expire_date&.future? # using '!!' will turn a nil into false
   end
 
+  alias_method :payments_current?, :membership_current?
+
 
   # TODO this should not be the responsibility of the User class. Need a MembershipManager class for this.
   # FIXME - this is ONLY about the payments, not the membership status as a whole.

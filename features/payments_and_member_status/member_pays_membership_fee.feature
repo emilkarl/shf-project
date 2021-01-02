@@ -11,13 +11,10 @@ Feature: Member pays membership fee
     Given the date is set to "2018-01-01"
 
     Given the following users exist:
-      | email          | admin | member | membership_number |
-      | emma@mutts.com |       | true   | 1001              |
-      | admin@shf.se   | true  | false  |                   |
+      | email          | admin | member | membership_number |agreed_to_membership_guidelines |
+      | emma@mutts.com |       | true   | 1001              | true                           |
+      | admin@shf.se   | true  | false  |                   |                                |
 
-    And the following users have agreed to the Membership Ethical Guidelines:
-      | email          |
-      | emma@mutts.com |
 
     Given the following companies exist:
       | name       | company_number | email               | region    |
@@ -31,11 +28,15 @@ Feature: Member pays membership fee
       | user_email     | start_date | expire_date | payment_type | status | hips_id |
       | emma@mutts.com | 2018-01-1  | 2018-12-31  | member_fee   | betald | none    |
 
+    Given these files have been uploaded:
+      | user_email     | file name | description                               |
+      | emma@mutts.com | image.png | Image of a class completion certification |
+
+
   @time_adjust
   Scenario: Member pays membership fee after term expires (after prior payment expiration date)
     Given the date is set to "2019-02-12"
     And I am logged in as "emma@mutts.com"
-    And I have agreed to all of the Membership Guidelines
     And I am on the "user account" page for "emma@mutts.com"
 #    And I should see t("payors.past_due")
     Then I click on t("users.show_for_applicant.pay_membership")
@@ -59,17 +60,15 @@ Feature: Member pays membership fee
 
 
   @time_adjust
-  Scenario: Member pays fee 'too soon' (way early) and extends membership
-    Given the date is set to "2018-01-02"
+  Scenario: Member pays fee early and extends membership
+    Given the date is set to "2018-11-20"
     And I am logged in as "emma@mutts.com"
     And I am on the "user account" page for "emma@mutts.com"
     And I should see "1001"
-    And I should see t("payors.too_early")
     Then I click on t("menus.nav.members.pay_membership")
     And I complete the membership payment
     And I should see t("payments.success.success")
     Then the user is paid through "2019-12-31"
-    #And I should see t("payors.paying_now_extends_until", fee_name: 'membership fee', term_name: 'membership', extended_end_date: '2019-12-31')
 
 
   @time_adjust

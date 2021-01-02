@@ -18,6 +18,9 @@ RSpec.describe MembershipStatusCheck, type: :model do
     allow(mock_log).to receive(:info)
     allow(mock_log).to receive(:record)
     allow(mock_log).to receive(:close)
+
+    allow(UserChecklistManager).to receive(:completed_membership_guidelines_checklist?)
+                                     .and_return(true)
   end
 
 

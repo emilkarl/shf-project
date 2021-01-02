@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-
+# FIXME stub calls to the Geocoder
 # Shared examples for the  Address model
 
 

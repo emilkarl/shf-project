@@ -1,4 +1,6 @@
-Feature: As an admin
+Feature: Admin can create and delete business subcategories
+
+  As an admin
   So that members can select the subcategories that apply to their business
   & so that visitors can search for the business subcategories they are interested in,
   I need to be able to create business subcategories

@@ -1,4 +1,6 @@
-Feature: As an admin
+Feature: Admin creates business categories; access
+
+  As an admin
   So that members can select the categories that their business falls into
   & so that visitors can search for the business categories they are interested in,
   I need to be able to create business categories

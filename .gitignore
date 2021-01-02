@@ -60,3 +60,4 @@ config/secrets.yml
 # ignore all directories named rubycritic no matter where they are
 # (rubycritic gem reports: do not put individual rubycritic reports into the repo)
 /**/rubycritic/
+/spec/examples.txt

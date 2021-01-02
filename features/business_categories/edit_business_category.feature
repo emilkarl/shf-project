@@ -1,4 +1,6 @@
-Feature: As an admin
+Feature: Admin edits business categories
+
+  As an admin
   In order to keep business categories correct and helpful to visitors and members
   I need to be able to edit and update them
 

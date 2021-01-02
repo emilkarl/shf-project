@@ -524,6 +524,11 @@ RSpec.describe ApplicationHelper, type: :helper do
     it 'allows to set the title element id' do
       expect(content_title(title, id: 'ID')).to include('id="ID"')
     end
+
+    it 'title can have HTML tags in it' do
+      title_w_html = 'Hello SHF Admin <span class="small">Is an Admin</span> <a class="shf-icon edit-user-account-icon" title="Edit the account for SHF Admin" href="/en/admin/anvandare/1/redigera"><i class="fas fa-edit"></i></a> <a class="shf-icon edit-user-profile-icon" title="Edit the profile for SHF Admin" href="/en/admin/user_profile_edit/1"><i class="fas fa-id-card"></i></a>'
+      expect(content_title(title_w_html)). to match(/<h1 class="entry-title">#{title_w_html}<\/h1>/)
+    end
   end
 
   describe '#user_name_for_display' do

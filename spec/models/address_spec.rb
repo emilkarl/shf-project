@@ -2,7 +2,7 @@ require 'rails_helper'
 
 require_relative 'address_shared_examples'
 
-
+# FIXME stub calls to the Geocoder
 RSpec.describe Address, type: :model do
 
   let(:new_region) { create(:region, name: 'New Region') }

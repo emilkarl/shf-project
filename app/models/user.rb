@@ -44,7 +44,7 @@ class User < ApplicationRecord
   validates :membership_number, uniqueness: true, allow_blank: true
 
   THIS_PAYMENT_TYPE = Payment::PAYMENT_TYPE_MEMBER
-
+  MOST_RECENT_UPLOAD_METHOD = :created_at
 
   scope :admins, -> { where(admin: true) }
   scope :not_admins, -> { where(admin: nil).or(User.where(admin: false)) }
@@ -101,6 +101,22 @@ class User < ApplicationRecord
                  saved_change_to_first_name? ||
                  saved_change_to_last_name? ||
                  saved_change_to_membership_number? }
+
+  # @return [ActiveSupport::Duration]
+  def self.membership_expired_grace_period
+    ActiveSupport::Duration.days(AdminOnly::AppConfiguration.config_to_use.membership_expired_grace_period.to_i)
+  end
+
+  def self.most_recent_upload_method
+    MOST_RECENT_UPLOAD_METHOD
+  end
+
+  # @return [ActiveSupport::Duration]
+  def self.days_can_renew_early
+    ActiveSupport::Duration.days(AdminOnly::AppConfiguration.config_to_use.payment_too_soon_days.to_i)
+  end
+
+  # ----------------------------------
 
   def cache_key(type)
     "user_#{id}_cache_#{type}"
@@ -316,6 +332,24 @@ class User < ApplicationRecord
     update(date_membership_packet_sent: new_sent_time)
   end
 
+  # TODO this doesn't belong in User.  but not sure yet where it does belong.
+  def file_uploaded_during_this_membership_term?
+    file_uploaded_on_or_after?(membership_start_date)
+  end
+
+  def file_uploaded_on_or_after?(the_date = Date.current)
+    return false if uploaded_files.blank?
+
+    most_recent_uploaded_file.send(most_recent_upload_method) >= the_date
+  end
+
+  def most_recent_uploaded_file
+    uploaded_files.order(most_recent_upload_method)&.last
+  end
+
+  def most_recent_upload_method
+    self.class.most_recent_upload_method
+  end
 
   # The fact that this can no longer be private is a smell that it should be refactored out into a separate class
   def issue_membership_number

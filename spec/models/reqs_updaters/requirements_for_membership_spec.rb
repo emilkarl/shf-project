@@ -10,29 +10,7 @@ RSpec.describe RequirementsForMembership, type: :model do
 
 
   let(:subject) { RequirementsForMembership }
-
-
-  let(:user) { create(:user) }
-
-  let(:member) { create(:member_with_membership_app) }
-
-  let(:member_expired_payment) do
-    create(:membership_fee_payment,
-           :successful,
-           user: member,
-           start_date: Time.zone.today - 1.year - 1.month,
-           expire_date: Time.zone.today - 1.year)
-  end
-
-  let(:member_current_payment) do
-    start_date, expire_date = User.next_membership_payment_dates(member.id)
-    create(:membership_fee_payment,
-           :successful,
-           user: member,
-           start_date: start_date,
-           expire_date: expire_date)
-  end
-
+  let(:user) { build(:user) }
 
   describe '.has_expected_arguments?' do
 
@@ -50,14 +28,82 @@ RSpec.describe RequirementsForMembership, type: :model do
   end
 
 
+  describe '.membership_guidelines_checklist_done?' do
+    it 'calls UserChecklistManager to see if the user has completed the Ethical guidelines checklist' do
+      expect(UserChecklistManager).to receive(:completed_membership_guidelines_checklist?)
+                                        .with(user)
+      subject.membership_guidelines_checklist_done?(user)
+    end
+  end
+
+
+  describe '.requirements_excluding_payments_met?' do
+    it 'all non-payment requirements  are && together' do
+      expect(user).to receive(:has_approved_shf_application?)
+                        .and_return(true)
+      expect(subject).to receive(:membership_guidelines_checklist_done?)
+                           .and_return(true)
+
+      expect(subject.requirements_excluding_payments_met?(user)).to be_truthy
+    end
+  end
+
+
   describe '.requirements_met?' do
 
-    context 'has approved application' do
+    it 'all non-payment requirements && all payment requirements' do
+      expect(subject).to receive(:requirements_excluding_payments_met?).with(user)
+                           .and_return(true)
+      expect(subject).to receive(:payment_requirements_met?).with(user)
+                                                            .and_return(true)
 
-      let(:approved_applicant) do
-        approved_app = create(:shf_application, :accepted)
-        approved_app.user
-      end
+      expect(subject.requirements_met?(user: user)).to be_truthy
+    end
+  end
+
+
+  describe '.payment_requirements_met?' do
+
+    it 'result = user.payments_current?' do
+      u = build(:user)
+      expect(u).to receive(:payments_current?).and_return(true)
+      expect(subject.payment_requirements_met?(u)).to be_truthy
+
+      expect(u).to receive(:payments_current?).and_return(false)
+      expect(subject.payment_requirements_met?(u)).to be_falsey
+    end
+  end
+
+
+  describe 'Integration tests' do
+    let(:member) { create(:member_with_membership_app) }
+
+    let(:member_expired_payment) do
+      create(:membership_fee_payment,
+             :successful,
+             user: member,
+             start_date: Time.zone.today - 1.year - 1.month,
+             expire_date: Time.zone.today - 1.year)
+    end
+
+    let(:member_current_payment) do
+      start_date, expire_date = User.next_membership_payment_dates(member.id)
+      create(:membership_fee_payment,
+             :successful,
+             user: member,
+             start_date: start_date,
+             expire_date: expire_date)
+    end
+
+
+    describe '.requirements_met?' do
+
+      context 'has approved application' do
+
+        let(:approved_applicant) do
+          approved_app = create(:shf_application, :accepted)
+          approved_app.user
+        end
 
       context 'membership guidelines ARE agreed to' do
         before(:each) { allow(UserChecklistManager).to receive(:completed_membership_guidelines_checklist?).and_return(true) }
@@ -87,7 +133,7 @@ RSpec.describe RequirementsForMembership, type: :model do
                  start_date: start_date,
                  expire_date: expire_date)
 
-          Timecop.freeze(expire_date + 1.day) do
+            travel_to(expire_date + 1.day) do
             expect(subject.requirements_met?({ user: approved_and_paid })).to be_falsey
           end
         end
@@ -125,7 +171,7 @@ RSpec.describe RequirementsForMembership, type: :model do
                  start_date: start_date,
                  expire_date: expire_date)
 
-          Timecop.freeze(expire_date + 1.day) do
+            travel_to(expire_date + 1.day) do
             expect(subject.requirements_met?({ user: approved_and_paid })).to be_falsey
           end
         end
@@ -169,7 +215,7 @@ RSpec.describe RequirementsForMembership, type: :model do
                        start_date: start_date,
                        expire_date: expire_date)
 
-                Timecop.freeze(expire_date + 1.day) do
+                travel_to(expire_date + 1.day) do
                   expect(subject.requirements_met?({ user: unapproved_and_paid })).to be_falsey
                 end
               end
@@ -182,6 +228,7 @@ RSpec.describe RequirementsForMembership, type: :model do
             end
           end
         end
+      end
     end
   end
 end

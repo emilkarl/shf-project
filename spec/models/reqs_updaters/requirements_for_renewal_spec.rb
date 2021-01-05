@@ -94,23 +94,14 @@ RSpec.describe RequirementsForRenewal, type: :model do
       expect(subject.payment_requirements_met?(u)).to be_truthy
     end
 
-    context 'a payment has been made but the expiration date is today or in the past' do
-
-      it 'result = is the payment expiration still in the grace period?' do
-        u = build(:user)
-        allow(u).to receive(:payments_current?).and_return(false)
-
-        expect(u).to receive(:membership_expired_in_grace_period?).and_return(true)
-        expect(subject.payment_requirements_met?(u)).to be_truthy
-      end
-    end
-
     it 'false if no payments have been made' do
       u = build(:user)
       expect(subject.payment_requirements_met?(u)).to be_falsey
     end
   end
 
+
+  # ------------------------------------------------------------------------------------------
 
 
   describe 'Integration tests' do
@@ -183,7 +174,7 @@ RSpec.describe RequirementsForRenewal, type: :model do
 
             context 'membership has expired' do
 
-              it 'true if membership payment made and still in grace period' do
+              it 'false if membership payment made and still in grace period' do
                 another_approved_app = create(:shf_application, :accepted)
                 approved_and_paid = another_approved_app.user
 
@@ -195,7 +186,7 @@ RSpec.describe RequirementsForRenewal, type: :model do
                        expire_date: expire_date)
 
                 travel_to(expire_date + 1.day) do
-                  expect(subject.requirements_met?({ user: approved_and_paid })).to be_truthy
+                  expect(subject.requirements_met?({ user: approved_and_paid })).to be_falsey
                 end
               end
             end

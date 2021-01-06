@@ -104,7 +104,7 @@ class User < ApplicationRecord
 
   # @return [ActiveSupport::Duration]
   def self.membership_expired_grace_period
-    ActiveSupport::Duration.days(AdminOnly::AppConfiguration.config_to_use.membership_expired_grace_period.to_i)
+    AdminOnly::AppConfiguration.config_to_use.membership_expired_grace_period.to_i.days
   end
 
   def self.most_recent_upload_method
@@ -113,7 +113,7 @@ class User < ApplicationRecord
 
   # @return [ActiveSupport::Duration]
   def self.days_can_renew_early
-    ActiveSupport::Duration.days(AdminOnly::AppConfiguration.config_to_use.payment_too_soon_days.to_i)
+    AdminOnly::AppConfiguration.config_to_use.payment_too_soon_days.to_i.days
   end
 
   # ----------------------------------
@@ -186,7 +186,7 @@ class User < ApplicationRecord
   end
 
   # The membership term has expired, but are they  still within a 'grace period'?
-  def membership_expired_in_grace_period?(this_date = Time.zone.now)
+  def membership_expired_in_grace_period?(this_date = Date.current)
     return false if this_date.nil?
 
     term_expired? && date_within_grace_period?(this_date,

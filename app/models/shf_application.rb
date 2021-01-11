@@ -198,18 +198,6 @@ class ShfApplication < ApplicationRecord
   end
 
 
-  # @return [boolean] - is the application in a state where the applicant can edit it?
-  def applicant_can_edit?
-    CAN_EDIT_STATES.include? state.to_sym
-  end
-
-
-  # @return [Boolean] - can the applicant upload files for this application?
-  def applicant_can_upload_files?
-    applicant_can_edit? || (accepted? && user.membership_app_and_payments_current?)
-  end
-
-
   def upload_files_will_be_delivered_later?
     file_delivery_method&.email? || file_delivery_method&.mail?
   end

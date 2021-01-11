@@ -56,6 +56,6 @@ class RequirementsForRenewal < AbstractRequirements
   end
 
   def self.payment_requirements_met?(user)
-    user.payments_current? || user.membership_expired_in_grace_period?
+    user.payments_current?
   end
 end

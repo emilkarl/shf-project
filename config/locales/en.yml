@@ -495,7 +495,7 @@ en:
       description: *description
 
     new:
-      title: Upload a file
+      title: &upload_new_file Upload a file
       description: *description
       submit: *submit
       index_title: *uploaded_files_index_title
@@ -536,6 +536,11 @@ en:
       admin_index_title: *uploaded_files_admin_index_title
       delete: "Radera %{file_name}"
 
+    small_table_files_list:
+      associated_with_application: "Application"
+      date_uploaded: "Uploaded"
+      description: *description
+      file_name: file name
 
   shf_applications:
     new:
@@ -640,17 +645,16 @@ en:
       title: About Application and Membership
       member:
         title: Welcome
-        using_the_logo: "It is important that we all follow our graphic identity,
+        using_the_logo: &membership_logo_use "It is important that we all follow our graphic identity,
                          that the logo is used in a uniform manner,
                           that you do not create your own version.
                           This is to promote recognition and clarity among customers.
                          This also guards against counterfeits of the H mark."
-        upload_this_image: "We'd like you to put the image below on your website
-                            and link this image to:"
-        using_the_h_mark: "We'd also like you to put the H-mark on your homepage.
+        upload_this_image: &put_membership_logo_on_your_website "We'd like you to put the image below on your website
+                            and link this image to: https://www.sverigeshundforetagare.se"
+        using_the_h_mark: &h_mark_use "We'd also like you to put the H-mark on your homepage.
                         This shows that you have achieved the H-mark and so
-                        provide more value. The H-mark image is below.
-                        It should be linked to:"
+                        provide more value. Link the H-mark image to: https://sverigeshundforetagare.se/agare/h-markt-av-sveriges-hundforetagare/"
         ffs: You find the image in your account.
 
       user:
@@ -978,7 +982,7 @@ en:
     all_business_categories: All categories
 
   users:
-    edit_user_account: &edit_user_account Edit the account for %{name}
+    edit_user_account: &edit_user_account "Edit the account for %{name}"
 
     index:
       title: All Users
@@ -1038,34 +1042,54 @@ en:
       membership_number: *membership_number
 
     show_for_applicant:
-      title: "Steps to SHF Membership:"
-      welcome: "Welcome to Sveriges Hundföretagare!"
-      welcome_want_to_have_benefits: "Do you want to be included in a context that confirms that your qualifications, dedication and dog knowledge are counted?"
+        title: "Steps to SHF Membership:"
+        welcome: "Welcome to Sveriges Hundföretagare!"
+        welcome_want_to_have_benefits: "Do you want to be included in a context that confirms that your qualifications, dedication and dog knowledge are counted?"
 
-      apply_4_membership: *apply_for_membership
-      my_application: &my_application My Application
-      submit_application: Fill out and submit your application.
-      app_status_new: "Thanks for submitting your application. We'll start reviewing it soon. You can always email us with questions."
-      app_status_under_review: "Thanks for submitting your application. We're reviewing it. You'll get an email letting you know the status."
-      app_status_waiting_for_applicant: We are waiting for information from you.
-      app_status_ready_for_review: "Thanks for submitting your application and information. We'll start reviewing it soon. You can always email us with questions."
-      app_status_accepted: Your application has been accepted.
-      app_status_rejected: Your application has been denied.
+        apply_4_membership: *apply_for_membership
+        my_application: &my_application My Application
+        submit_application: Fill out and submit your application.
+        app_status_new: "Thanks for submitting your application. We'll start reviewing it soon. You can always email us with questions."
+        app_status_under_review: "Thanks for submitting your application. We're reviewing it. You'll get an email letting you know the status."
+        app_status_waiting_for_applicant: We are waiting for information from you.
+        app_status_ready_for_review: "Thanks for submitting your application and information. We'll start reviewing it soon. You can always email us with questions."
+        app_status_accepted: Your application has been accepted.
+        app_status_rejected: Your application has been denied.
+        pay_membership: *pay_membership
+        when_can_pay:  &when_can_pay Once your application has been accepted and you've agreed to the guidelines, you can make your payment.
+
+
+    renewal:
+      title_time_to_renew: "It's time to renew!"
+      title_renewal_overdue: "You are overdue to renew."
+      renewal_overdue_warning: "Your membership has lapsed! But you can still renew without resubmitting a new application. Just follow the steps below."
+      instructions: "You need to renew your membership! Here are the steps you must complete so you can keep enjoying the benefits of SHF membership:"
+      steps_to_renew: "Steps to renew your membership:"
+      pay_button_disabled_info: "Once you have completed the steps above, you can make your payment."
       pay_membership: *pay_membership
-      when_can_pay: Once your application has been accepted and you've agreed to the guidelines, you can make your payment.
+
 
     ethical_guidelines_link_or_checklist:
       agree_to_guidelines: Agree to All Membership Guidelines
       agreed_to: Agreed to
       membership_guidelines: All Membership Guidelines
 
+    uploaded_files_requirement:
+      have_been_uploaded: Files have been uploaded during your membership term
+      need_to_upload: You need to upload files to show that you have continued your professional education and still meet SHF membership requirements.
+      upload_file: *upload_new_file
+      upload_another: Upload another file
+
     show_member_images_row_cols:
       email: *email
       proof_of_membership: &proof_of_membership Proof of Membership
+      using_membership_logo: *membership_logo_use
+      put_membership_logo_on_site: *put_membership_logo_on_your_website
       proof_of_membership_describe: &proof_of_membership_describe This image is your proof of membership in SHF.
       proof_of_membership_photo_needed: &proof_of_membership_photo_needed 'If you see "Photo Unavailable" then please
                                            upload a photo of yourself here: '
       company_h_brand: &company_h_brand Company H-Brand for %{company}
+      using_h_mark: *h_mark_use
       company_h_brand_describe: &company_h_brand_describe This image is your company's H-Brand.
 
       image_how_to_use_html: &image_how_to_use_html "You can download the image, take a screenshot,
@@ -1084,6 +1108,9 @@ en:
       use_this_image_link_html: "<span style='font-weight: bold'>
                                   Use this link in an external website
                                   (will return a JPG image):</span>"
+
+    show_uploaded_files_section_row_cols:
+      title: Uploaded Files
 
     proof_of_membership:
       proof_title: *proof_of_membership

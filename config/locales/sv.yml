@@ -501,7 +501,7 @@ sv:
       description: *description
 
     new:
-      title: Upload a file
+      title: &upload_new_file Upload a file
       description: *description
       submit: *submit
       index_title: *uploaded_files_index_title
@@ -542,6 +542,11 @@ sv:
       admin_index_title: *uploaded_files_admin_index_title
       delete: "Radera %{file_name}"
 
+    small_table_files_list:
+      associated_with_application: "Application"
+      date_uploaded: "Uploaded"
+      description: *description
+      file_name: file name
 
   shf_applications:
     new:
@@ -644,16 +649,16 @@ sv:
       title: Om ansökan och medlemskap
       member:
         title: Välkommen
-        using_the_logo: Det är viktigt att vi alla följer vår grafiska profil,
+        using_the_logo: &membership_logo_use Det är viktigt att vi alla följer vår grafiska profil,
                         att loggan nyttjas på ett enhetligt sätt och inga egna
                         versioner skapas av dig som är medlem. Detta för att
                         skapa igenkänning, tydlighet gentemot kund. Och skydda
                         oss mot förfalskningar av H-märket.
-        upload_this_image: 'Vi önskar att du lägger upp nedanstående bild på din
+        upload_this_image: &put_membership_logo_on_your_website 'Vi önskar att du lägger upp nedanstående bild på din
                           hemsida. Samt länkar denna bild till: "https://www.sverigeshundforetagare.se"'
-        using_the_h_mark: 'Vi önskar även att du pryder din hemsida med H-märket.
+        using_the_h_mark: &h_mark_use 'Vi önskar även att du pryder din hemsida med H-märket.
                           För att visa att ni är just H-märkta med allt vad det innebär.
-                          Bilden nedan nyttjas i detta syfte och länkas till: "https://sverigeshundforetagare.se/agare/h-markt-av-sveriges-hundforetagare/"'
+                          H-märkningsbilden används för detta ändamål och länkad till: "https://sverigeshundforetagare.se/agare/h-markt-av-sveriges-hundforetagare/"'
         ffs: Du hittar ditt h-märke och ditt behörighetsbevis under ditt konto.
       waiting_for_approval:
         title: Hej, kul att du vill bli medlem
@@ -1060,21 +1065,38 @@ sv:
       app_status_accepted: Din ansökan är godkänd och klar.
       app_status_rejected: Din ansökan är avböjd.
       pay_membership: *pay_membership
-      when_can_pay: När din ansökan är godkänd och du har skrivit under medlemsåtagandet (kryssat i alla rutor) kan du betala.
+      when_can_pay: &when_can_pay När din ansökan är godkänd och du har skrivit under medlemsåtagandet (kryssat i alla rutor) kan du betala.
 
+    renewal:
+      title_time_to_renew: "It's time to renew!"
+      title_renewal_overdue: You are overdue to renew.
+      renewal_overdue_warning: "Your membership has lapsed! But you can still renew without resubmitting a new application. Just follow the steps below."
+      instructions: "You need to renew your membership! Here are the steps you must complete so you can keep enjoying the benefits of SHF membership:"
+      steps_to_renew: "Steg för att förnya ditt medlemskap:"
+      pay_membership: *pay_membership
+      pay_button_disabled_info: Once you have completed the steps above, you can make your payment.
 
     ethical_guidelines_link_or_checklist:
       agree_to_guidelines: Skriv under medlemsåtagandet
       agreed_to: Skrivit under
       membership_guidelines: Alla medlemsåtaganden
 
+    uploaded_files_requirement:
+      have_been_uploaded: Files have been uploaded during your membership term
+      need_to_upload: You need to upload files to show that you have continued your professional education and still meet SHF membership requirements.
+      upload_file: *upload_new_file
+      upload_another: Upload another file
+
     show_member_images_row_cols:
       email: *email
       proof_of_membership: &proof_of_membership Behörighetsbevis
+      using_membership_logo: *membership_logo_use
+      put_membership_logo_on_site: *put_membership_logo_on_your_website
       proof_of_membership_describe: &proof_of_membership_describe Detta är ditt behörighetsbevis.
       proof_of_membership_photo_needed: &proof_of_membership_photo_needed 'Om du saknar profilbild (ser "Photo
                                            Unavailable"), ladda upp en bild av dig själv (utan hund) här '
       company_h_brand: &company_h_brand Företaget H-märke för %{company}
+      using_h_mark: *h_mark_use
       company_h_brand_describe: &company_h_brand_describe Detta är ditt företags H-märke.
 
       use_guidelines: &use_guidelines riktlinjer
@@ -1095,6 +1117,9 @@ sv:
       show_image: &show_image Visa bild
       copy_image_url: &copy_image_url Kopiera bildadress
       copied:  &copied Kopierat
+
+    show_uploaded_files_section_row_cols:
+      title: Uploaded Files
 
     proof_of_membership:
       proof_title: *proof_of_membership

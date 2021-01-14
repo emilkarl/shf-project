@@ -2190,6 +2190,62 @@ RSpec.describe User, type: :model do
     end
   end
 
+  describe 'most_recent_uploaded_file' do
+    let(:yesterday) { Date.current - 1.day }
+    let(:tomorrow) { Date.current + 1.day }
+    let(:faux_file_today) { double('UploadedFile', created_at: Date.current) }
+    let(:faux_file_tomorrow) { double('UploadedFile', created_at: tomorrow) }
+    let(:faux_file_yesterday) { double('UploadedFile', created_at: yesterday) }
+    let(:faux_file_one_week_ago) { double('UploadedFile', created_at: Date.current - 7.days) }
+
+    it 'nil if there are no uploaded files' do
+      expect(build(:user).most_recent_uploaded_file).to be_nil
+    end
+
+    it 'returns the most recently created uploaded_file for the user' do
+      u = build(:user, uploaded_files: [])
+      file1 = create(:uploaded_file, :pdf, user: u)
+      file1.update(created_at: Time.zone.now)
+      file2 = create(:uploaded_file, :jpg, user: u)
+      file2.update(created_at: (Time.zone.now - 1.day))
+      u.uploaded_files << file1 << file2
+
+      expect(u).to receive(:uploaded_files).and_call_original
+      expect(u.most_recent_uploaded_file).to eq(file1)
+    end
+  end
+
+  describe '.most_recent_upload_method' do
+    it 'is the created_at date' do
+      expect(described_class.most_recent_upload_method).to eq(:created_at)
+    end
+  end
+
+  describe 'most_recent_upload_method' do
+    it 'calls the class method' do
+      expect(described_class).to receive(:most_recent_upload_method) #.and_call_original
+      subject.most_recent_upload_method
+    end
+  end
+
+  describe 'issue_membership_number' do
+    pending
+  end
+end
+
+  describe 'file_uploaded_during_this_membership_term?' do
+
+    it 'gets the files uploaded on or after the membership start date' do
+      u = build(:user)
+      start_date = Date.current - 2
+      allow(u).to receive(:membership_start_date)
+                    .and_return(start_date)
+      expect(u).to receive(:file_uploaded_on_or_after?)
+                     .with(start_date)
+      u.file_uploaded_during_this_membership_term?
+    end
+  end
+
 
   describe 'files_uploaded_during_this_membership' do
     let(:today) { Date.current }

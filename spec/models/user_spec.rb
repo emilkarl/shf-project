@@ -2228,10 +2228,6 @@ RSpec.describe User, type: :model do
     end
   end
 
-  describe 'issue_membership_number' do
-    pending
-  end
-end
 
   describe 'file_uploaded_during_this_membership_term?' do
 

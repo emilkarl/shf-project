@@ -131,6 +131,8 @@ begin
 
     ActivityLogger.open(SEEDING_LOG_FILE_NAME, SEEDING_LOG_FACILITY, 'Users') do |log|
 
+      SeedHelper::UsersFactory.seed_predefined_users
+
       number_of_users = (ENV['SHF_SEED_USERS'] || SEED_USERS).to_i
       log.info("Creating #{number_of_users} additional users. (This number can be set with ENV['SHF_SEED_USERS'])...")
       while users.length < number_of_users - 1 do

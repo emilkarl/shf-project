@@ -90,6 +90,7 @@ FactoryBot.define do
     #
     factory :member_with_expiration_date do
 
+      # FIXME this attribute no longer means anything.
       member { true }
 
       transient do

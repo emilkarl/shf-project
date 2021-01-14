@@ -1,4 +1,8 @@
-Feature: As a Member
+Feature: Users are taken to the correct page after logging in
+
+  TODO: is this still needed or is everything covered by log_in.feature?
+
+  As a Member
   So that I can get the correct information
   Information page should show correct information
 

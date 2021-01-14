@@ -70,7 +70,6 @@
   }
 }
 
-
 .steps {
   .step {
     margin-top: 1rem;
@@ -81,7 +80,60 @@
   }
 }
 
-
-.is-complete{
+.is-complete {
   color: $checkbox-complete-color;
+}
+
+$highlight-yellow: #ffffe0;
+
+.renewal-section {
+
+  $renewal-lmargin: 1em;
+
+  margin-top: 1rem;
+
+  .intro {
+    .alert.alert-danger,
+    .alert.alert-warning {
+      margin-bottom: 0;
+      margin-top: 0;
+      padding-top: 0;
+    }
+
+    h3.section-title {
+      margin-bottom: 0;
+      margin-top: 1rem;
+    }
+  }
+
+  .instructions {
+    margin-left: $renewal-lmargin;
+  }
+
+  .warn {
+    color: $warn-red-text;
+    font-weight: bold;
+  }
+
+  .next-steps {
+    margin-left: $renewal-lmargin;
+    margin-top: 1em;
+
+    .steps-title {
+      color: $warn-red-text;
+      font-weight: bold;
+    }
+
+    .upload-qualification-file {
+
+      .uploaded-files {
+        font-size: smaller;
+
+        .table-sm {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+
 }

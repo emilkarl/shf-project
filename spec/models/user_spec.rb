@@ -2178,6 +2178,7 @@ RSpec.describe User, type: :model do
   end
 
   describe 'file_uploaded_during_this_membership_term?' do
+
     it 'gets the files uploaded on or after the membership start date' do
       u = build(:user)
       start_date = Date.current - 2
@@ -2188,6 +2189,70 @@ RSpec.describe User, type: :model do
       u.file_uploaded_during_this_membership_term?
     end
   end
+
+
+  describe 'files_uploaded_during_this_membership' do
+    let(:today) { Date.current }
+    let(:yesterday) { Date.current - 1.day }
+    let(:faux_file_today) { double('UploadedFile', created_at: Date.current) }
+    let(:faux_file_yesterday) { double('UploadedFile', created_at: yesterday) }
+    let(:faux_file_one_week_ago) { double('UploadedFile', created_at: Date.current - 7.days) }
+
+    context 'user is a member' do
+
+      context "user's membership is in the grace period (expired, but can still renew without penalty)" do
+
+        it 'files were uploaded on or after the start date of this membership term' do
+          member = build(:user)
+          allow(member).to receive(:membership_current?).and_return(true)
+          allow(member).to receive(:membership_start_date).and_return(yesterday)
+
+          expect(member).to receive(:uploaded_files).and_return([faux_file_today, faux_file_yesterday, faux_file_one_week_ago])
+          expect(member).to receive(:uploaded_files_most_recent_first).and_return([faux_file_today, faux_file_yesterday, faux_file_one_week_ago])
+
+          expect(member.files_uploaded_during_this_membership).to eq([faux_file_today, faux_file_yesterday])
+        end
+      end
+
+
+      it 'empty list if no files have been uploaded ever' do
+        member = build(:user)
+        allow(member).to receive(:membership_current?).and_return(true)
+        allow(member).to receive(:uploaded_files).and_return([])
+        expect(member).not_to receive(:uploaded_files_most_recent_first)
+        expect(member.files_uploaded_during_this_membership).to be_empty
+      end
+
+      it 'empty list if files only uploaded during previous membership term' do
+        member = build(:user)
+        allow(member).to receive(:membership_current?).and_return(true)
+        allow(member).to receive(:membership_start_date).and_return(today)
+
+        expect(member).to receive(:uploaded_files).and_return([faux_file_yesterday, faux_file_one_week_ago])
+        expect(member).to receive(:uploaded_files_most_recent_first).and_return([faux_file_yesterday, faux_file_one_week_ago])
+        expect(member.files_uploaded_during_this_membership).to eq([])
+      end
+
+      it 'files were uploaded on or after the start date of this membership term' do
+        member = build(:user)
+        allow(member).to receive(:membership_current?).and_return(true)
+        allow(member).to receive(:membership_start_date).and_return(yesterday)
+
+        expect(member).to receive(:uploaded_files).and_return([faux_file_today, faux_file_yesterday, faux_file_one_week_ago])
+        expect(member).to receive(:uploaded_files_most_recent_first).and_return([faux_file_today, faux_file_yesterday, faux_file_one_week_ago])
+
+        expect(member.files_uploaded_during_this_membership).to eq([faux_file_today, faux_file_yesterday])
+      end
+    end
+
+    it 'empty list if user is not a member' do
+      not_member = build(:user)
+
+      expect(not_member).not_to receive(:uploaded_files_most_recent_first)
+      expect(not_member.files_uploaded_during_this_membership).to be_empty
+    end
+  end
+
 
   describe 'most_recent_uploaded_file' do
     let(:yesterday) { Date.current - 1.day }

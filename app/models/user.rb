@@ -394,6 +394,14 @@ class User < ApplicationRecord
     file_uploaded_on_or_after?(membership_start_date)
   end
 
+  # TODO this doesn't belong in User.  but not sure yet where it does belong.
+  def files_uploaded_during_this_membership
+    return [] unless membership_current? || membership_expired_in_grace_period?
+    return [] if uploaded_files.blank?
+
+    uploaded_files_most_recent_first.select { |uploaded_file| uploaded_file.send(most_recent_upload_method) >= membership_start_date }
+  end
+
   def file_uploaded_on_or_after?(the_date = Date.current)
     return false if uploaded_files.blank?
 
@@ -401,7 +409,11 @@ class User < ApplicationRecord
   end
 
   def most_recent_uploaded_file
-    uploaded_files.order(most_recent_upload_method)&.last
+    uploaded_files_most_recent_first&.last
+  end
+
+  def uploaded_files_most_recent_first
+    uploaded_files.order(most_recent_upload_method)
   end
 
   def most_recent_upload_method

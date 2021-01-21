@@ -18,6 +18,12 @@ class User < ApplicationRecord
 
   before_destroy :adjust_related_info_for_destroy
 
+  after_update :clear_proof_of_membership_jpg_cache,
+               if: Proc.new { saved_change_to_member_photo_file_name? ||
+                 saved_change_to_first_name? ||
+                 saved_change_to_last_name? ||
+                 saved_change_to_membership_number? }
+
   has_one :shf_application, dependent: :destroy
   accepts_nested_attributes_for :shf_application, update_only: true
 
@@ -96,11 +102,6 @@ class User < ApplicationRecord
     end
   end
 
-  after_update :clear_proof_of_membership_jpg_cache,
-               if: Proc.new { saved_change_to_member_photo_file_name? ||
-                 saved_change_to_first_name? ||
-                 saved_change_to_last_name? ||
-                 saved_change_to_membership_number? }
 
   # @return [ActiveSupport::Duration]
   def self.membership_expired_grace_period

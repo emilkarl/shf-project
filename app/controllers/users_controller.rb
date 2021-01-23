@@ -42,7 +42,7 @@ class UsersController < ApplicationController
 
     action_params, @items_count, items_per_page = process_pagination_params('user')
 
-    if action_params then
+    if action_params
       @filter_are_members = action_params[:membership_filter] == '1'
       @filter_are_not_members = action_params[:membership_filter] == '2'
     end

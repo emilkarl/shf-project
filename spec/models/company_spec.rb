@@ -1281,8 +1281,64 @@ RSpec.describe Company, type: :model, focus: true do
       end
 
     end
-
   end # describe '#earliest_current_member_fee_paid'
+
+
+  describe 'in_good_standing?' do
+    let(:co) { build(:company) }
+
+    context 'required information for a company is complete' do
+      before(:each) { allow(co).to receive(:complete_information?).and_return(true) }
+
+      it 'true if branding license payment is current' do
+        allow(co).to receive(:branding_license_current?).and_return(true)
+        expect(co.in_good_standing?).to be_truthy
+      end
+
+      it 'false if branding license payment is not current' do
+        allow(co).to receive(:branding_license_current?).and_return(false)
+        expect(co.in_good_standing?).to be_falsey
+      end
+    end
+
+    it 'false if required information for a company is not complete' do
+      allow(co).to receive(:complete_information?).and_return(false)
+      expect(co.in_good_standing?).to be_falsey
+    end
+  end
+
+
+  describe 'complete?' do
+    it 'is the result of RequirementsForCoInfoComplete.requirements_met?' do
+      co = build(:company)
+      expect(RequirementsForCoInfoComplete).to receive(:requirements_met?).with(company: co)
+      co.complete?
+    end
+  end
+
+
+  describe 'searchable?' do
+    let(:co) { build(:company) }
+
+    context 'has a current branding license' do
+      before(:each) { allow(co).to receive(:branding_license_current?).and_return(true) }
+
+      it 'true if there are any current members' do
+        allow(co).to receive(:current_members).and_return([build(:user)])
+        expect(co.searchable?).to be_truthy
+      end
+
+      it 'false if there are no current members' do
+        allow(co).to receive(:current_members).and_return([])
+        expect(co.searchable?).to be_falsey
+      end
+    end
+
+    it 'false if there is no current branding license' do
+      allow(co).to receive(:branding_license_current?).and_return(false)
+      expect(co.searchable?).to be_falsey
+    end
+  end
 
 
   describe '#missing_region?' do

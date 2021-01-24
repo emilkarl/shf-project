@@ -93,7 +93,7 @@ RSpec.describe AbstractUpdater, type: :model do
   end
 
 
-  describe 'subclasses must define; raises NoMethodError' do
+  describe 'subclasses must define these methods; raises NoMethodError' do
 
     it '.update_requirements_checker' do
       expect { described_class.update_requirements_checker }.to raise_error NoMethodError

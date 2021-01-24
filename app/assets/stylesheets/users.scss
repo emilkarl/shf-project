@@ -149,14 +149,32 @@ $highlight-yellow: #ffffe0;
 
 }
 
-.in-grace-period {
+.expire-date-background.current,
+.membership-status.current {
+  background-color:$yes-background-green;
+}
+
+.expire-date-background.expires-soon,
+.membership-status.expires-soon {
+  background-color: $maybe-background-yellow;
+}
+
+.expire-date-background.in-grace-period,
+.membership-status.in-grace-period {
   background-color: $in-grace-period-color;
 }
 
-.past-member {
+.expire-date-background.past-member,
+.membership-status.past-member {
   background-color: $past-member-color;
   font-style: italic;
 }
+
+// No formatting for not-a-member
+// .expire-date-background.not-a-member,
+// .membership-status.not-a-member {
+//}
+
 
 .legend {
   border: solid thin $legend-border-color;

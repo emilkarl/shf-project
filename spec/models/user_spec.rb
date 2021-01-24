@@ -1227,37 +1227,56 @@ RSpec.describe User, type: :model do
         end
       end
     end
-
   end
 
 
-  describe '#allowed_to_pay_member_fee?' do
+  describe 'allowed_to_pay_member_fee?' do
+
+    it 'default date = Date.current' do
+      u = create(:user)
+      expect(u).to receive(:payments_current_as_of?)
+                     .with(Date.current)
+                     .and_return(false)
+      expect(u).to receive(:membership_expired_in_grace_period?)
+                     .with(Date.current)
+                     .and_return(false)
+      u.allowed_to_pay_member_fee?
+    end
+
+    it 'can check for a given date' do
+      u = create(:user)
+      yesterday = Date.current - 1.day
+      expect(u).to receive(:payments_current_as_of?)
+                     .with(yesterday)
+                     .and_return(false)
+      expect(u).to receive(:membership_expired_in_grace_period?)
+                     .with(yesterday)
+                     .and_return(false)
+      u.allowed_to_pay_member_fee?(yesterday)
+    end
 
     it 'false if the user is an admin' do
       expect(build(:admin).allowed_to_pay_member_fee?).to be_falsey
     end
 
     context 'not an admin' do
+      let(:member) { build(:user) }
 
-      context 'membership_current? is true' do
-        before(:each) { }
+      context 'payments_current_as_of? is true' do
+        before(:each) { allow(member).to receive(:payments_current_as_of?).and_return(true) }
 
         it 'is the result of allowed_to_pay_renewal_fee?' do
-          member = build(:member_with_expiration_date, expiration_date: (Date.current - 2))
-          allow(member).to receive(:membership_current?).and_return(true)
-
           expect(member).to receive(:allowed_to_pay_renewal_member_fee?)
           member.allowed_to_pay_member_fee?
         end
       end
 
-      context 'membership_current? is false' do
-        before(:each) { allow(member).to receive(:membership_current?).and_return(false) }
+      context 'payments_current_as_of? is false' do
+        before(:each) { allow(member).to receive(:payments_current_as_of?).and_return(false) }
 
         context 'membership_expired_in_grace_period? is true' do
 
           it 'is the result of allowed_to_pay_renewal_fee?' do
-            member = build(:member_with_expiration_date, expiration_date: (Date.current - 2))
             allow(member).to receive(:membership_expired_in_grace_period?)
                                                      .and_return(true)
 
@@ -1269,7 +1288,6 @@ RSpec.describe User, type: :model do
         context 'membership_expired_in_grace_period? is false (not a member and not in the grace period)' do
 
           it 'is the result of allowed_to_pay_new_membership_fee?' do
-            member = build(:member_with_expiration_date, expiration_date: (Date.current - 2))
             allow(member).to receive(:membership_expired_in_grace_period?)
                                .and_return(false)
 
@@ -1280,11 +1298,28 @@ RSpec.describe User, type: :model do
 
       end
     end
-
   end
 
 
   describe 'allowed_to_pay_renewal_member_fee?' do
+
+    it 'default date = Date.current' do
+      u = create(:user)
+      expect(RequirementsForRenewal).to receive(:requirements_excluding_payments_met?)
+                                          .with(u, Date.current)
+                                          .and_return(true)
+      u.allowed_to_pay_renewal_member_fee?
+    end
+
+    it 'can check for a given date' do
+      u = create(:user)
+      yesterday = Date.current - 1.day
+      expect(RequirementsForRenewal).to receive(:requirements_excluding_payments_met?)
+                                          .with(u,yesterday)
+                                          .and_return(true)
+      u.allowed_to_pay_renewal_member_fee?(yesterday)
+    end
+
     it 'false if user is an admin' do
       expect(build(:admin).allowed_to_pay_renewal_member_fee?).to be_falsey
     end
@@ -1292,24 +1327,91 @@ RSpec.describe User, type: :model do
     it 'returns the result of RequirementsForRenewal.requirements_excluding_payments_met?' do
       u = build(:user)
       expect(RequirementsForRenewal).to receive(:requirements_excluding_payments_met?)
-                                          .with(u)
+                                          .with(u, anything)
       u.allowed_to_pay_renewal_member_fee?
     end
   end
 
 
   describe 'allowed_to_pay_new_membership_fee?' do
+
     it 'false if user is an admin' do
       expect(build(:admin).allowed_to_pay_new_membership_fee?).to be_falsey
     end
 
-    it 'returns the result of RequirementsForMembership.requirements_excluding_payments_met?' do
-      u = build(:user)
-      expect(RequirementsForMembership).to receive(:requirements_excluding_payments_met?)
-                                             .with(u)
-      u.allowed_to_pay_new_membership_fee?
+    context 'default given is Date.current' do
+      it 'returns the result of RequirementsForMembership.requirements_excluding_payments_met?' do
+        u = build(:user)
+        expect(RequirementsForMembership).to receive(:requirements_excluding_payments_met?)
+                                               .with(u, Date.current)
+        u.allowed_to_pay_new_membership_fee?
+      end
+    end
+
+    context 'uses a specific given date' do
+
+      it 'returns the result of RequirementsForMembership.requirements_excluding_payments_met?' do
+        u = build(:user)
+        yesterday = Date.current - 1.day
+
+        expect(RequirementsForMembership).to receive(:requirements_excluding_payments_met?)
+                                               .with(u, yesterday)
+        u.allowed_to_pay_new_membership_fee?(yesterday)
+      end
+    end
+
+  end
+
+
+  describe 'membership_status' do
+
+    it 'default date = Date.current' do
+      u = create(:user)
+      expect(u).to receive(:payments_current_as_of?).with(Date.current)
+                                                      .and_return(true)
+      u.membership_status
+    end
+
+    it 'membership is current if payments are current' do
+      u = create(:user)
+      allow(u).to receive(:payments_current_as_of?).and_return(true)
+
+      expect(u.membership_status).to eq :current
+    end
+
+    it 'membership is in the grace period for renewal' do
+      u = create(:user)
+      allow(u).to receive(:membership_current_as_of?).and_return(false)
+      allow(u).to receive(:membership_expired_in_grace_period?).and_return(true)
+
+      expect(u.membership_status).to eq :in_grace_period
+    end
+
+    it 'is a past member' do
+      u = create(:user)
+      allow(u).to receive(:membership_current_as_of?).and_return(false)
+      allow(u).to receive(:membership_expired_in_grace_period?).and_return(false)
+      allow(u).to receive(:term_expired?).and_return(true)
+
+      expect(u.membership_status).to eq :past_member
+    end
+
+    describe 'not a member' do
+      it 'if no payments ever made' do
+        expect(create(:user).membership_status).to eq :not_a_member
+      end
+
+      it 'not a member if no other status is true ( = fallback)' do
+        u = create(:user)
+        allow(u).to receive(:membership_current_as_of?).and_return(false)
+        allow(u).to receive(:membership_expired_in_grace_period?).and_return(false)
+        allow(u).to receive(:term_expired?).and_return(false)
+
+        expect(u.membership_status).to eq :not_a_member
+      end
     end
   end
+
 
   describe 'membership_current? just checks membership payment status' do
 
@@ -1580,6 +1682,37 @@ RSpec.describe User, type: :model do
       end
     end
   end
+
+
+  describe 'expires_soon?' do
+    let(:u) { build(:user) }
+
+    context 'membership is current' do
+      before(:each) { allow(u).to receive(:membership_current?).and_return(true)
+      }
+
+      it 'false if expiration date is more than 1 month before Date.current' do
+        allow(u).to receive(:membership_expire_date).and_return(Date.current - 1.month - 1.day)
+        expect(u.expires_soon?).to be_truthy
+      end
+
+      it 'true if expiration date is exactly 1 month before Date.current' do
+        allow(u).to receive(:membership_expire_date).and_return(Date.current - 1.month)
+        expect(u.expires_soon?).to be_truthy
+      end
+
+      it 'true if expiration date is less than 1 month before Date.current' do
+        allow(u).to receive(:membership_expire_date).and_return(Date.current - 1.month + 1.day)
+        expect(u.expires_soon?).to be_truthy
+      end
+    end
+
+    it 'false if membership is not current' do
+      allow(u).to receive(:membership_current?).and_return(false)
+      expect(u.expires_soon?).to be_falsey
+    end
+  end
+
 
   describe '.days_can_renew_early' do
     it 'gets the payment_too_soon_days from the AppConfiguration' do

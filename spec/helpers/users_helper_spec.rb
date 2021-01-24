@@ -131,11 +131,57 @@ RSpec.describe UsersHelper, type: :helper do
     it 'is t(not_sent) if the package was not sent' do
       expect(membership_packet_status_str(false)).to eq I18n.t('not_sent', scope: i18n_scope)
     end
-
   end
 
 
   it 'member_packet_sent_checkbox' do
     expect(member_packet_sent_checkbox(create(:user))).to match(/<input type="checkbox" name="date_membership_packet_sent" id="date_membership_packet_sent" value="false" class="checkbox.membership-packet" data-remote="true" data-method="post" data-url="\/anvandare\/(\d+)\/toggle_membership_package_sent\s*/)
+  end
+
+
+  describe 'expire_date_css_class' do
+
+    it 'uses expires_soon as the status if status is current and membership will expires soon' do
+      u = double(User)
+      allow(u).to receive(:membership_status).and_return(:current)
+      allow(helper).to receive(:expires_soon?).with(u).and_return(true)
+
+      expect(helper.expire_date_css_class(u)).to eq('expires-soon')
+    end
+
+    it 'makes the status dasherized: lowercase and has dashes for spaces' do
+      u = double(User)
+      allow(u).to receive(:membership_status).and_return(:this_is_some_status)
+      expect(helper.expire_date_css_class(u)).to eq('this-is-some-status')
+    end
+  end
+
+
+  describe 'membership_status_legend' do
+
+    it 'legend title is Membership status' do
+      expect(helper).to receive(:legend).with(hash_including(title: 'Membership status:'))
+      helper.membership_status_legend
+    end
+
+    describe 'lengend entries' do
+      let(:result) { helper.membership_status_legend }
+
+      membership_statuses = ['Current', 'Expires soon', 'In grace period', 'Past member', 'Not a member']
+      membership_statuses.each do |membership_status_title|
+
+        it "legend entry title is #{membership_status_title} surrounded by span with legend-item" do
+          expect(result).to match(/<span class="([^"])*legend-item([^"])*">#{membership_status_title}/)
+        end
+
+        it 'span CSS classes include membership-status' do
+          expect(result).to match(/<span class="([^"])*membership-status([^"])*">/)
+        end
+
+        it "span CSS classes include #{membership_status_title.parameterize}" do
+          expect(result).to match(/<span class="([^"])*#{membership_status_title.parameterize}([^"])*">/)
+        end
+      end
+    end
   end
 end

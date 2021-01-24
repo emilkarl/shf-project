@@ -42,6 +42,22 @@ RSpec.describe User, type: :model do
   end
 
 
+  describe 'latest_expiring_payment' do
+    it 'returns nil if there are no payments' do
+      expect(build(:user).latest_expiring_payment).to be_nil
+    end
+
+    context 'has payments' do
+      it 'is the payment with the expiration farthest in the future' do
+        member = create(:member_with_expiration_date, expiration_date: Date.new(2018, 6, 24))
+        p2020 = create(:membership_fee_payment, expire_date: Date.new(2020, 6,24), user: member)
+        create(:membership_fee_payment, expire_date: Date.new(2019, 6,24), user: member)
+        expect(member.latest_expiring_payment).to eq p2020
+      end
+    end
+  end
+
+
   describe '#payment_start_date' do
 
     it 'is nil if no payments' do

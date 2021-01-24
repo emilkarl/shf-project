@@ -35,6 +35,9 @@ module PaymentUtility
       payments.completed.send(payment_type).order(:created_at).last
     end
 
+    def latest_expiring_payment(payment_type = self.class::THIS_PAYMENT_TYPE)
+      payments.completed.send(payment_type).order(:expire_date).last
+    end
 
     def has_successful_payments?(payment_type = self.class::THIS_PAYMENT_TYPE)
       payments.completed.send(payment_type).any?

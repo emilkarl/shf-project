@@ -66,7 +66,8 @@ module ApplicationHelper
 
   # call field_or_default with the default value = an empty String
   def field_or_none(label, value, tag: :p, tag_options: {}, separator: ': ',
-                    label_class: 'field-label', value_class: 'field-value')
+                    label_class: default_field_label_css_class,
+                    value_class: default_field_value_css_class)
 
     field_or_default(label, value, default: '', tag: tag, tag_options: tag_options, separator: separator,
                      label_class: label_class, value_class: value_class)
@@ -116,8 +117,8 @@ module ApplicationHelper
   #     will produce:  "<p id='bob-ross'><span class='field-label'>Name: </span><span class='special-value'>Bob Ross</span></p>"
   #
   def field_or_default(label, value, default: '', tag: :p, tag_options: {}, separator: ': ',
-                       label_class: 'field-label', value_class: 'field-value')
-
+                       label_class: default_field_label_css_class,
+                       value_class: default_field_value_css_class)
     if value.blank?
       default
     else
@@ -126,10 +127,15 @@ module ApplicationHelper
         concat content_tag(:span, value, class: value_class)
       end
     end
-
   end
 
+  def default_field_value_css_class
+    'field-value'
+  end
 
+  def default_field_label_css_class
+    'field-label'
+  end
 
   # Construct a string that can be used by CSS to style things in a particular view.
   # TODO standardize this method name:  should it end in '_css_class' to make it clear it is not related to Ruby classes?
@@ -347,5 +353,40 @@ module ApplicationHelper
 
   def edit_profile_link(user, url: admin_only_user_profile_edit_path(user), text: user_profile_icon, title: '', show_if: true)
     show_if ? link_to(text, url, class: ['shf-icon', 'edit-user-profile-icon'], title: title) : ''
+  end
+
+  # @param [String] title - title for the entire legend
+  # @param [Array[String]] title_classes - list of CSS classes for the title. These will be applied
+  #   with a span tag that surrounds the title.
+  # @param [Array[String]] legend_classes - list of CSS classes for the entire legend.
+  #   These will be applied to the div tag that surrounds the entire legend; they are added to
+  #   the default CSS classes for the legend.
+  # @param [Array[String]] entries - list of legend entries to display. A legend entry can be
+  #   created with the ApplicationHelper#legend_entry method.
+  #
+  # @return [String] - HTML for a legend
+  def legend(title: '', title_classes: [], legend_classes: [],
+             entries: [])
+    return '' if title.empty? && entries.empty?
+
+    legend_default_classes = ['legend']
+    legend_entries = entries.map{|entry| legend_entry(entry[:title], entry[:css_classes]) }
+
+    tag.div class: (legend_classes | legend_default_classes) do
+      concat(tag.span title.html_safe, class: title_classes)
+      legend_entries.each{|entry| concat entry}.join(' ')
+    end
+  end
+
+  # @return [String] - HTML formatted to display a legend entry: a span with the given
+  #   CSS classes AND the default CSS classes for a legend entry
+  # @param [String] display_string - the string to display for this entry
+  # @param [Array[String]] css_classes - a list of CSS classes to apply to the display_string.
+  #   These are added (AND) to the default CSS classes for display strings.
+  def legend_entry(display_string = '', css_classes = [])
+    return '' if display_string.empty?
+    css_classes = [] if css_classes.nil?
+    legend_classes = ['legend-item']
+    tag.span display_string.html_safe, class: (legend_classes | css_classes)
   end
 end

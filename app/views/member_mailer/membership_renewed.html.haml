@@ -1,0 +1,23 @@
+- provide :signoff do
+  = render 'application_mailer/signoff'
+
+- message_scope = 'mailers.member_mailer.membership_renewed.message_text'
+
+= render layout: 'layouts/mail_from_membership' do
+  %p.welcome= t('welcome', scope: message_scope) + '.'
+
+  %p.youre-active= t('youre_active', scope: message_scope)
+  = render 'mailers_shared/login_here_with_email', email: @recipient_email
+
+  %p.can-edit-co-pay
+    = t('can_edit_co_pay', scope: message_scope)
+    - company = @member.shf_application.companies.first
+    = link_to(company.name,  company_url(company), target: '_blank')
+
+  %p.access-to
+    = t('access_fb_group', scope: message_scope)
+    = link_to(t('shf_facebook_group_url'), t('shf_facebook_group_url'), target: '_blank')
+
+    %br
+    = t('and_member_pages', scope: message_scope)
+    = link_to(t('shf_medlemssystem_url'), t('shf_medlemssystem_url'), target: '_blank')

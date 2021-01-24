@@ -14,6 +14,12 @@ class MemberMailerPreview < ActionMailer::Preview
     MemberMailer.membership_granted(approved_app.user)
   end
 
+  def membership_renewed
+    approved_app = ShfApplication.where(state: :accepted).first
+    check_co_name(approved_app.companies.first)
+    MemberMailer.membership_renewed(approved_app.user)
+  end
+
 
   def membership_expiration_reminder
     member = User.where(member: true).first

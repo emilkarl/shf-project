@@ -152,16 +152,17 @@ RSpec.describe PaymentsHelper, type: :helper do
 
   describe 'payment_notes_label_and_value' do
 
-    it 'returns label and "none" if no notes' do
-      response = /#{t('activerecord.attributes.payment.notes')}.*#{t('none_plur')}/
-      expect(payment_notes_label_and_value(user)).to match response
+    it "displays t('none_plur)' if there is no text to display" do
+      expect(helper).to receive(:field_or_none)
+                          .with(anything, I18n.t('none_plur'), anything)
+      helper.payment_notes_label_and_value
     end
 
-    it 'returns label and value if notes' do
-      notes = 'here are some notes for this payment'
-      user_payment.update(notes: notes)
-      response = /#{t('activerecord.attributes.payment.notes')}.*#{notes}/
-      expect(payment_notes_label_and_value(user)).to match response
+    it 'returns the HTML for payment notes label and display string (=field value)' do
+      note_text = 'This is the payment note.'
+      expect(helper).to receive(:field_or_none)
+                          .with(anything, note_text, tag: :div)
+      helper.payment_notes_label_and_value(note_text)
     end
   end
 
@@ -225,24 +226,6 @@ RSpec.describe PaymentsHelper, type: :helper do
       expect(payment_due_now_hint_css_class(faux_co)).to eq helper.no_css_class
     end
 
-  end
-
-
-
-
-  describe 'expires_soon_hint_css_class' do
-
-    it 'returns yes css class if expire_date more than a month away' do
-      expect(expires_soon_hint_css_class(Time.zone.today + 2.months)).to eq helper.yes_css_class
-    end
-
-    it 'returns maybe css class if expire_date less than a month away' do
-      expect(expires_soon_hint_css_class(Time.zone.today + 2.days)).to eq helper.maybe_css_class
-    end
-
-    it 'returns no css class if expire_date has passed' do
-      expect(expires_soon_hint_css_class(Time.zone.today - 2.days)).to eq helper.no_css_class
-    end
   end
 
 

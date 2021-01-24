@@ -7,7 +7,9 @@ module PaymentsHelper
   # must respond to :entity_expire_date
   #
   # @return [String] - the HTML <span> string
-  def expire_date_label_and_value(entity)
+  def expire_date_label_and_value(entity,
+                                  label_class: default_field_label_css_class,
+                                  value_class: default_field_value_css_class)
 
     expire_date = entity_expire_date(entity)
     t_scope = entity.is_a?(User) ? 'users' : 'companies' # TODO - should use polymorphism to handle this
@@ -17,8 +19,8 @@ module PaymentsHelper
 
     if expire_date
       tag.div do
-        concat tag.span "#{expire_label}: ", class: 'standard-label'
-        concat tag.span "#{expire_date}", class: payment_due_now_hint_css_class(entity)
+        concat tag.span "#{expire_label}: ", class: label_class
+        concat tag.span "#{expire_date}", class: [payment_due_now_hint_css_class(entity), value_class]
         concat ' '
         concat fas_tooltip(expire_after_tooltip_title)
       end
@@ -55,9 +57,7 @@ module PaymentsHelper
   end
 
 
-  # Another possible name for this method: payment_status_ok_indicator_css_class
-  # The word "indicator" is good. It's possibly better than "hint"
-  #
+
   # This method name ends with '_css_class' to make it clear that this returns
   # a CSS class as opposed to a normal Ruby class.
   #
@@ -70,19 +70,6 @@ module PaymentsHelper
       when :due, :past_due then no_css_class
       else maybe_css_class
     end
-  end
-
-
-  def expires_soon_hint_css_class(expire_date)
-    today = Time.zone.today
-    if today < expire_date.months_ago(1) # expire_date minus one month
-      value_class = yes_css_class
-    elsif today >= expire_date
-      value_class = no_css_class
-    else
-      value_class = maybe_css_class
-    end
-    value_class
   end
 
 
@@ -101,13 +88,10 @@ module PaymentsHelper
 
 
   # TODO abstract out to Payor
-  def payment_notes_label_and_value(entity)
-
-    notes = entity.payment_notes(entity.class::THIS_PAYMENT_TYPE)
+  # @return [String] - HTML to display a label and value for payment notes
+  def payment_notes_label_and_value(notes = '')
     display_text = notes.blank? ? t('none_plur') : notes
-
     field_or_none("#{t('activerecord.attributes.payment.notes')}",
-                  display_text, tag: :div, label_class: 'standard-label')
-
+                  display_text, tag: :div)
   end
 end

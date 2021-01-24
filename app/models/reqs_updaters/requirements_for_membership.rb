@@ -11,6 +11,7 @@
 #
 #  Only 1 is needed for the system.
 #
+#
 # @author Ashley Engelund (ashley@ashleycaroline.com  weedySeaDragon @ github)
 # @date   12/23/17
 # @file requirements_for_membership.rb
@@ -18,35 +19,12 @@
 #--------------------------
 
 
-class RequirementsForMembership < AbstractRequirements
-
-  def self.has_expected_arguments?(args)
-    args_have_keys?(args, [:user])
-  end
-
-
-  def self.requirements_met?(args)
-    user = args[:user]
-
-    requirements_excluding_payments_met?(user) &&
-      payment_requirements_met?(user)
-  end
+class RequirementsForMembership < AbstractReqsForMembership
 
   # FIXME - be consistent everywhere about whether the requirements include payments or not
-  def self.requirements_excluding_payments_met?(user)
+  def self.requirements_excluding_payments_met?(user, _date = Date.current)
     user.has_approved_shf_application? &&
       membership_guidelines_checklist_done?(user)
   end
 
-  # @return [Boolean] - if a user must have a completed Membership Guidelines checklist,
-  #   return true if has been completed  (false if not completed)
-  # else if the user does not have to have a completed Membership Guidelines checklist,
-  #   return true (we assume it's fine)
-  def self.membership_guidelines_checklist_done?(user)
-    UserChecklistManager.completed_membership_guidelines_checklist?(user)
-  end
-
-  def self.payment_requirements_met?(user)
-    user.payments_current?
-  end
-end # RequirementsForMembership
+end

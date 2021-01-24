@@ -10,65 +10,36 @@ RSpec.describe RequirementsForMembership, type: :model do
 
   let(:subject) { RequirementsForMembership }
   let(:user) { build(:user) }
-
-  describe '.has_expected_arguments?' do
-
-    it 'args has expected :user key' do
-      expect(subject.has_expected_arguments?({ user: 'some user' })).to be_truthy
-    end
-
-    it 'args does not have expected :user key' do
-      expect(subject.has_expected_arguments?({ not_user: 'not some user' })).to be_falsey
-    end
-
-    it 'args is nil' do
-      expect(subject.has_expected_arguments?(nil)).to be_falsey
-    end
-  end
-
-  describe '.membership_guidelines_checklist_done?' do
-    it 'calls UserChecklistManager to see if the user has completed the Ethical guidelines checklist' do
-      expect(UserChecklistManager).to receive(:completed_membership_guidelines_checklist?)
-                                        .with(user)
-      subject.membership_guidelines_checklist_done?(user)
-    end
-  end
+  let(:yesterday) { Date.current - 1.day }
 
   describe '.requirements_excluding_payments_met?' do
-    it 'all non-payment requirements  are && together' do
-      expect(user).to receive(:has_approved_shf_application?)
-                        .and_return(true)
-      expect(subject).to receive(:membership_guidelines_checklist_done?)
-                           .and_return(true)
+    context 'user has an approved application' do
+      before(:each) { allow(user).to receive(:has_approved_shf_application?).and_return(true) }
 
-      expect(subject.requirements_excluding_payments_met?(user)).to be_truthy
+      it 'true if membership guidelines have been agreed to' do
+        allow(subject).to receive(:membership_guidelines_checklist_done?).with(user)
+                            .and_return(true)
+        expect(subject.requirements_excluding_payments_met?(user)).to be_truthy
+      end
+
+      it 'false if membership guidelines have not been agreed to' do
+        allow(subject).to receive(:membership_guidelines_checklist_done?).with(user)
+                            .and_return(false)
+        expect(subject.requirements_excluding_payments_met?(user)).to be_falsey
+      end
+    end
+
+    it 'false if user does not have an approved application' do
+      allow(user).to receive(:has_approved_shf_application?)
+                        .and_return(false)
+      expect(subject).not_to receive(:membership_guidelines_checklist_done?)
+
+      expect(subject.requirements_excluding_payments_met?(user)).to be_falsey
     end
   end
 
-  describe '.requirements_met?' do
 
-    it 'all non-payment requirements && all payment requirements' do
-      expect(subject).to receive(:requirements_excluding_payments_met?).with(user)
-                                                                       .and_return(true)
-      expect(subject).to receive(:payment_requirements_met?).with(user)
-                                                            .and_return(true)
-
-      expect(subject.requirements_met?(user: user)).to be_truthy
-    end
-  end
-
-  describe '.payment_requirements_met?' do
-
-    it 'result = user.payments_current?' do
-      u = build(:user)
-      expect(u).to receive(:payments_current?).and_return(true)
-      expect(subject.payment_requirements_met?(u)).to be_truthy
-
-      expect(u).to receive(:payments_current?).and_return(false)
-      expect(subject.payment_requirements_met?(u)).to be_falsey
-    end
-  end
-
+  # TODO: Are all of these integration tests needed?  Can things be mocked/stubbed?
   describe 'Integration tests' do
     let(:member) { create(:member_with_membership_app) }
 

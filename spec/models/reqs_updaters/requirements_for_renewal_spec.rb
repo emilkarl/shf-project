@@ -10,70 +10,77 @@ RSpec.describe RequirementsForRenewal, type: :model do
 
   let(:subject) { RequirementsForRenewal }
   let(:user) { build(:user) }
-
-
-  describe '.has_expected_arguments?' do
-    it 'args has expected :user key' do
-      expect(subject.has_expected_arguments?({ user: 'some user' })).to be_truthy
-    end
-
-    it 'args does not have expected :user key' do
-      expect(subject.has_expected_arguments?({ not_user: 'not some user' })).to be_falsey
-    end
-
-    it 'args is nil' do
-      expect(subject.has_expected_arguments?(nil)).to be_falsey
-    end
-  end
-
-
-  describe '.requirements_met?' do
-    it 'checks if all non-payment requirements are met' do
-      u = build(:user)
-      expect(subject).to receive(:requirements_excluding_payments_met?).with(u)
-      subject.requirements_met?(user: u)
-    end
-
-    it 'checks if all payment requirements are met' do
-      u = build(:user)
-      allow(subject).to receive(:requirements_excluding_payments_met?)
-                          .with(u)
-                          .and_return(true)
-      expect(subject).to receive(:payment_requirements_met?).with(u)
-      subject.requirements_met?(user: u)
-    end
-  end
+  let(:yesterday) { Date.current - 1.day }
 
 
   describe '.requirements_excluding_payments_met?' do
-    it 'all requirements checked and && together' do
-      allow(subject).to receive(:max_days_can_still_renew).and_return(10)
 
-      expect(user).to receive(:has_approved_shf_application?)
-                        .and_return(true)
-      expect(subject).to receive(:membership_guidelines_checklist_done?)
-                           .and_return(true)
-      expect(subject).to receive(:doc_uploaded_during_this_membership_term?)
-                           .with(user)
-                           .and_return(true)
-      expect(user).to receive(:can_renew_today?)
-                        .and_return(true)
+    before(:each) { allow(subject).to receive(:max_days_can_still_renew).and_return(10) }
 
-      expect(subject.requirements_excluding_payments_met?(user)).to be_truthy
+    context 'user can renew on the given date' do
+      before(:each) {   allow(user).to receive(:can_renew_on?).and_return(true) }
+
+      context 'user has an approved SHF application' do
+        before(:each) { allow(user).to receive(:has_approved_shf_application?).and_return(true) }
+
+        context 'user has agreed to the membership guidelines' do
+          before(:each) { allow(subject).to receive(:membership_guidelines_checklist_done?).and_return(true) }
+
+          it 'true if documents have been uploaded during the current membership term' do
+            allow(subject).to receive(:doc_uploaded_during_this_membership_term?).and_return(true)
+
+            expect(subject.requirements_excluding_payments_met?(user)).to be_truthy
+          end
+
+          it 'false if not documents have been uploaded during the current membership term' do
+            allow(subject).to receive(:doc_uploaded_during_this_membership_term?).and_return(false)
+
+            expect(subject.requirements_excluding_payments_met?(user)).to be_falsey
+          end
+        end
+
+        it 'false if the user has not agreed to the membership guidelines' do
+          allow(subject).to receive(:membership_guidelines_checklist_done?).and_return(false)
+
+          expect(subject).not_to receive(:doc_uploaded_during_this_membership_term?)
+          expect(subject.requirements_excluding_payments_met?(user)).to be_falsey
+        end
+      end
+
+      it 'false if user does not have an approved SHF application' do
+        allow(user).to receive(:has_approved_shf_application?).and_return(false)
+
+        expect(subject).not_to receive(:membership_guidelines_checklist_done?)
+        expect(subject).not_to receive(:doc_uploaded_during_this_membership_term?)
+        expect(subject.requirements_excluding_payments_met?(user)).to be_falsey
+      end
+    end
+
+    it 'false if user cannot renew on the given date' do
+      allow(user).to receive(:can_renew_on?).and_return(false)
+
+      expect(user).not_to receive(:has_approved_shf_application?)
+      expect(subject).not_to receive(:membership_guidelines_checklist_done?)
+      expect(subject).not_to receive(:doc_uploaded_during_this_membership_term?)
+      expect(subject.requirements_excluding_payments_met?(user)).to be_falsey
     end
   end
 
 
   describe '.doc_uploaded_during_this_membership_term?' do
 
-    it 'queries the user to see if a doc has been uploaded on or after the term start' do
-      expect(user).to receive(:file_uploaded_during_this_membership_term?)
-                          .and_return(true)
-      expect(subject.doc_uploaded_during_this_membership_term?(user)).to be_truthy
-    end
+    describe 'queries the user to see if files have been uploaded on or after the term start' do
+      it 'true if files have been uploaded' do
+        allow(user).to receive(:file_uploaded_during_this_membership_term?)
+                            .and_return(true)
+        expect(subject.doc_uploaded_during_this_membership_term?(user)).to be_truthy
+      end
 
-    it 'no docs uploaded' do
-      expect(subject.doc_uploaded_during_this_membership_term?(user)).to be_falsey
+      it 'false if files were not uploaded during the term' do
+        allow(user).to receive(:file_uploaded_during_this_membership_term?)
+                    .and_return(false)
+        expect(subject.doc_uploaded_during_this_membership_term?(user)).to be_falsey
+      end
     end
   end
 
@@ -85,25 +92,9 @@ RSpec.describe RequirementsForRenewal, type: :model do
     end
   end
 
-
-  describe '.payment_requirements_met?' do
-
-    it 'true if a payment has been made and the expiration date is in the future' do
-      u = build(:user)
-      expect(u).to receive(:payments_current?).and_return(true)
-      expect(subject.payment_requirements_met?(u)).to be_truthy
-    end
-
-    it 'false if no payments have been made' do
-      u = build(:user)
-      expect(subject.payment_requirements_met?(u)).to be_falsey
-    end
-  end
-
-
   # ------------------------------------------------------------------------------------------
 
-
+  # TODO: Are any of these really needed?  can things be mocked or stubbed?
   describe 'Integration tests' do
     let(:member) { build(:member_with_membership_app) }
 
@@ -143,9 +134,13 @@ RSpec.describe RequirementsForRenewal, type: :model do
                        expire_date: expire_date)
 
                 travel_to(expire_date - 3) do
-                  expect(approved_and_paid.can_renew_today?).to be_truthy
+                  expect(approved_and_paid.can_renew_on?(Date.current)).to be_truthy
+                  expect(approved_and_paid.has_approved_shf_application?).to be_truthy
                   expect(approved_and_paid.membership_guidelines_checklist_done?).to be_truthy
                   expect(subject.doc_uploaded_during_this_membership_term?(approved_and_paid)).to be_truthy
+
+                  expect(subject.requirements_excluding_payments_met?(approved_and_paid)).to be_truthy
+                  expect(subject.payment_requirements_met?(approved_and_paid)).to be_truthy
 
                   expect(subject.requirements_met?({ user: approved_and_paid })).to be_truthy
                 end

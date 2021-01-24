@@ -12,6 +12,17 @@
   font-weight: bold;
 }
 
+.users.show {
+  // TODO: this is the opposite of how bold is used to show a Company
+  .field-label {
+    font-weight: normal;
+  }
+
+  .field-value {
+    font-weight: bold;
+  }
+}
+
 .panel.admin-set-new-password-form {
   margin-left: 2em;
   margin-right: 2em;
@@ -136,4 +147,24 @@ $highlight-yellow: #ffffe0;
     }
   }
 
+}
+
+.in-grace-period {
+  background-color: $in-grace-period-color;
+}
+
+.past-member {
+  background-color: $past-member-color;
+  font-style: italic;
+}
+
+.legend {
+  border: solid thin $legend-border-color;
+  font-size: smaller;
+  padding: 0.3em;
+
+  .legend-item {
+    font-size: smaller;
+    margin-left: 1em;
+  }
 }

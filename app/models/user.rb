@@ -81,6 +81,7 @@ class User < ApplicationRecord
 
   scope :agreed_to_membership_guidelines, -> { where(id: UserChecklist.top_level_for_current_membership_guidelines.completed.pluck(:user_id)) }
 
+  # FIXME: DO NOT USE. This is no longer accurate! Need to use :member_in_good_standing
   scope :current_members, -> { application_accepted.membership_payment_current }
 
   # -----------------------------------
@@ -116,6 +117,14 @@ class User < ApplicationRecord
   def self.days_can_renew_early
     AdminOnly::AppConfiguration.config_to_use.payment_too_soon_days.to_i.days
   end
+
+
+  # TODO this belongs in a Membership -type class and perhaps should not be hardcoded
+  # @return [Array[Symbol]] - list of all of the membership statuses
+  def self.membership_statuses(include_expires_soon: true)
+    [:current, :expires_soon, :in_grace_period, :past_member, :not_a_member]
+  end
+
 
   # ----------------------------------
 
@@ -165,6 +174,25 @@ class User < ApplicationRecord
     payment_notes(THIS_PAYMENT_TYPE)
   end
 
+
+  # TODO this belongs in a Membership -type class
+  # @return [Symbol] - status of the membership:
+  #   :not_a_member, :current, :in_grace_period, :past_member
+  #   also include :expires_soon if include_expires_soon is true
+  def membership_status(date = Date.current, include_expires_soon: true)
+    return current_or_expires_soon_status(date, include_expires_soon: include_expires_soon) if payments_current_as_of?(date)
+    return :in_grace_period if membership_expired_in_grace_period?(date)
+    return :past_member if term_expired?
+
+    :not_a_member
+  end
+
+
+  def member_in_good_standing?(date = Date.current)
+    RequirementsForMembership.requirements_met?(user: self, date: date)
+  end
+
+
   # TODO this should not be the responsibility of the User class. Need a MembershipManager class for this.
   # FIXME - this is ONLY about the payments, not the membership status as a whole.
   #   so the name should be changed.  ex: membership_payments_current?  or membership_payment_term....
@@ -206,6 +234,15 @@ class User < ApplicationRecord
   def membership_expired_grace_period
     self.class.membership_expired_grace_period
   end
+
+  # FIXME: this should be in a Membership -type class.
+  # TODO: get the value from AppConfiguration
+  # @return [Boolean] - does the membership expire on or before 1 month from now?
+  def expires_soon?
+    payments_current? &&
+      Date.current >= membership_expire_date.months_ago(1) # expire_date minus one month
+  end
+
 
   # @return [ActiveSupport::Duration]
   def days_can_renew_early
@@ -437,6 +474,32 @@ class User < ApplicationRecord
 
   # ===============================================================================================
   private
+
+  # 'expires soon' is not really a "main" membership status.  It is a sub-status of 'current';
+  # it is "current, but membership expires soon."  There may be times when it should not be returned
+  # as one of the possible membership statuses.  There may be times when it should be included.
+  #
+  # If the 'expires soon' status should be considered (e.g. if it should be included as all of the possible membership statuses),
+  #   return it if appropriate.
+  # Else ('expires soon' is not to be used)
+  #   return the 'current' status if the membership is current
+  # Return 'unknown' if the status is not generally current
+  #
+  # Should really be called only if the membership status is :current.
+  #
+  # @return [Symbol] - either :current or :expires_soon depending on whether expires soon should be considered
+  #
+  def current_or_expires_soon_status(date = Date.current, include_expires_soon: true)
+    status = :unknown  # TODO what is a meaningful  thing to return?  Should use the Null Object Pattern for the status
+    if payments_current_as_of?(date)
+      status = :current
+      if include_expires_soon
+        status = :expires_soon if expires_soon?
+      end
+    end
+    status
+  end
+
 
   # TODO this should not be the responsibility of the User class. Need a MembershipManager class for this.
   def get_next_membership_number

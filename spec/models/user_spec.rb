@@ -6,6 +6,8 @@ require 'shared_context/named_dates'
 
 # ================================================================================
 
+# TODO stub, mock, and use doubles as much as possible.  Ex: AdminOnly::FileDeliveryMethod, Address, etc.
+
 RSpec.describe User, type: :model do
 
   # These are required to get the content type and validate it
@@ -1367,16 +1369,54 @@ RSpec.describe User, type: :model do
 
     it 'default date = Date.current' do
       u = create(:user)
-      expect(u).to receive(:payments_current_as_of?).with(Date.current)
+      expect(u).to receive(:payments_current_as_of?).at_least(1).times.with(Date.current)
                                                       .and_return(true)
       u.membership_status
     end
 
-    it 'membership is current if payments are current' do
-      u = create(:user)
-      allow(u).to receive(:payments_current_as_of?).and_return(true)
+    context 'payments are current' do
+      let(:current_member) do
+        u = build(:user)
+        allow(u).to receive(:payments_current_as_of?).and_return(true)
+        u
+      end
 
-      expect(u.membership_status).to eq :current
+      it 'uses current_or_expires_soon_status to return the status' do
+        given_date = Date.current - 1.day
+        expect(current_member).to receive(:current_or_expires_soon_status).with(given_date, include_expires_soon: true)
+        current_member.membership_status(given_date, include_expires_soon: true)
+      end
+
+      it 'default is to include expires_soon as a status' do
+        expect(current_member).to receive(:current_or_expires_soon_status).with(anything, include_expires_soon: true)
+        current_member.membership_status
+      end
+
+      context 'also include expires_soon as a status' do
+
+        it 'uses current_or_expires_soon_status to return the status' do
+          given_date = Date.current - 1.day
+          expect(current_member).to receive(:current_or_expires_soon_status).with(given_date, include_expires_soon: true)
+          current_member.membership_status(given_date, include_expires_soon: true)
+        end
+
+        it 'membership expires soon if it expires soon' do
+          expect(current_member).to receive(:expires_soon?).and_return(true)
+          expect(current_member.membership_status(include_expires_soon: true)).to eq :expires_soon
+        end
+
+        it 'membership is current if it does not expire soon' do
+          expect(current_member).to receive(:expires_soon?).and_return(false)
+          expect(current_member.membership_status(include_expires_soon: true)).to eq :current
+        end
+      end
+
+      context 'do not include expires_soon as a status' do
+        it 'membership is current and whether it expires soon is never checked' do
+          expect(current_member).not_to receive(:expires_soon?)
+          expect(current_member.membership_status(include_expires_soon: false)).to eq :current
+        end
+      end
     end
 
     it 'membership is in the grace period for renewal' do
@@ -1413,7 +1453,24 @@ RSpec.describe User, type: :model do
   end
 
 
-  describe 'membership_current? just checks membership payment status' do
+  describe 'member_in_good_standing?' do
+
+    it 'RequirementsForMembership is checked with the user and given date' do
+      given_date = Date.current - 1
+      u = build(:user)
+      expect(RequirementsForMembership).to receive(:requirements_met?).with(user: u, date: given_date)
+      u.member_in_good_standing?(given_date)
+    end
+
+    it 'default date is Date.current' do
+      u = build(:user)
+      expect(RequirementsForMembership).to receive(:requirements_met?).with(user: u, date: Date.current)
+      u.member_in_good_standing?
+    end
+  end
+
+
+  describe 'payments_current? only checks membership payment status  (was membership_current?; aliased method) ' do
 
     context 'membership payments have not expired yet' do
 

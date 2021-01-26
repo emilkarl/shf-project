@@ -57,7 +57,7 @@ RSpec.describe RequirementsForFirstMembershipFeeOwed, type: :model do
                start_date: start_date_last_year,
                expire_date: User.expire_date_for_start_date(start_date_last_year))
 
-        expect(past_member.membership_current?).to be_falsey
+        expect(past_member.payments_current?).to be_falsey
         expect(subject.requirements_met?({ user: past_member })).to be_falsey
       end
 

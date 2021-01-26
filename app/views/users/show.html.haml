@@ -8,7 +8,7 @@
   = content_title(title, user: current_user)
 
 .entry-content.container
-  - if @user.membership_current? || @user.membership_expired_in_grace_period?
+  - if @user.payments_current? || @user.membership_expired_in_grace_period?
     = render partial: 'show_for_member',
              locals: { user: @user,
                        current_user: @current_user,

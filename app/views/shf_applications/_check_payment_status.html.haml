@@ -8,7 +8,7 @@
   %p= t('shf_applications.information.check_payment_status.approved')
   %h4= t('shf_applications.information.check_payment_status.pay_m_here')
 
-- elsif ! current_user.membership_current?
+- elsif ! current_user.payments_current?
   -# User has paid but payment has expired
 
   - need_to_pay = true

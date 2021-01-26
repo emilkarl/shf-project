@@ -23,7 +23,7 @@
         %span.member-name
           = user.full_name
         %br
-        - if user.membership_current?
+        - if user.payments_current?
           = succeed ':' do
             = t('.member_number')
 

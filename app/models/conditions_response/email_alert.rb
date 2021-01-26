@@ -181,12 +181,12 @@ class EmailAlert < ConditionResponder
   # Ex:
   #   def send_alert_this_day?(timing, config, user)
   #     days_until = (user.membership_expire_date - Date.current).to_i
-  #     user.membership_current? &&  config[:days].include?(days_until)
+  #     user.payments_current? &&  config[:days].include?(days_until)
   #   end
   #
   # Does every implementation take the form:
   #
-  #    return_false_condition (ex: return false unless user.membership_current?)
+  #    return_false_condition (ex: return false unless user.payments_current?)
   #
   #    day_to_check = <determined somehow>
   #

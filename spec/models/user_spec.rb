@@ -1430,7 +1430,7 @@ RSpec.describe User, type: :model do
       it 'true if today = dec 1, start = jan 1, expire = dec 31' do
         Timecop.freeze(dec_1) do
           expect(paid_member.membership_expire_date).to eq dec_31
-          expect(paid_member.membership_current?).to be_truthy
+          expect(paid_member.payments_current?).to be_truthy
         end # Timecop
       end
 
@@ -1451,28 +1451,28 @@ RSpec.describe User, type: :model do
       it 'true if today = nov 30, start = dec 3 last year, expire = dec 2' do
         Timecop.freeze(nov_30) do
           expect(paid_expires_today_member.membership_expire_date).to eq dec_2
-          expect(paid_expires_today_member.membership_current?).to be_truthy
+          expect(paid_expires_today_member.payments_current?).to be_truthy
         end # Timecop
       end
 
       it 'true if today = dec 1, start = dec 3 last year, expire = dec 2' do
         Timecop.freeze(dec_1) do
           expect(paid_expires_today_member.membership_expire_date).to eq dec_2
-          expect(paid_expires_today_member.membership_current?).to be_truthy
+          expect(paid_expires_today_member.payments_current?).to be_truthy
         end # Timecop
       end
 
       it 'false if today = dec 2, start = dec 3 last year, expire = dec 2' do
         Timecop.freeze(dec_2) do
           expect(paid_expires_today_member.membership_expire_date).to eq dec_2
-          expect(paid_expires_today_member.membership_current?).to be_falsey
+          expect(paid_expires_today_member.payments_current?).to be_falsey
         end # Timecop
       end
 
       it 'false today = dec 3, start = dec 3 last year, expire = dec 2' do
         Timecop.freeze(dec_3) do
           expect(paid_expires_today_member.membership_expire_date).to eq dec_2
-          expect(paid_expires_today_member.membership_current?).to be_falsey
+          expect(paid_expires_today_member.payments_current?).to be_falsey
         end # Timecop
       end
 
@@ -1688,7 +1688,7 @@ RSpec.describe User, type: :model do
     let(:u) { build(:user) }
 
     context 'membership is current' do
-      before(:each) { allow(u).to receive(:membership_current?).and_return(true)
+      before(:each) { allow(u).to receive(:payments_current?).and_return(true)
       }
 
       it 'false if expiration date is more than 1 month before Date.current' do
@@ -1708,7 +1708,7 @@ RSpec.describe User, type: :model do
     end
 
     it 'false if membership is not current' do
-      allow(u).to receive(:membership_current?).and_return(false)
+      allow(u).to receive(:payments_current?).and_return(false)
       expect(u.expires_soon?).to be_falsey
     end
   end
@@ -1881,9 +1881,9 @@ RSpec.describe User, type: :model do
             end
           end
 
-          it 'is == membership_current?' do
+          it 'is == payments_current?' do
             Timecop.freeze(dec_1) do
-              expect(paid_member.membership_app_and_payments_current?).to eq(paid_member.membership_current?)
+              expect(paid_member.membership_app_and_payments_current?).to eq(paid_member.payments_current?)
             end
           end
 
@@ -1910,9 +1910,9 @@ RSpec.describe User, type: :model do
               expect(paid_expires_today_member.membership_app_and_payments_current?).to be_truthy
             end # Timecop
           end
-          it 'is == membership_current?' do
+          it 'is == payments_current?' do
             Timecop.freeze(nov_30) do
-              expect(paid_expires_today_member.membership_app_and_payments_current?).to eq(paid_expires_today_member.membership_current?)
+              expect(paid_expires_today_member.membership_app_and_payments_current?).to eq(paid_expires_today_member.payments_current?)
             end
           end
         end # context 'today is nov 30'
@@ -1924,9 +1924,9 @@ RSpec.describe User, type: :model do
               expect(paid_expires_today_member.membership_app_and_payments_current?).to be_truthy
             end # Timecop
           end
-          it 'is == membership_current?' do
+          it 'is == payments_current?' do
             Timecop.freeze(dec_1) do
-              expect(paid_expires_today_member.membership_app_and_payments_current?).to eq(paid_expires_today_member.membership_current?)
+              expect(paid_expires_today_member.membership_app_and_payments_current?).to eq(paid_expires_today_member.payments_current?)
             end
           end
         end # context 'today is dec 1'
@@ -1938,9 +1938,9 @@ RSpec.describe User, type: :model do
               expect(paid_expires_today_member.membership_app_and_payments_current?).to be_falsey
             end # Timecop
           end
-          it 'is == membership_current?' do
+          it 'is == payments_current?' do
             Timecop.freeze(dec_2) do
-              expect(paid_expires_today_member.membership_app_and_payments_current?).to eq(paid_expires_today_member.membership_current?)
+              expect(paid_expires_today_member.membership_app_and_payments_current?).to eq(paid_expires_today_member.payments_current?)
             end
           end
         end # context 'today is dec 2'
@@ -1952,9 +1952,9 @@ RSpec.describe User, type: :model do
               expect(paid_expires_today_member.membership_app_and_payments_current?).to be_falsey
             end # Timecop
           end
-          it 'is == membership_current?' do
+          it 'is == payments_current?' do
             Timecop.freeze(dec_3) do
-              expect(paid_expires_today_member.membership_app_and_payments_current?).to eq(paid_expires_today_member.membership_current?)
+              expect(paid_expires_today_member.membership_app_and_payments_current?).to eq(paid_expires_today_member.payments_current?)
             end
           end
         end # context 'today is dec 2'
@@ -2389,7 +2389,7 @@ RSpec.describe User, type: :model do
 
         it 'files were uploaded on or after the start date of this membership term' do
           member = build(:user)
-          allow(member).to receive(:membership_current?).and_return(true)
+          allow(member).to receive(:payments_current?).and_return(true)
           allow(member).to receive(:membership_start_date).and_return(yesterday)
 
           expect(member).to receive(:uploaded_files).and_return([faux_file_today, faux_file_yesterday, faux_file_one_week_ago])
@@ -2402,7 +2402,7 @@ RSpec.describe User, type: :model do
 
       it 'empty list if no files have been uploaded ever' do
         member = build(:user)
-        allow(member).to receive(:membership_current?).and_return(true)
+        allow(member).to receive(:payments_current?).and_return(true)
         allow(member).to receive(:uploaded_files).and_return([])
         expect(member).not_to receive(:uploaded_files_most_recent_first)
         expect(member.files_uploaded_during_this_membership).to be_empty
@@ -2410,7 +2410,7 @@ RSpec.describe User, type: :model do
 
       it 'empty list if files only uploaded during previous membership term' do
         member = build(:user)
-        allow(member).to receive(:membership_current?).and_return(true)
+        allow(member).to receive(:payments_current?).and_return(true)
         allow(member).to receive(:membership_start_date).and_return(today)
 
         expect(member).to receive(:uploaded_files).and_return([faux_file_yesterday, faux_file_one_week_ago])
@@ -2420,7 +2420,7 @@ RSpec.describe User, type: :model do
 
       it 'files were uploaded on or after the start date of this membership term' do
         member = build(:user)
-        allow(member).to receive(:membership_current?).and_return(true)
+        allow(member).to receive(:payments_current?).and_return(true)
         allow(member).to receive(:membership_start_date).and_return(yesterday)
 
         expect(member).to receive(:uploaded_files).and_return([faux_file_today, faux_file_yesterday, faux_file_one_week_ago])

@@ -430,7 +430,7 @@ RSpec.describe Company, type: :model, focus: true do
 
           it 'has no members in good standing (no current members)' do
             complete_and_paid_co_user = co1_current.shf_applications.first.user
-            allow(complete_and_paid_co_user).to receive(:membership_current?).and_return(false)
+            allow(complete_and_paid_co_user).to receive(:payments_current?).and_return(false)
 
             expect(described_class.searchable).to be_empty
           end

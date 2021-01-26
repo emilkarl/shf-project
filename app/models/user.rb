@@ -186,6 +186,8 @@ class User < ApplicationRecord
     !membership_payment_expire_date.nil? && (membership_payment_expire_date > this_date)
   end
 
+  alias_method :payments_current_as_of?, :membership_current_as_of?
+
   # The membership term has expired, but are they  still within a 'grace period'?
   def membership_expired_in_grace_period?(this_date = Date.current)
     return false if this_date.nil?
@@ -229,13 +231,13 @@ class User < ApplicationRecord
   # User has an approved membership application and
   # is up to date (current) on membership payments
   def membership_app_and_payments_current?
-    has_approved_shf_application? && membership_current?
+    has_approved_shf_application? && payments_current?
   end
 
   # User has an approved membership application and
   # is up to date (current) on membership payments
   def membership_app_and_payments_current_as_of?(this_date)
-    has_approved_shf_application? && membership_current_as_of?(this_date)
+    has_approved_shf_application? && payments_current_as_of?(this_date)
   end
 
   # Business rule: user can pay membership fee if:
@@ -286,7 +288,7 @@ class User < ApplicationRecord
 
   def member_fee_payment_due?
     # FIXME: should member? be used here?
-    member? && !membership_current?
+    member? && !payments_current?
   end
 
   def has_shf_application?
@@ -397,7 +399,7 @@ class User < ApplicationRecord
 
   # TODO this doesn't belong in User.  but not sure yet where it does belong.
   def files_uploaded_during_this_membership
-    return [] unless membership_current? || membership_expired_in_grace_period?
+    return [] unless payments_current? || membership_expired_in_grace_period?
     return [] if uploaded_files.blank?
 
     uploaded_files_most_recent_first.select { |uploaded_file| uploaded_file.send(most_recent_upload_method) >= membership_start_date }

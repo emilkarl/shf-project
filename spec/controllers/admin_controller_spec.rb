@@ -170,7 +170,7 @@ RSpec.describe AdminController, type: :controller do
 
             # Membership Fee
             # say Paid if member fee is paid, otherwise make link to where it is paid
-            result_str << '"' + paid_or_payment_url(u.membership_current?, user_path(u)) + '"'
+            result_str << '"' + paid_or_payment_url(u.payments_current?, user_path(u)) + '"'
             result_str << ','
             result_str << '"' + (never_paid_if_blank(m.user.membership_expire_date)) + '",'
             result_str << ','

@@ -179,8 +179,8 @@ class User < ApplicationRecord
   # TODO this should not be the responsibility of the User class. Need a MembershipManager class for this.
   # FIXME - this is ONLY about the payments, not the membership status as a whole.
   #   so the name should be changed.  ex: membership_payments_current_as_of?
-  def membership_current_as_of?(this_date)
-    return false if this_date.nil?
+  def membership_current_as_of?(this_date = Date.current)
+    this_date = Date.current if this_date.nil?  # in case nil is passed in explicitly
 
     membership_payment_expire_date = membership_expire_date
     !membership_payment_expire_date.nil? && (membership_payment_expire_date > this_date)
@@ -219,8 +219,9 @@ class User < ApplicationRecord
 
   # This just checks the dates about renewal, not any requirements for renewing a membership.
   def can_renew_on?(this_date = Date.current)
-    return false if membership_expire_date.nil?
+    return false if membership_expire_date.nil?  # No payment has ever been made; this is not a renewal
 
+    this_date = Date.current if this_date.nil?  # if passed in as nil, assume it is checking today
     if this_date <= membership_expire_date
       this_date >= (membership_expire_date - days_can_renew_early)
     else
@@ -248,30 +249,30 @@ class User < ApplicationRecord
   #    OR
   #    the user has is allowed to pay the new membership fee
   #
-  def allowed_to_pay_member_fee?
+  def allowed_to_pay_member_fee?(date = Date.current)
     return false if admin?
 
-    if membership_current? || membership_expired_in_grace_period?
-      allowed_to_pay_renewal_member_fee?
+    if payments_current_as_of?(date) || membership_expired_in_grace_period?(date)
+      allowed_to_pay_renewal_member_fee?(date)
     else
-      allowed_to_pay_new_membership_fee?
+      allowed_to_pay_new_membership_fee?(date)
     end
   end
 
   # A user can pay a renewal membership fee if they have met all of the requirements for renewing,
   #  excluding any payment required.
-  def allowed_to_pay_renewal_member_fee?
+  def allowed_to_pay_renewal_member_fee?(date = Date.current)
     return false if admin?
 
-    RequirementsForRenewal.requirements_excluding_payments_met? self
+    RequirementsForRenewal.requirements_excluding_payments_met? self, date
   end
 
   # A user can pay a (new) membership fee if they have met all of the requirements for membership,
   #  excluding any payment required.
-  def allowed_to_pay_new_membership_fee?
+  def allowed_to_pay_new_membership_fee?(date = Date.current)
     return false if admin?
 
-    RequirementsForMembership.requirements_excluding_payments_met? self
+    RequirementsForMembership.requirements_excluding_payments_met? self, date
   end
 
   # Business rule: user can pay h-brand license fee if:

@@ -805,6 +805,37 @@ RSpec.describe User, type: :model do
     end
   end
 
+
+  describe 'in_at_least_one_co_in_good_standing?' do
+
+    it 'false if in no companies' do
+      expect(build(:user).in_at_least_one_co_in_good_standing?).to be_falsey
+    end
+
+    it 'false if in companies but none are in good standing' do
+      co = build(:company)
+      u = create(:user_with_membership_app, company_number: co.company_number)
+      expect(u.in_at_least_one_co_in_good_standing?).to be_falsey
+    end
+
+    it 'true if in 1 or more companies that are in good standing' do
+      other_user = build(:user, email: 'other@example.com')
+      co1_good_standing = build(:company, name: 'Co 1 in good standing')
+      create(:h_branding_fee_payment, company: co1_good_standing, user: other_user)
+      expect(co1_good_standing.in_good_standing?).to be_truthy
+
+      co2 = build(:company, name: 'Co 2')
+      expect(co2.in_good_standing?).to be_falsey
+
+      u = create(:user, email: 'user@example.com')
+      u_shf_app = create(:shf_application, user: u, company_number: co2.company_number)
+      u_shf_app.companies << co1_good_standing
+
+      expect(u.in_at_least_one_co_in_good_standing?).to be_truthy
+    end
+  end
+
+
   describe '#has_approved_app_for_company?' do
 
     describe 'not a member' do
@@ -1014,11 +1045,18 @@ RSpec.describe User, type: :model do
 
   end
 
+
   describe 'apps_for_company' do
-    pending
+    it 'gets all SHF applications for the company number of the given company' do
+      co = create(:company)
+      u = create(:user_with_membership_app, company_number: co.company_number, email: 'user_with_co@example.com')
+      expect(u).to receive(:apps_for_company_number).with(co.company_number)
+      u.apps_for_company(co)
+    end
   end
 
-  describe '#apps_for_company_number' do
+
+  describe 'apps_for_company_number' do
 
     it 'empty list if no application' do
       expect(build(:user).apps_for_company_number(given_co_num)).to be_empty
@@ -2235,6 +2273,12 @@ RSpec.describe User, type: :model do
 
   end
 
+
+  describe 'ransacker :padded_membership_number' do
+    pending
+  end
+
+
   describe '#get_short_proof_of_membership_url' do
     context 'there is already a shortened url in the table' do
       it 'returns shortened url' do
@@ -2534,7 +2578,21 @@ RSpec.describe User, type: :model do
     end
   end
 
+
   describe 'issue_membership_number' do
+    pending
+  end
+
+  describe 'get_next_membership_number' do
+    # This is a private method so should make sure any calling methods are tested and so test this.
+    # else send this method to a user to test it.
+    pending
+  end
+
+
+  describe 'destroy_updloaded_files' do
+    # This is a private method so should make sure any calling methods are tested and so test this.
+    # else send this method to a user to test it.
     pending
   end
 end

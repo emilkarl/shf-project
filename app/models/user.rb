@@ -349,6 +349,10 @@ class User < ApplicationRecord
     member? && has_approved_app_for_company_number?(company_num)
   end
 
+  def in_at_least_one_co_in_good_standing?
+    companies.any?(&:in_good_standing?)
+  end
+
   def has_approved_app_for_company?(company)
     has_approved_app_for_company_number?(company.company_number)
   end

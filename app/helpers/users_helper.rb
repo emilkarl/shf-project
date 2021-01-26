@@ -86,23 +86,20 @@ module UsersHelper
 
   # @return [String] - CSS class for the expiration date, based on the membership status of the user
   def expire_date_css_class(user)
-    status = user.membership_status
-    status = :expires_soon if status == :current && expires_soon?(user)
-
-    status.to_s.dasherize
+    user.membership_status.to_s.dasherize
   end
 
 
-  # TODO: i18n
-  # TODO: should get all of the membership status instead of this hardcoded list.
   # @return [String] - return the HTML code to display the legend for the Membership Status formatting
   def membership_status_legend
     expire_background_css = 'membership-status'
-    legend_titles = ['Current', 'Expires soon', 'In grace period', 'Past member', 'Not a member'] # TODO: these should be all membership statuses
-    legend_entries = legend_titles.map do |entry_title|
-       { title: entry_title, css_classes: [expire_background_css, "#{entry_title.parameterize}"] }
+    membership_statuses = User.membership_statuses
+
+    legend_entries = membership_statuses.map do |status|
+       { title: t("activerecord.attributes.membership.status.#{status}"),
+                  css_classes: [expire_background_css, "#{status.to_s.dasherize}"] }
     end
 
-    legend(title: 'Membership status:', entries: legend_entries)
+    legend(title: t('users.membership_status'), entries: legend_entries)
   end
 end

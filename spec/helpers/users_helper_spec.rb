@@ -14,7 +14,7 @@ RSpec.describe UsersHelper, type: :helper do
     create(:payment, user: user, status: Payment::ORDER_PAYMENT_STATUS['successful'])
   end
 
-  describe '#most_recent_login_time' do
+  describe 'most_recent_login_time' do
 
     it 'returns nil if the user has never logged in' do
       expect(helper.most_recent_login_time(user)).to be_nil
@@ -77,13 +77,13 @@ RSpec.describe UsersHelper, type: :helper do
     end
   end
 
-  describe '#proof_of_membership_jpg_url' do
+  describe 'proof_of_membership_jpg_url' do
     it 'returns user POM GET url with ".jpg" appended' do
       expect(proof_of_membership_jpg_url(user)).to eq proof_of_membership_url(user) + '.jpg'
     end
   end
 
-  describe '#short_proof_of_membership_url' do
+  describe 'short_proof_of_membership_url' do
     it 'calls #proof_of_membership_jpg_url and returns value returned by #get_short_proof_of_membership_url' do
       url = proof_of_membership_jpg_url(user.id)
       allow(user).to receive(:get_short_proof_of_membership_url).with(url).and_return(url)
@@ -92,7 +92,7 @@ RSpec.describe UsersHelper, type: :helper do
   end
 
 
-  describe '#membership_packet_str' do
+  describe 'membership_packet_str' do
 
     let(:i18n_scope) { 'users.show_info_for_admin_only' }
 
@@ -120,7 +120,7 @@ RSpec.describe UsersHelper, type: :helper do
   end
 
 
-  describe '#membership_packet_status_str' do
+  describe 'membership_packet_status_str' do
 
     let(:i18n_scope) { 'users.show_info_for_admin_only' }
 
@@ -141,14 +141,6 @@ RSpec.describe UsersHelper, type: :helper do
 
   describe 'expire_date_css_class' do
 
-    it 'uses expires_soon as the status if status is current and membership will expires soon' do
-      u = double(User)
-      allow(u).to receive(:membership_status).and_return(:current)
-      allow(helper).to receive(:expires_soon?).with(u).and_return(true)
-
-      expect(helper.expire_date_css_class(u)).to eq('expires-soon')
-    end
-
     it 'makes the status dasherized: lowercase and has dashes for spaces' do
       u = double(User)
       allow(u).to receive(:membership_status).and_return(:this_is_some_status)
@@ -159,27 +151,38 @@ RSpec.describe UsersHelper, type: :helper do
 
   describe 'membership_status_legend' do
 
-    it 'legend title is Membership status' do
-      expect(helper).to receive(:legend).with(hash_including(title: 'Membership status:'))
+    it 'gets the list of membership statuses from User' do
+      expect(User).to receive(:membership_statuses).and_return([])
       helper.membership_status_legend
     end
 
-    describe 'lengend entries' do
+    it 'legend title is Membership status' do
+      expect(helper).to receive(:legend).with(hash_including(title: t('users.membership_status')))
+      helper.membership_status_legend
+    end
+
+    describe 'legend entries' do
       let(:result) { helper.membership_status_legend }
 
-      membership_statuses = ['Current', 'Expires soon', 'In grace period', 'Past member', 'Not a member']
-      membership_statuses.each do |membership_status_title|
+      it "includes 'expires soon' as a status" do
+        expect(result).to match(/#{t('activerecord.attributes.membership.status.expires_soon')}/)
+      end
 
-        it "legend entry title is #{membership_status_title} surrounded by span with legend-item" do
-          expect(result).to match(/<span class="([^"])*legend-item([^"])*">#{membership_status_title}/)
+      membership_statuses = User.membership_statuses
+      membership_statuses.each do |status|
+
+        it "legend entry title for #{status} is surrounded by span with legend-item" do
+          # use escape so any () that may be in the title are escaped
+          title = Regexp.escape(t("activerecord.attributes.membership.status.#{status}"))
+          expect(result).to match(/<span class="([^"])*legend-item([^"])*">#{title}/)
         end
 
         it 'span CSS classes include membership-status' do
           expect(result).to match(/<span class="([^"])*membership-status([^"])*">/)
         end
 
-        it "span CSS classes include #{membership_status_title.parameterize}" do
-          expect(result).to match(/<span class="([^"])*#{membership_status_title.parameterize}([^"])*">/)
+        it "span CSS classes include the class dasherized (dashes instead of underscores)" do
+          expect(result).to match(/<span class="([^"])*#{status.to_s.dasherize}([^"])*">/)
         end
       end
     end

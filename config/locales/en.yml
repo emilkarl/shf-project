@@ -243,6 +243,14 @@ en:
         true: Member
         false: Not member
 
+      membership:
+        status:
+          current: Current
+          expires_soon: Expires Soon
+          in_grace_period: Renewal Overdue (In Grace Period)
+          past_member: Former Member
+          not_a_member: Not a Member
+
       address:
         street: &street Street
         post_code: &post_code Post code
@@ -983,6 +991,7 @@ en:
 
   users:
     edit_user_account: &edit_user_account "Edit the account for %{name}"
+    membership_status: Membership status
 
     index:
       title: All Users
@@ -1040,6 +1049,7 @@ en:
 
     show_for_member:
       membership_number: *membership_number
+      no_membership_number: (No membership number)
 
     show_for_applicant:
         title: "Steps to SHF Membership:"
@@ -1853,6 +1863,17 @@ en:
           can_edit_co_pay: "When you are signed in, you can edit your business page and pay your branding license fee here: "
           access_fb_group: "As a member, you will also have access to our closed Facebook group: "
           and_member_pages: "as well as hidden pages in our member system: "
+
+      membership_renewed:
+        subject: &subject_welcome "Thanks for renewing your SHF membership!"
+        greeting: *email_greeting
+        message_text:
+          welcome:  *subject_welcome
+          youre_active: "Du har nu aktiverats som medlem i systemet. Du kan logga in och hantera din profil och bygga upp din företagssida."
+          can_edit_co_pay: "När du är inloggad kan du redigera din företagssida (glöm inte lägga till adress) och betala din H-märkesavgift här: "
+          access_fb_group: "Som medlem (med betald H-märkespremie) får du även tillgång till vår slutna Facebookgrupp: "
+          and_member_pages: "samt dolda sidor i vårt medlemssystem: "
+
 
       membership_will_expire:
         subject: Your membership will expire soon

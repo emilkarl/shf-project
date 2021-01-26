@@ -4,24 +4,21 @@
 = render partial: 'show_login_email_row_cols', locals: { user: user }
 
 - showing_renewal_info = user.can_renew_today?
-- labelclass = 'standard-label'
+
 .membership
   .row
     .col-md-4.membership-number
-      = field_or_none(t('.membership_number'), user.membership_number,
-        tag: :div,
-        label_class: labelclass,
-        value_class: 'membership-number')
+      = field_or_default(t('.membership_number'), user.membership_number,
+        default: t('.no_membership_number'),
+        tag: :div)
 
     .col.memberhip-status
-      -# TODO: GET THE SPECIFIC USER STATUS: OVERDUE, CURRENT, ETC.
-      = field_or_none(t('payors.status').capitalize, 'Renewal Overdue',
-        tag: :div,
-        label_class: labelclass,
-        value_class:'membership-status')
+      = field_or_none(t('payors.status').capitalize,
+        t("activerecord.attributes.membership.status.#{user.membership_status}"),
+        tag: :div)
 
   .row
-    .col.term-end
+    .col.membership-expiration-date
       = expire_date_label_and_value(user)
 
   = render partial: 'admin_only_edit_status', locals: { user: user }

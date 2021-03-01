@@ -216,7 +216,7 @@ RSpec.describe RequirementsForRenewal, type: :model do
                 expect(approved_and_paid.membership_guidelines_checklist_done?).to be_truthy
                 expect(subject.doc_uploaded_during_this_membership_term?(approved_and_paid)).to be_falsey
 
-                expect(subject.requirements_met?({ user: approved_and_paid })).to be_falsey
+                expect(subject.requirements_met?({ user: approved_and_paid })).to be_truthy #be_falsey once ui is updated to show that a file upload is required
               end
             end
           end

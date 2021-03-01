@@ -32,8 +32,8 @@ class RequirementsForRenewal < AbstractRequirements
   def self.requirements_excluding_payments_met?(user)
     user.can_renew_today? &&
       user.has_approved_shf_application? &&
-      membership_guidelines_checklist_done?(user) &&
-      doc_uploaded_during_this_membership_term?(user)
+      membership_guidelines_checklist_done?(user) # &&
+      #doc_uploaded_during_this_membership_term?(user)
   end
 
   # @return [Boolean] - if a user must have a completed Membership Guidelines checklist,

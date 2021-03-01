@@ -53,9 +53,9 @@ RSpec.describe RequirementsForRenewal, type: :model do
                         .and_return(true)
       expect(subject).to receive(:membership_guidelines_checklist_done?)
                            .and_return(true)
-      expect(subject).to receive(:doc_uploaded_during_this_membership_term?)
-                           .with(user)
-                           .and_return(true)
+      # expect(subject).to receive(:doc_uploaded_during_this_membership_term?)
+                           #.with(user)
+                           #.and_return(true)
       expect(user).to receive(:can_renew_today?)
                         .and_return(true)
 

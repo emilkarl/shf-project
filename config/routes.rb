@@ -22,6 +22,7 @@ Rails.application.routes.draw do
         get 'payments', to: 'dashboard#payments'
 
         resources :master_checklist_types
+        resources :memberships
       end
 
 

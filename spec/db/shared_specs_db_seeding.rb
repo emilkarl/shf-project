@@ -25,12 +25,14 @@ RSpec.shared_examples 'admin, business categories, kommuns, and regions are seed
         stub_const('ENV', ENV.to_hash.merge({ENV_ADMIN_EMAIL_KEY    => admin_email,
                                              ENV_ADMIN_PASSWORD_KEY => admin_pwd}) )
 
-        allow(SeedHelper::AppConfigurationSeeder).to receive(:seed).and_return(true)
+        allow(Seeders::AppConfigurationSeeder).to receive(:seed).and_return(true)
 
         allow(Seeders::MasterChecklistTypesSeeder).to receive(:seed).and_return([])
         allow(Seeders::MasterChecklistsSeeder).to receive(:seed).and_return([])
         allow(Seeders::UserChecklistsSeeder).to receive(:seed).and_return([])
         allow(SeedHelper::UsersFactory ).to receive(:seed_predefined_users).and_return(true)
+
+        allow(Membership).to receive(:term_length).and_return(10)  # so AppConfiguration is not called
 
         SHFProject::Application.load_tasks
         SHFProject::Application.load_seed
@@ -95,7 +97,9 @@ RSpec.shared_examples 'admin, business categories, kommuns, and regions are seed
         stub_const('ENV', ENV.to_hash.merge({ENV_ADMIN_EMAIL_KEY => admin_email,
                                              ENV_ADMIN_PASSWORD_KEY => admin_pwd}) )
 
-        allow(SeedHelper::AppConfigurationSeeder).to receive(:seed).and_return(true)
+        allow(Seeders::AppConfigurationSeeder).to receive(:seed).and_return(true)
+
+        allow(Membership).to receive(:term_length).and_return(10)  # so AppConfiguration is not called
       end
     end
 
@@ -160,6 +164,7 @@ RSpec.shared_examples 'it calls geocode min max times with csv file' do |num_use
       allow_any_instance_of(SeedHelper::AddressFactory).to receive(:tell).and_return(false)
 
       allow(Seeders::UserChecklistsSeeder).to receive(:seed).and_return([])
+      allow(Membership).to receive(:term_length).and_return(10)  # so AppConfiguration is not called
 
       stub_const('ENV', ENV.to_hash.merge({ ENV_NUM_SEEDED_USERS_KEY    => num_users,
                                             ENV_SEED_FAKE_CSV_FNAME_KEY => csv_filename,
@@ -174,7 +179,7 @@ RSpec.shared_examples 'it calls geocode min max times with csv file' do |num_use
 
       expect(Geocoder).to receive(:search).at_most(geocode_max).times if geocode_max > 0
 
-      allow(SeedHelper::AppConfigurationSeeder).to receive(:seed).and_return(true)
+      allow(Seeders::AppConfigurationSeeder).to receive(:seed).and_return(true)
 
       SHFProject::Application.load_seed
 

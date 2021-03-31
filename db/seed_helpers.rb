@@ -177,7 +177,7 @@ module SeedHelper
       guidelines_list = UserChecklistManager.find_or_create_membership_guidelines_list_for(user)
       guidelines_list.set_complete_including_children(start_date) if FFaker::Random.rand(100) < 86
 
-      MembershipStatusUpdater.instance.check_requirements_and_act({ user: user, send_email: false })
+      MembershipStatusUpdater.instance.update_membership_status(user) unless user.admin?
       #user.update_action(send_email: false)
 
       ma.companies[0].payments << Payment.create(payment_type: Payment::PAYMENT_TYPE_BRANDING,

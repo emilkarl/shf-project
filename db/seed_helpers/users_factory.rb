@@ -101,6 +101,8 @@ module SeedHelper
         payment_ends_tomorrow = make_n_save_app(member, MA_ACCEPTED_STATE)
         membership_payment = payment_ends_tomorrow.most_recent_membership_payment
         membership_payment.update(expire_date: last_payment_expiry, start_date: User.start_date_for_expire_date(last_payment_expiry))
+        member.start_membership_on(date: Membership.first_day_from_last(last_payment_expiry))
+        #   member.update(member: true)  TODO should this be done? or does .start_membership_on take care of it?
       end
     end
 

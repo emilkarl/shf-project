@@ -81,7 +81,6 @@ begin
   seed_model_with_seeder(AdminOnly::FileDeliveryMethod, Seeders::FileDeliveryMethodsSeeder)
   seed_model_with_seeder(BusinessCategory, Seeders::BusinessCategoriesSeeder)
 
-
   init_generated_seeding_info
 
   ActivityLogger.open(SEEDING_LOG_FILE_NAME, SEEDING_LOG_FACILITY, 'Admin User') do |log|

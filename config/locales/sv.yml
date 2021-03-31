@@ -135,7 +135,7 @@ sv:
 
   checklist_common:
     done: &done Done
-    complete: &complete Complete
+    complete: *complete
     date_completed: &date_completed Datum Slutfört
 
 
@@ -242,13 +242,6 @@ sv:
         true: Medlem
         false: Ej medlem
 
-      membership:
-        status:
-          current: Current
-          expires_soon: Expires Soon
-          in_grace_period: Renewal Overdue (In Grace Period)
-          past_member: Former Member
-          not_a_member: Not a Member
 
       address:
         street: &street Gata
@@ -342,6 +335,19 @@ sv:
         name: *name
         description: *description
 
+      membership:
+        first_day: First day
+        last_day: Last day
+        member_number: *membership_number
+        notes: Notes
+        status:
+          current: Current
+          expires_soon: Expires Soon
+          in_grace_period: Renewal Overdue (In Grace Period)
+          past_member: Former Member
+          not_a_member: Not a Member
+
+
     errors:
       models:
 
@@ -426,6 +432,9 @@ sv:
         restrict_dependent_destroy:
           has_one: Kan inte ta bort post då beroende %{record} finns
           has_many: Kan inte ta bort poster då beroende %{record} finns
+        record_not_found:
+          header: "%{entity_type} kunde inte hittas"
+          message: "Beklagar, vi kunde inte hitta %{entity_type} med id %{id}."
 
 
   shared:
@@ -857,6 +866,11 @@ sv:
       dinkurs_fetching: Hämtar händelser ... vänligen vänta
       dinkurs_key: *dinkurs_company_key
       pay_branding_fee: &pay_branding_fee Betala H-märkespremie
+      info_is_complete: Din företagssida är synlig.
+      info_is_not_complete: Din företagssida är inte synlig.
+      info_is_not_complete_explanation: Din företagssida är bara synlig när all markerad information är angiven.
+      this_info_missing: "This information is missing:"
+      complete: *complete
 
     index:
       title:  Hitta H-märkt företag
@@ -865,6 +879,7 @@ sv:
       name: *name
       company_number: *org_nr
       region_land: *region_short
+      complete: *complete
       h_companies_listed_below: Nedan listas anslutna företag.
       how_to_search: Sök efter företag genom att använda sökfunktionen.
       confirm_are_you_sure: *are_you_sure_confirm
@@ -1058,7 +1073,7 @@ sv:
 
     show_for_member:
       membership_number: *membership_number
-      no_membership_number: (No membership number)
+      no_membership_number: (inget medlemsnummer)
 
     show_for_applicant:
       title: "Steg mot medlemskap:"
@@ -1761,7 +1776,15 @@ sv:
     how_to_pay_hmarkt: "Så här betalar du H-märkespremien:"
     pay_hmarkt_step: "När du är inloggad ser du när din H-märkningspremie går ut och hur du betalar på din företagssida."
     here_is_co_page: "Här är länken där du kan redigera ditt företag: "
+    find_co_in_my_cos: You will find the page for a company by going to the 'My Companies' menu and clicking on the company you want to see.
     h_brand_exp_shown: "Du ser när din H-märkningspremie går ut på din företagssida."
+
+    how_to_edit_companies:
+      title: "How to Edit Your Company(-ies):"
+      go_to_my_cos_menu: "Once you are logged in, go to the 'My Companies' menu at the top and click on it."
+      see_click_co_name: You will see all of the companies you belong to, listed by name.  Click on the Company name you want to edit.
+      view_then_edit: You will then see the information about the company. At the bottom you will see a button to edit the company. Click it to edit the company.
+      cos_you_can_edit: "These are the companies you can edit:"
 
 
     application_mailer:
@@ -1867,16 +1890,6 @@ sv:
           access_fb_group: "Som medlem (med betald H-märkespremie) får du även tillgång till vår slutna Facebookgrupp: "
           and_member_pages: "samt dolda sidor i vårt medlemssystem: "
 
-      membership_renewed:
-        subject: &subject_welcome "Tack för att du förnya ditt Sveriges Hundföretagare-medlemskap"
-        greeting: *email_greeting
-        message_text:
-          welcome:  *subject_welcome
-          youre_active: "Du har nu aktiverats som medlem i systemet. Du kan logga in och hantera din profil och bygga upp din företagssida."
-          can_edit_co_pay: "När du är inloggad kan du redigera din företagssida (glöm inte lägga till adress) och betala din H-märkesavgift här: "
-          access_fb_group: "Som medlem (med betald H-märkespremie) får du även tillgång till vår slutna Facebookgrupp: "
-          and_member_pages: "samt dolda sidor i vårt medlemssystem: "
-
       membership_will_expire:
         subject: Ditt medlemskap löper ut snart
         greeting: *email_greeting
@@ -1925,6 +1938,16 @@ sv:
         greeting: *email_greeting
         message_text: "Du har blivit godkänd för att bli medlem, men du måste betala medlemsavgift för att kunna dra nytta av de förmåner, erbjudande och rabatter som ingår i medlemskapet. Du kan enkelt betala genom att följa stegen nedan."
 
+      membership_renewed:
+        subject:  &subject_welcome "Tack för att du förnya ditt Sveriges Hundföretagare-medlemskap"
+        greeting: *email_greeting
+        message_text:
+          awesome: "Awesome!"
+          renewed_last_day: "You have now renewed your membership. The last day of your membership is now "
+          companies_you_belong_to: "As a reminder, here are the companies you belong to:"
+          thanks: Thanks for joining us for another year.
+          company-incomplete: Incomplete info for company
+          company-license-expired: H-Markt license has expired
 
 
   devise:

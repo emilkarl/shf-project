@@ -136,7 +136,7 @@ en:
 
   checklist_common:
     done: &done Done
-    complete: &complete Complete
+    complete: *complete
     date_completed: &date_completed Date Completed
 
 
@@ -243,13 +243,6 @@ en:
         true: Member
         false: Not member
 
-      membership:
-        status:
-          current: Current
-          expires_soon: Expires Soon
-          in_grace_period: Renewal Overdue (In Grace Period)
-          past_member: Former Member
-          not_a_member: Not a Member
 
       address:
         street: &street Street
@@ -342,6 +335,17 @@ en:
         name: *name
         description: *description
 
+      membership:
+        first_day: First day
+        last_day: Last day
+        member_number: *membership_number
+        notes: Notes
+        status:
+          current: Current
+          expires_soon: Expires Soon
+          in_grace_period: Renewal Overdue (In Grace Period)
+          past_member: Former Member
+          not_a_member: Not a Member
 
     errors:
       models:
@@ -428,6 +432,9 @@ en:
         restrict_dependent_destroy:
           has_one: "Cannot delete record because a dependent %{record} exists"
           has_many: "Cannot delete record because dependent %{record} exist"
+        record_not_found:
+          header: "Could not find the %{entity_type}"
+          message: "So sorry. We could not find the %{entity_type} with id %{id}."
 
 
   shared:
@@ -850,6 +857,11 @@ en:
       dinkurs_fetching: Fetching events ... please wait
       dinkurs_key: *dinkurs_company_key
       pay_branding_fee: &pay_branding_fee Pay H-Branding Fee
+      info_is_complete: Company information is complete
+      info_is_not_complete: Company information is not complete
+      info_is_not_complete_explanation: This company will not appear on the website until all required information is complete.
+      this_info_missing: "This information is missing:"
+      complete: *complete
 
     index:
       title: Find H-labeled companies
@@ -858,6 +870,7 @@ en:
       company_number: *org_nr
       category: Category
       region_land: *region
+      complete: *complete
       h_companies_listed_below: Member companies are listed below.
       how_to_search: Search for companies using the search form.
       confirm_are_you_sure: *are_you_sure_confirm
@@ -1049,7 +1062,7 @@ en:
 
     show_for_member:
       membership_number: *membership_number
-      no_membership_number: (No membership number)
+      no_membership_number: (no membership number)
 
     show_for_applicant:
         title: "Steps to SHF Membership:"
@@ -1756,8 +1769,15 @@ en:
     how_to_pay_hmarkt: "How to Pay the H-Markt License Fee:"
     pay_hmarkt_step: &co_pay_after_loggedin "Once you are logged in, go to the company page where you will see the button to pay."
     here_is_co_page: "Here is the company page: "
+    find_co_in_my_cos: You will find the page for a company by going to the 'My Companies' menu and clicking on the company you want to see.
     h_brand_exp_shown: "The H-markt license expiration date will be on the company page."
 
+    how_to_edit_companies:
+      title: "How to Edit Your Company(-ies):"
+      go_to_my_cos_menu: "Once you are logged in, go to the 'My Companies' menu at the top and click on it."
+      see_click_co_name: You will see all of the companies you belong to, listed by name.  Click on the Company name you want to edit.
+      view_then_edit: You will then see the information about the company. At the bottom you will see a button to edit the company. Click it to edit the company.
+      cos_you_can_edit: "These are the companies you can edit:"
 
     application_mailer:
       greeting: &email_greeting "Hello %{greeting_name}"
@@ -1864,17 +1884,6 @@ en:
           access_fb_group: "As a member, you will also have access to our closed Facebook group: "
           and_member_pages: "as well as hidden pages in our member system: "
 
-      membership_renewed:
-        subject: &subject_welcome "Thanks for renewing your SHF membership!"
-        greeting: *email_greeting
-        message_text:
-          welcome:  *subject_welcome
-          youre_active: "Du har nu aktiverats som medlem i systemet. Du kan logga in och hantera din profil och bygga upp din företagssida."
-          can_edit_co_pay: "När du är inloggad kan du redigera din företagssida (glöm inte lägga till adress) och betala din H-märkesavgift här: "
-          access_fb_group: "Som medlem (med betald H-märkespremie) får du även tillgång till vår slutna Facebookgrupp: "
-          and_member_pages: "samt dolda sidor i vårt medlemssystem: "
-
-
       membership_will_expire:
         subject: Your membership will expire soon
         greeting: *email_greeting
@@ -1923,6 +1932,17 @@ en:
         subject: "Approved, but haven't paid yet?"
         greeting: *email_greeting
         message_text: "You have been approved to become a member, but you must pay a membership fee in order to take advantage of the benefits, offers and discounts included in the membership. You can easily pay by following the steps below."
+
+      membership_renewed:
+        subject: &subject_welcome "Thanks for renewing your SHF membership!"
+        greeting: *email_greeting
+        message_text:
+          awesome: "Awesome!"
+          renewed_last_day: "You have now renewed your membership. The last day of your membership is now "
+          companies_you_belong_to: "As a reminder, here are the companies you belong to:"
+          thanks: Thanks for joining us for another year.
+          company-incomplete: Incomplete info for company
+          company-license-expired: H-Markt license has expired
 
 
   devise:

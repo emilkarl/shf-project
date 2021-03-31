@@ -51,4 +51,38 @@ RSpec.describe RequirementsForCoInfoComplete, type: :model do
 
   end # describe '.requirements_met?'
 
+
+  describe '.missing_info' do
+
+    describe 'validates the arguments' do
+
+      it 'raise ArgumentError if arguments are not correct' do
+        expect { subject.missing_info({this: 'that'})}.to raise_error(ArgumentError)
+      end
+    end
+
+    context 'company name is blank' do
+      it 'adds activerecord.attributes.company.name to the list of results' do
+        co_no_name = build(:company)
+        co_no_name.name = ''
+
+        expect(subject.missing_info(company: co_no_name)).to match_array([I18n.t('activerecord.attributes.company.name')])
+      end
+    end
+
+    context 'region is blank' do
+      it 'adds activerecord.attributes.address.region to the list of results' do
+        co_no_region = build(:company)
+        co_no_region.addresses.first.region = nil
+
+        expect(subject.missing_info(company: co_no_region)).to match_array([I18n.t('activerecord.attributes.address.region')])
+      end
+    end
+
+    context 'no information is missing' do
+      it 'returns an empty list' do
+        expect(subject.missing_info(company: build(:company))).to be_empty
+      end
+    end
+  end
 end

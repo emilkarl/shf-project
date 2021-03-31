@@ -33,4 +33,19 @@ class RequirementsForCoInfoComplete < AbstractRequirements
     !( company.name.blank? || company.missing_region? )
   end
 
-end # RequirementsForCoInfoComplete
+
+  # This could be generalized if needed; it is not DRY because it repeats code in requirements_met?
+  #   Because we're just checking 2 specific pieces of information,
+  #   this is simple and explicit.
+  def self.missing_info(args)
+    raise ArgumentError, 'Missing arguments. Expected { company: <some company} ' unless  has_expected_arguments?(args)
+
+    company = args[:company]
+
+    missing_errors = []
+    missing_errors << I18n.t('activerecord.attributes.company.name') if company.name.blank?
+    missing_errors << I18n.t('activerecord.attributes.address.region') if  company.missing_region?
+    missing_errors
+  end
+
+end

@@ -25,8 +25,8 @@ class RequirementsForRenewal < AbstractReqsForMembership
     user.may_renew? &&
       user.valid_date_for_renewal?(date) &&
       user.has_approved_shf_application? &&
-      membership_guidelines_checklist_done?(user) # &&
-      #doc_uploaded_during_this_membership_term?(user)
+      membership_guidelines_checklist_done?(user) &&
+      doc_uploaded_during_this_membership_term?(user)
   end
 
 

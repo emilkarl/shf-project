@@ -8,7 +8,7 @@ class CompaniesController < ApplicationController
   before_action :set_company, only: [:show, :edit, :update, :destroy,
                                      :edit_payment, :fetch_from_dinkurs,
                                      :company_h_brand]
-  before_action :authorize_company, only: [:update, :show, :edit, :destroy]
+  before_action :authorize_company, only: [:update, :edit, :destroy]
   before_action :set_app_config, only: [:company_h_brand]
   before_action :allow_iframe_request, only: [:company_h_brand]
 
@@ -22,66 +22,53 @@ class CompaniesController < ApplicationController
 
     action_params, @items_count, items_per_page = process_pagination_params('company')
 
+    scope_for_user = current_user.admin? ? [:all] : [:searchable]
+
     @search_params = Company.ransack(action_params)
+    @search_params.sorts = ['updated_at desc'] if @search_params.sorts.empty?
 
-    # only select companies that are 'complete'; see the Company.complete scope
-    @all_companies = @search_params.result(distinct: true)
-                         .includes(:business_categories)
-                         .includes(addresses: [:region, :kommun])
-                         .joins(addresses: [:region, :kommun])
-                         .order(company_order)
+    # Cannot use DISTINCT because it will not work when ordering (sorting) by information_complete
+    #   It is not really needed due to the INNER joins with addresses, regions, kommuns
+    @all_displayed_companies = @search_params.result(distinct: false)
+                                             .send(*scope_for_user)
+                                             .includes(:business_categories)
+                                             .includes(addresses: [:region, :kommun])
+                                             .joins(addresses: [:region, :kommun])
 
-    # The last qualifier ("joins") on above statement ("addresses: :region") is
+    # Must use a joins qualifier on the above statement
     # to get around a problem with DISTINCT queries used with ransack when also
-    # allowing sorting on an associated table column ("region" in this case)
+    # the action params specify that _sorting_ needs to be done on a column
+    # that belongs to an associated table.  (ex: "region" or "kommuns")
     # https://github.com/activerecord-hackery/ransack#problem-with-distinct-selects
 
+    @all_mappable_companies = mappable_companies(@all_displayed_companies)
+    @all_mappable_companies.each { |co| geocode_if_needed co }
 
-    if current_user.admin?
-      @all_visible_companies = @all_companies
-      @addresses_select_list = Address.select(:city).distinct
-                                 .sort { |a,b| a.city.downcase.strip <=> b.city.downcase.strip }
-    else
-      @all_companies = @all_companies.searchable
-      @all_visible_companies = @all_companies.address_visible
+    addresses_to_use = addresses_to_use_with_current_user(@all_mappable_companies)
+    @addr_cities_select_list= addresses_to_use.map{|a| a.city.capitalize.strip }.uniq.sort
 
-      addresses = []
-      @all_visible_companies.each do |company|
-        company.addresses.where.not(visibility: 'none').select(:city).each do |address|
-          addresses << address
-        end
-      end
-
-      @addresses_select_list = addresses.uniq { |a| a.city.downcase.strip }
-                                .sort { |a,b| a.city.downcase.strip <=> b.city.downcase.strip }
-    end
-
-    @all_visible_companies.each { |co| geocode_if_needed co }
-
+    # TODO: is this being used?  If not, comment out for now.  Can re-instate it later.
     if params.include? :near
       addresses = get_addresses_near(params[:near])
-      @all_companies = @all_companies.at_addresses( addresses)
+      @all_displayed_companies = @all_displayed_companies.at_addresses( addresses)
     end
 
-    @companies = @all_companies.page(params[:page]).per_page(items_per_page)
+    @one_page_of_displayed_companies = @all_displayed_companies.page(params[:page]).per_page(items_per_page)
 
     respond_to do |format|
       format.html
 
       format.js do
         list_html = render_to_string(partial: 'companies_list',
-                                     locals: { companies: @companies,
+                                     locals: { companies: @one_page_of_displayed_companies,
                                                search_params: @search_params })
 
-        if params[:page]  # handling a pagination request - update companies list
+        if params[:page]  # handling a pagination request so update the companies list
           render json: { list_html: list_html }
-        else              # handling a search request
-
-          markers = helpers.location_and_markers_for(@all_visible_companies)
-
+        else
+          markers = helpers.location_and_markers_for(@all_mappable_companies)
           map_html = render_to_string(partial: 'map_companies',
                                       locals: { markers: markers })
-
           render json: { list_html: list_html, map_html: map_html }
         end
       end
@@ -90,14 +77,25 @@ class CompaniesController < ApplicationController
 
 
   def show
-    setup_events_and_events_pagination
-    set_meta_tags_for_company(@company)
+    begin
+      authorize @company
+      setup_events_and_events_pagination
+      set_meta_tags_for_company(@company)
 
-    @applications = @company.shf_applications
-                            .includes(:user, :business_categories, :shfapplications_business_categories)
+      @applications = @company.shf_applications
+                              .includes(:user, :business_categories, :shfapplications_business_categories)
 
-    show_events_list if request.xhr?
+      show_events_list if request.xhr?
+
+    # If someone is not authorized to view a company, we don't want to let them know that it exists,
+    #   so we want to return a 404, vs. a "You are not authorized to see this" error.
+    #   This is especially important for bots.  We don't want them repeatedly trying to crawl the page.
+    #   TODO probably want to generalize this and make it available to all main classes
+    rescue Pundit::NotAuthorizedError
+      render_company_not_found
+    end
   end
+
 
   def company_h_brand
     render_as = request.format.to_sym
@@ -157,7 +155,6 @@ class CompaniesController < ApplicationController
 
     Ckeditor::Picture.images_category = 'company_' + @company.id.to_s
     Ckeditor::Picture.for_company_id = @company.id
-
   end
 
 
@@ -246,8 +243,7 @@ class CompaniesController < ApplicationController
   end
 
   def show_companies_list
-
-    render partial: 'companies_list', locals: { companies: @companies,
+    render partial: 'companies_list', locals: { companies: @one_page_of_displayed_companies,
                                                 search_params: @search_params } if request.xhr?
   end
 
@@ -256,6 +252,9 @@ class CompaniesController < ApplicationController
   def set_company
     @company = Company.includes(:addresses).find(params[:id])
     geocode_if_needed @company
+
+  rescue ActiveRecord::RecordNotFound
+    render_company_not_found
   end
 
 
@@ -306,6 +305,28 @@ class CompaniesController < ApplicationController
     params
   end
 
+
+  # If the user is an admin, map all companies, regardless of address visibility level
+  # Else only those that have at least 1 address with visibility level not none
+  def mappable_companies(list_of_companies)
+    current_user.admin? ? list_of_companies : list_of_companies.address_visible
+  end
+
+
+  def addresses_to_use_with_current_user(list_of_companies)
+    if current_user.admin?
+      Address.select(:city).distinct
+    else
+      # get the cities for all addresses where the visibility level is not none
+      addresses_to_use = []
+      list_of_companies.each do |company|
+        company.addresses.where.not(visibility: 'none').select(:city).each do |address|
+          addresses_to_use << address
+        end
+      end
+      addresses_to_use
+    end
+  end
 
   def get_addresses_near(near_params)
 
@@ -389,5 +410,16 @@ class CompaniesController < ApplicationController
   # @return [Hash | String] - the arguments to use in the .order  method
   def company_order
     {updated_at: :desc}
+  end
+
+
+  def render_company_not_found
+    id = params[:id]
+    Rails.logger.info("Company not found. id = #{id}")
+    render 'error_entity_not_found', locals: { entity_type_name: t('activerecord.models.company.one'),
+                                               id: id,
+                                               button_text: t('companies.list_all_companies'),
+                                               button_path: companies_path},
+           status: 404
   end
 end

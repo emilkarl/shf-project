@@ -1,0 +1,29 @@
+-# This partial expects these locals:
+-#   entity_type_name - the name of this type of entity that wasn't found. ex: Company
+-#   id - the database id that was searched for
+-#   button_text [optional] - text to show on the button displayed at the bottom (e.g. 'Back to All Companies')
+-#           if this is nil, then no button is displayed
+-#   button_path [optional] - the path for the button
+-#           if this is nil, then no button is displayed
+-#
+- display_button = local_assigns.fetch(:button_text, false) && local_assigns.fetch(:button_path, false)
+- entity_name = local_assigns.fetch(:entity_type_name, '')
+- bad_id = local_assigns.fetch(:id, '')
+.error-not-found
+
+  %header.entry-header
+    %h1.error-header
+      = t('activerecord.errors.messages.record_not_found.header', entity_type: entity_name)
+
+  .entry-content.container
+    .row
+      .col.error-details
+        = t('activerecord.errors.messages.record_not_found.message', entity_type: entity_name, id: bad_id)
+
+    - if display_button
+      %hr
+      .row
+        .col.d-flex.justify-content-center
+          = link_to button_text,
+                      button_path,
+                      class: 'btn btn-light btn-sm mr-3'

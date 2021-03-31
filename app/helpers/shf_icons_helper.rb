@@ -96,8 +96,10 @@ module ShfIconsHelper
 
   # Commonly used actions and information:
   FA_EXTERNAL_LINK = 'external-link-alt'
-  FA_CHECKBOX = ''
+  FA_NOT_COMPLETE_CHECK_CIRCLE = 'circle'
   FA_COMPLETE_CHECK = 'check-circle'
+  FA_NOT_COMPLETE_CHECK_SQ = 'square'
+  FA_COMPLETE_CHECK_SQ = 'check-square'
   FA_WARNING = 'exclamation-triangle'
   FA_PROBLEM = 'times-circle'
   FA_PLUS = 'plus'
@@ -247,7 +249,10 @@ module ShfIconsHelper
 
 
       { method_name_start: 'external_link', icon: FA_EXTERNAL_LINK },
+      { method_name_start: 'not_complete_check', icon: FA_NOT_COMPLETE_CHECK_CIRCLE, fa_style: 'far' },
       { method_name_start: 'complete_check', icon: FA_COMPLETE_CHECK },
+      { method_name_start: 'not_complete_check_sq', icon: FA_NOT_COMPLETE_CHECK_SQ, fa_style: 'far' },
+      { method_name_start: 'complete_check_sq', icon: FA_COMPLETE_CHECK_SQ, fa_style: 'far' },
       { method_name_start: 'warning', icon: FA_WARNING },
       { method_name_start: 'problem', icon: FA_PROBLEM },
       { method_name_start: 'plus', icon: FA_PLUS },

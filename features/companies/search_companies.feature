@@ -322,7 +322,7 @@ Feature: Sort and search Companies
   Scenario: Search by city ignores case, and leading and trailing whitespace in city name
     Given I am Logged out
     And I am on the "landing" page
-    When I select "Space City" in select list t("activerecord.attributes.company.city")
+    When I select "Space city" in select list t("activerecord.attributes.company.city")
     And I click on t("search")
     Then I should see "New Company"
     And I should not see "HappyMutts" in the list of companies

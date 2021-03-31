@@ -329,8 +329,8 @@ module ApplicationHelper
   end
 
   # public method to render the main title of a page
-  def content_title(title, user: nil, id: nil, classes: [])
-    tag.h1 title.html_safe,
+  def content_title(title = '', user: nil, id: nil, classes: [])
+    tag.h1 title&.html_safe,
            class: classes + with_admin_css_class_if_needed(user, [content_title_css_class]),
            id: id
   end
@@ -355,6 +355,19 @@ module ApplicationHelper
     show_if ? link_to(text, url, class: ['shf-icon', 'edit-user-profile-icon'], title: title) : ''
   end
 
+
+  # @return [String] HTML safe string for a FontAwesome checkbox with the text = displayed_text
+  #   Use a square checkbox by default. if use_circle: true, use a circular one
+  def fa_checkbox(is_checked = false, displayed_text = '',
+                              use_circle: false, html_options: {})
+    append_sq_str = use_circle ? '' : '_sq'
+    icon_method = is_checked ? 'complete_check' : 'not_complete_check'
+
+    checkbox_icon_method = "#{icon_method}#{append_sq_str}_icon".to_sym
+    self.send(checkbox_icon_method, text: displayed_text, html_options: html_options)
+  end
+
+
   # @param [String] title - title for the entire legend
   # @param [Array[String]] title_classes - list of CSS classes for the title. These will be applied
   #   with a span tag that surrounds the title.
@@ -377,6 +390,7 @@ module ApplicationHelper
       legend_entries.each{|entry| concat entry}.join(' ')
     end
   end
+
 
   # @return [String] - HTML formatted to display a legend entry: a span with the given
   #   CSS classes AND the default CSS classes for a legend entry

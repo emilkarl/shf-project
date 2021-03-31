@@ -23,7 +23,28 @@
     font-weight: bold;
     margin-top: 2rem;
   }
+}
 
+th .complete-status {
+  font-size: smaller;
+}
+
+.row {
+  .complete-status {
+    padding-bottom: 2%;
+  }
+
+  .db-id {
+    margin-top: 1%;
+  }
+
+  .header {
+    margin-bottom: 1%;
+  }
+}
+
+.not-complete {
+  background-color: $no-background-red;
 }
 
 
@@ -43,6 +64,17 @@
   h2 {
     font-size: 1.8rem;
     font-weight: normal;
+  }
+
+  .complete-status {
+    .alert {
+      margin-top: 0;
+
+      .alert-heading {
+        font-weight: bold;
+      }
+
+    }
   }
 
   .post-category {
@@ -110,7 +142,7 @@
   }
 
   .search-instructions {
-    margin-bottom: 20px;  // same as Bootstrap panel margin-bottom
+    margin-bottom: 20px; // same as Bootstrap panel margin-bottom
   }
 
   .map-marker {
@@ -149,13 +181,12 @@
 
 
 #map {
-
   margin: 0;
   padding: 0;
   width: 100%;
 }
 
- // The switch - the box around the slider
+// The switch is the box around the slider
 .switch {
   display: inline-block;
   height: 34px;
@@ -189,7 +220,7 @@
     position: absolute;
     transition: 0.4s;
     width: 26px;
-    }
+  }
 
   input:checked + & {
     background-color: $slider-checked;

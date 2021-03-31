@@ -1,4 +1,6 @@
-Feature: As an admin
+Feature: Admin can create a company
+
+  As an admin
   So that I can view and manage companies
   I need to be able to create them
 
@@ -68,15 +70,22 @@ Feature: As an admin
     Then I should see "No More Snarky Barky"
     And I should see "Bowsers"
 
-  Scenario: User tries to create a company
+  Scenario: User is not allowed to create a company
     Given I am logged in as "applicant_1@happymutts.com"
     And I am on the "create a new company" page
     Then I should see a message telling me I am not allowed to see that page
 
-  Scenario: Visitor tries to create a company
+  Scenario: Visitor is not allowed to create a company
     Given I am Logged out
     And I am on the "create a new company" page
     Then I should see a message telling me I am not allowed to see that page
+
+
+  Scenario: Member is not allowed to create a company
+    Given I am logged in as "member_1@happymutts.com"
+    And I am on the "create a new company" page
+    Then I should see a message telling me I am not allowed to see that page
+
 
   @time_adjust @dinkurs_fetch
   Scenario: Admin creates a company

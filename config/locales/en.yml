@@ -348,8 +348,8 @@ en:
           not_a_member: Not a Member
 
     errors:
-      models:
 
+      models:
         uploaded_file:
           attributes:
             actual_file_file_size:

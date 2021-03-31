@@ -30,7 +30,7 @@
           %td.company
             %table.companies.table-borderless
               - application.companies.each do | app_company |
-                %tr.company
+                %tr.company{class: (app_company.information_complete? ? '' : 'not-complete') }
                   %td.company-number= link_to(app_company.company_number, company_path(app_company))
                   %td.company-name= link_to(app_company.name, company_path(app_company))
         - else

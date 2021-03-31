@@ -18,7 +18,7 @@
         = f.label :kommun_id, "#{t('activerecord.attributes.address.kommun')}"
         = f.collection_select :kommun_id, Kommun.all, :id, :name, {}, {class: 'form-control'}
       .col.form-group
-        = f.label :region_id, "#{t('activerecord.attributes.address.region')}"
+        = f.label :region_id, "#{t('activerecord.attributes.address.region')}", class: 'required'
         = fas_tooltip(t('companies.form.region_tooltip'))
         = f.collection_select :region_id, Region.all, :id, :name, {}, {class: 'form-control'}
 

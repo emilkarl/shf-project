@@ -46,7 +46,7 @@ And(/^the following applications exist:$/) do |table|
     legacy_app = hash[IS_LEGACY] == 'true' ? true : false
 
     # 'ma' = Member Application
-    if (ma = user.shf_application)
+    if (member_application = user.shf_application)
       user.shf_application.companies << companies
 
     else
@@ -58,27 +58,27 @@ And(/^the following applications exist:$/) do |table|
                                        num_categories: num_categories)
 
       if legacy_app
-        ma = FactoryBot.build(:shf_application, :legacy_application, ma_attributes)
+        member_application = FactoryBot.build(:shf_application, :legacy_application, ma_attributes)
       else
-        ma = FactoryBot.build(:shf_application, ma_attributes)
+        member_application = FactoryBot.build(:shf_application, ma_attributes)
       end
 
-      ma.companies = companies
+      member_application.companies = companies
     end
 
     if hash[CATEGORIES]
       categories = []
       for category_name in hash[CATEGORIES].split(/\s*,\s*/)
-        categories << BusinessCategory.find_by_name(category_name) unless ma.business_categories.where(name: category_name).exists?
+        categories << BusinessCategory.find_by_name(category_name) unless member_application.business_categories.where(name: category_name).exists?
       end
-      ma.business_categories << categories
+      member_application.business_categories << categories
     end
 
     if hash[UPLOADED_FILES]
       uploaded_files = []
 
       for uploaded_file_name in hash[UPLOADED_FILES].split(/\s*,\s*/)
-        unless ma.uploaded_files.where(user: user.id, actual_file_file_name: uploaded_file_name).exists?
+        unless member_application.uploaded_files.where(user: user.id, actual_file_file_name: uploaded_file_name).exists?
           file_already_uploaded = UploadedFile.find_by(user: user, actual_file_file_name: uploaded_file_name)
           if file_already_uploaded
             uploaded_file = file_already_uploaded
@@ -87,7 +87,7 @@ And(/^the following applications exist:$/) do |table|
             if file_fixture_exists?(uploaded_file_name, 'the following applications exist')
               File.open(Rails.root.join(UPLOADED_FILES_DIR, uploaded_file_name), 'r') do |f|
                 uploaded_file = UploadedFile.create!(user: user,
-                                                     shf_application: ma,
+                                                     shf_application: member_application,
                                                      actual_file: f,
                                                      actual_file_file_name: uploaded_file_name)
               end
@@ -96,17 +96,17 @@ And(/^the following applications exist:$/) do |table|
           uploaded_files << uploaded_file
         end
       end
-      ma.uploaded_files << uploaded_files
+      member_application.uploaded_files << uploaded_files
     end
 
     if legacy_app
       # We save without validation - so, confirm that the **only** validation errors
       # would be associated with the missing file-delivery method.
-      ma.valid?
-      expect(ma.errors.keys).to match_array [:file_delivery_method]
+      member_application.valid?
+      expect(member_application.errors.keys).to match_array [:file_delivery_method]
     end
 
-    ma.save!(validate: (legacy_app ? false : true))
+    member_application.save!(validate: (legacy_app ? false : true))
   end
 end
 

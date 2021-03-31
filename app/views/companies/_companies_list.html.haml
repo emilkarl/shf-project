@@ -3,6 +3,8 @@
     %table.table.table-hover.table-md
       %thead
         %tr
+          -# The .companies_pagination style is what triggers the Javascript to replace the #companies_list page content
+              @see app/assets/javascripts/companies.js
           %th
             = t('activerecord.models.business_category.one')
           %th
@@ -26,14 +28,22 @@
                         t('activerecord.attributes.company.company_number'), {},
                         { class: 'companies_pagination', remote: true })
             %th
+              = sort_link(search_params, :information_complete,
+                      "#{t('companies.index.complete')}?", {},
+                      { class: 'complete-status companies_pagination', remote: true })
+            %th
+              = sort_link(search_params, :id,
+                        'db id', {},
+                        { class: 'db-id companies_pagination', remote: true })
+            %th
             %th
 
       %tbody
         - companies.each do |company|
-          %tr.company
+          %tr.company{class: company.information_complete? ? '' : 'not-complete' }
             %td.categories
               = safe_join(company.categories_names(false), tag.br)
-            %td.name= link_to company.name.blank? ? t('name_missing') : company.name, company
+            %td.name= link_to company_display_name(company), company
             %td.region
               = safe_join(company.addresses_region_names, tag.br)
             %td.kommun
@@ -43,6 +53,8 @@
 
             - if current_user.admin?
               %td.company-number= company.company_number
+              %td.complete= (company.information_complete? ? t('yes') : t('no'))
+              %td.db-id= company.id
               %td.edit= link_to icon('fas', 'edit'), edit_company_path(company)
               %td.delete= link_to icon('fas', 'trash', class: 'delete'), company, method: :delete,
                               data: { :confirm => "#{t('confirm_are_you_sure')}" }

@@ -92,22 +92,6 @@ RSpec.describe AdminController, type: :controller do
 
       end
 
-      it 'filename is Ansokningar-<datetime>.csv' do
-
-        post :export_ansokan_csv
-
-        expect(response.header['Content-Disposition']).to match(/filename=\"Ansokningar-\d\d\d\d-\d\d-\d\d--\d\d-\d\d-\d\d\.csv\"/)
-      end
-
-
-      it 'header line is correct' do
-
-        export_response_body
-
-        expect(export_response_body).to eq csv_header
-
-      end
-
 
       describe 'with 0 membership applications' do
 
@@ -426,41 +410,27 @@ RSpec.describe AdminController, type: :controller do
 
 
       describe 'error from send_data is rescued' do
-
-        # status, location, response_body
-
         let(:error_message) { 'Error. Error. Warning Will Robinson' }
 
-        subject { allow(@controller).to receive(:send_data) { raise StandardError.new(error_message) }
-
-        post :export_ansokan_csv
-        }
-
+        subject do
+          allow(@controller).to receive(:send_data) { raise StandardError.new(error_message) }
+          post :export_ansokan_csv
+        end
 
         it 'redirects to back or the root path' do
-
           expect(subject).to redirect_to root_path
-
         end
-
 
         it "flashes an error :alert message" do
-
-          error_flash_message = ["#{I18n.t('admin.export_ansokan_csv.error')} [#{error_message}]"]
-
           expect(subject.request.flash[:alert]).to_not be_nil
-          expect(subject.request.flash[:alert]).to eq error_flash_message
-
+          expect(subject.request.flash[:alert]).to eq ["#{I18n.t('admin.export_ansokan_csv.error')}"]
         end
-
       end
 
 
       describe 'includes membership expiry date' do
 
-
         it "no membership expiry date shows wording and url to pay and 'never paid'" do
-
           user_with_app = FactoryBot.create(:user_with_membership_app)
 
           user_app = user_with_app.shf_application
@@ -474,9 +444,7 @@ RSpec.describe AdminController, type: :controller do
           expected_pattern = /(.*)\n(.*),(.*),(.*),(.*),(.*),(.*),([^"]*),"([^"]*)","([^"]*)","(#{pay_using_url})","(#{never_paid})","([^"]*)","([^"]*)","([^"]*)",'(.*),"([^"]*)",(.*),(.*),(.*)/m
 
           expect(response.body).to match expected_pattern
-
         end
-
       end
 
 

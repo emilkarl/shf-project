@@ -17,7 +17,7 @@ module Adapters
   # @file shf_application_to_csv_adapter.rb
   #
   #--------------------------
-  class ShfApplicationToCsvAdapter < AbstractAdapter
+  class ShfApplicationToCsvAdapter < AbstractCsvAdapter
 
 
     # Required so that the url for the payment page can be used
@@ -26,6 +26,30 @@ module Adapters
 
     def target_class
       CsvRow
+    end
+
+    def self.headers(_args)
+      [I18n.t('activerecord.attributes.shf_application.contact_email'),
+       I18n.t('activerecord.attributes.user.email'),
+       I18n.t('activerecord.attributes.shf_application.first_name'),
+       I18n.t('activerecord.attributes.shf_application.last_name'),
+       I18n.t('activerecord.attributes.user.membership_number'),
+       I18n.t('activerecord.attributes.user.date_member_packet_sent'),
+       I18n.t('activerecord.attributes.shf_application.state'),
+       I18n.t('admin.export_ansokan_csv.date_state_changed'),
+       I18n.t('activerecord.models.business_category.other'),
+       I18n.t('activerecord.models.company.one'),
+       I18n.t('admin.export_ansokan_csv.member_fee_paid'),
+       I18n.t('admin.export_ansokan_csv.member_fee_expires'),
+       I18n.t('admin.export_ansokan_csv.branding_fee_paid'),
+       I18n.t('admin.export_ansokan_csv.branding_fee_expires'),
+       I18n.t('activerecord.attributes.address.street'),
+       I18n.t('activerecord.attributes.address.post_code'),
+       I18n.t('activerecord.attributes.address.city'),
+       I18n.t('activerecord.attributes.address.kommun'),
+       I18n.t('activerecord.attributes.address.region'),
+       I18n.t('activerecord.attributes.address.country')
+      ]
     end
 
 
@@ -97,13 +121,13 @@ module Adapters
     end
 
 
-    # t('Paid') if member fee is paid, otherwise make link to where to pay it
+    # I18n.t('Paid') if member fee is paid, otherwise make link to where to pay it
     def paid_or_payment_link(is_paid, payment_url)
       is_paid ? I18n.t('admin.export_ansokan_csv.paid') : I18n.t('admin.export_ansokan_csv.fee_payment_url', payment_url: payment_url)
     end
 
 
-    # return t('never paid') if arg isNil else the arg.to_s
+    # return I18n.t('never paid') if arg isNil else the arg.to_s
     def never_paid_if_blank(arg)
       arg.blank? ? I18n.t('admin.export_ansokan_csv.never_paid') : arg.to_s
     end

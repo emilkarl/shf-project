@@ -8,7 +8,10 @@ Feature: Visitors see only companies in good standing with complete information
   And I only want to see companies with all of the information needed
     so that I can contact them,
 
-  Visitors should only see companies in good standing with complete information.
+  Visitors and users and members should only see companies in good standing with complete information.
+
+  Members and users that are part of a company can view and edit a company that is not in good standing,
+  but will not see the company in the list of all companies.
 
 
   Background:

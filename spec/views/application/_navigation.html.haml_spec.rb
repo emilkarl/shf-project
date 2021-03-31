@@ -18,6 +18,48 @@ RSpec.describe 'Navigation menus' do
 
   let(:shf_site) { Regexp.escape('https://sverigeshundforetagare.se/') }
 
+  let(:main_site_link_text) { t('menus.nav.shf_main_site') }
+
+
+  # ----------------------------------------------------------------------------------------------
+
+  shared_examples 'it shows a link to the main site' do
+    it 'main site text as a link to it' do
+      expect(rendered_html).to match %r{<a class="nav-link" href=\"#{shf_site}\">#{main_site_link_text}}
+    end
+  end
+
+  shared_examples 'it shows a link to the companies index view' do
+    it 'companies index view has a link' do
+      text = t('menus.nav.members.shf_companies')
+      expect(rendered_html).to match %r{<a class="nav-link" href=\"\/\">#{text}}
+    end
+  end
+
+  shared_examples 'it has a link to see a list of all publicly viewable companies' do
+    it 'link to companies index view' do
+      text = t('menus.nav.members.shf_companies')
+      expect(rendered).to match %r{<a class="nav-link" href=\"\/\">#{text}}
+    end
+  end
+
+  shared_examples 'it shows the menu and items for someone logged in' do
+    it 'logged-in greeting' do
+      expect(rendered).to match %r{#{t('hello', name: member.first_name)}}
+    end
+
+    it 'edit-profile link' do
+      expect(rendered).to match %r{#{t('devise.registrations.edit.title')}}
+    end
+
+    it 'log-off link' do
+      expect(rendered).to match %r{#{t('devise.sessions.destroy.log_out')}}
+    end
+  end
+
+  # ----------------------------------------------------------------------------------------------
+
+
   # https://stackoverflow.com/questions/41762057/
   # rails-view-specs-referenced-partials-of-inherited-controllers-arent-found/
   # 41762292#41762292
@@ -38,22 +80,19 @@ RSpec.describe 'Navigation menus' do
         allow(view).to receive(:policy).and_return(double('ShfApplicationPolicy.new', update?: false))
       end
 
-      assign(:all_visible_companies, [])
+      assign(:all_displayed_companies, [])
       assign(:search_params, Company.ransack(nil))
       assign(:companies, Company.ransack(nil).result.page(params[:page]).per_page(10))
 
       render 'nav-menus/navigation'
     end
 
-    it 'renders link to main site' do
-      text = t('menus.nav.shf_main_site')
-      expect(rendered).to match %r{<a class="nav-link" href=\"#{shf_site}\">#{text}}
+    it_behaves_like 'it shows a link to the main site' do
+      let(:rendered_html) { rendered }
     end
 
-    it 'renders link to companies index view' do
-      text = t('menus.nav.members.shf_companies')
-      expect(rendered).to match %r{<a class="nav-link" href=\"\/\">#{text}}
-    end
+    it_behaves_like 'it has a link to see a list of all publicly viewable companies'
+
 
     it 'renders link to my application' do
       text = t('menus.nav.users.my_application')
@@ -95,7 +134,7 @@ RSpec.describe 'Navigation menus' do
           render 'nav-menus/navigation'
         end
 
-        # The order the companies are fetched and stored is inderterminate (can vary with each test run)
+        # The order the companies are fetched and stored is indeterminate (can vary with each test run)
         # Thus using {cmpy_id} might refer to the first company in one test run, but the second company
         # in another test run -- and thus fail.
         #
@@ -123,20 +162,9 @@ RSpec.describe 'Navigation menus' do
       end
     end
 
-    context 'logged-in menu' do
-      it 'renders logged-in greeting' do
-        expect(rendered).to match %r{#{t('hello', name: member.first_name)}}
-      end
-
-      it 'renders log-off link' do
-        expect(rendered).to match %r{#{t('devise.sessions.destroy.log_out')}}
-      end
-
-      it 'renders edit-profile link' do
-        expect(rendered).to match %r{#{t('devise.registrations.edit.title')}}
-      end
-    end
+    it_behaves_like 'it shows the menu and items for someone logged in'
   end
+
 
   describe 'user with application' do
 
@@ -150,43 +178,30 @@ RSpec.describe 'Navigation menus' do
         allow(view).to receive(:policy).and_return(double('ShfApplicationPolicy.new', update?: true))
       end
 
-      assign(:all_visible_companies, [])
+      assign(:all_displayed_companies, [])
       assign(:search_params, Company.ransack(nil))
       assign(:companies, Company.ransack(nil).result.page(params[:page]).per_page(10))
 
       render 'nav-menus/navigation'
     end
 
-    it 'renders link to main site' do
-      text = t('menus.nav.shf_main_site')
-      expect(rendered).to match %r{<a class="nav-link" href=\"#{shf_site}\">#{text}}
+    it_behaves_like 'it shows a link to the main site' do
+      let(:rendered_html) { rendered }
     end
 
-    it 'renders link to companies index view' do
-      text = t('menus.nav.members.shf_companies')
-      expect(rendered).to match %r{<a class="nav-link" href=\"\/\">#{text}}
+    it_behaves_like 'it shows a link to the companies index view' do
+      let(:rendered_html) { rendered }
     end
+
+    it_behaves_like 'it has a link to see a list of all publicly viewable companies'
+
 
     it 'renders link to edit my application' do
       text = t('menus.nav.users.my_application')
       expect(rendered).to match %r{<a class="nav-link" href=\"\/ansokan\/#{user_app_id}\/redigera\">#{text}}
     end
 
-    context 'logged-in menu' do
-      it 'renders logged-in greeting' do
-        expect(rendered).to match %r{#{t('hello', name: user.first_name)}}
-      end
-
-      it 'renders log-off link' do
-        text = t('devise.sessions.destroy.log_out')
-        expect(rendered).to match %r{<a.*href=\"\/users\/sign_out\">#{text}}
-      end
-
-      it 'renders edit-profile link' do
-        text = t('devise.registrations.edit.title')
-        expect(rendered).to match %r{<a.*href=\"\/users\/edit\">#{text}}
-      end
-    end
+    it_behaves_like 'it shows the menu and items for someone logged in'
   end
 
 
@@ -211,6 +226,11 @@ RSpec.describe 'Navigation menus' do
         expect(rendered).to match %r{<a href=\"\/dokument">#{text}}
       end
     end
+
+    it_behaves_like 'it shows a link to the main site' do
+      let(:rendered_html) { rendered }
+    end
+
 
     it 'renders link to main site' do
       text = t('menus.nav.shf_main_site')
@@ -272,24 +292,15 @@ RSpec.describe 'Navigation menus' do
       expect(rendered).to match %r{<a class="nav-link" href=\"\/anvandare\">#{text}}
     end
 
+    it_behaves_like 'it shows the menu and items for someone logged in'
+
     context 'logged-in menu' do
-      it 'renders logged-in greeting' do
-        expect(rendered).to match %r{#{t('hello', name: admin.first_name)}}
-      end
 
-      it 'renders log-off link' do
-        expect(rendered).to match %r{#{t('devise.sessions.destroy.log_out')}}
-      end
-
-      it 'renders edit-profile link' do
-        expect(rendered).to match %r{#{t('devise.registrations.edit.title')}}
-      end
-
-      it 'renders view-your-account link' do
+      it 'view-your-account link' do
         expect(rendered).to match %r{#{t('menus.nav.users.your_account')}}
       end
 
-      it 'renders app-configuration link' do
+      it 'app-configuration link' do
         expect(rendered).to match %r{#{t('menus.nav.admin.app_configuration')}}
       end
     end
@@ -304,7 +315,7 @@ RSpec.describe 'Navigation menus' do
       render 'nav-menus/navigation'
     end
 
-    it 'renders link to main site' do
+    it 'renders link to main site with with Home/Hem as the text' do
       text = t('menus.nav.home')
       expect(rendered).to match %r{<a class="nav-link" href=\"#{shf_site}\">#{text}}
     end

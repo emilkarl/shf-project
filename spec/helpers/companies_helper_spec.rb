@@ -212,6 +212,22 @@ RSpec.describe CompaniesHelper, type: :helper do
 
   end
 
+
+  describe 'company_display_name' do
+
+    it 't(name_missing) if name is blank' do
+      co_no_name = build(:company)
+      co_no_name.name = nil
+      expect(helper.company_display_name(co_no_name)).to eq(I18n.t('name_missing'))
+    end
+
+    it 'is the name if name is not blank' do
+      co_with_name = build(:company, name: 'Company Name')
+      expect(helper.company_display_name(co_with_name)).to eq('Company Name')
+    end
+  end
+
+
   describe '#company_number_selection_field' do
     4.times do |n|
       let!("cmpy_#{n+1}".to_sym) { create(:company) }

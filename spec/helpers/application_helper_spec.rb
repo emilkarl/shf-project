@@ -529,6 +529,17 @@ RSpec.describe ApplicationHelper, type: :helper do
       title_w_html = 'Hello SHF Admin <span class="small">Is an Admin</span> <a class="shf-icon edit-user-account-icon" title="Edit the account for SHF Admin" href="/en/admin/anvandare/1/redigera"><i class="fas fa-edit"></i></a> <a class="shf-icon edit-user-profile-icon" title="Edit the profile for SHF Admin" href="/en/admin/user_profile_edit/1"><i class="fas fa-id-card"></i></a>'
       expect(content_title(title_w_html)). to match(/<h1 class="entry-title">#{title_w_html}<\/h1>/)
     end
+
+    context 'title is nil' do
+      let(:empty_title_string_header) { '<h1 class="entry-title"><\/h1>' }
+      it 'is empty string if explicitly passed as nil' do
+        expect(content_title(nil)). to match(/#{empty_title_string_header}/)
+      end
+
+      it 'is empty string if nothing is passed in (implicitly nil)' do
+        expect(content_title()). to match(/#{empty_title_string_header}/)
+      end
+    end
   end
 
   describe '#user_name_for_display' do
@@ -616,6 +627,58 @@ RSpec.describe ApplicationHelper, type: :helper do
         expect(helper).to receive(:legend_entry).with('Expires soon', ['expires-soon'])
         expect(helper).to receive(:legend_entry).with('Not a member', ['not-a-member'])
         helper.legend(title: 'Title', entries: entries)
+      end
+    end
+  end
+
+
+
+  describe 'fa_checkbox' do
+    let(:fa_unchecked_square) { not_complete_check_sq_fa_icon_name }
+    let(:fa_checked_square) { complete_check_sq_fa_icon_name}
+    let(:fa_unchecked_circle) { not_complete_check_fa_icon_name }
+    let(:fa_checked_circle) { complete_check_fa_icon_name}
+
+    it 'is_checked default is false, so displays the unchecked icon, not the circle' do
+      expect(helper).to receive(:not_complete_check_sq_icon)
+      helper.fa_checkbox()
+    end
+
+    it 'default displayed text is an empty string' do
+      expect(helper).to receive(:not_complete_check_sq_icon)
+                          .with( text: '', html_options: {} )
+      helper.fa_checkbox()
+    end
+
+    it 'default html_options is {}' do
+      expect(helper).to receive(:not_complete_check_sq_icon)
+                          .with( text: 'displayed text', html_options: {} )
+      helper.fa_checkbox(false, 'displayed text')
+    end
+
+    context 'is_checked is true' do
+      it 'is the fas checked checkbox icon with the displayed text' do
+        expect(helper).to receive(:complete_check_sq_icon)
+                            .with( text: 'displayed string', html_options: {} )
+        helper.fa_checkbox(true, 'displayed string')
+      end
+
+      it 'displays the circle checked with displayed text if use_circle: true' do
+        expect(helper).to receive(:complete_check_icon)
+        helper.fa_checkbox(true, 'displayed string', use_circle: true)
+      end
+    end
+
+    context 'is_checked is false' do
+      it 'is the fas not checked checkbox icon with the displayed text' do
+        expect(helper).to receive(:not_complete_check_sq_icon)
+                            .with( text: 'displayed string', html_options: {} )
+        helper.fa_checkbox(false, 'displayed string')
+      end
+
+      it 'displays the circle (unchecked) with displayed text if use_circle: true' do
+        expect(helper).to receive(:not_complete_check_icon)
+        helper.fa_checkbox(false, 'displayed string', use_circle: true)
       end
     end
   end

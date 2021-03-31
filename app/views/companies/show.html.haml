@@ -5,12 +5,40 @@
 %div{ id: "#{unique_css_id(@company)}",
       class: "#{item_view_class(@company, controller.action_name)}" }
 
+  - if policy(@company).view_complete_status?
+    - complete_status_css = @company.information_complete? ? 'complete' : 'not-complete'
+
   %header.entry-header
-    = content_title(@company.name, user: current_user)
+    .row.header
+      .col.header{class: complete_status_css}
+        = content_title(company_display_name(@company), user: current_user, classes: [complete_status_css])
+
   .entry-content.container
+
+    - if policy(@company).view_complete_status?
+      .row.complete-status
+        - if @company.information_complete?
+          .col
+            %p.info-is-complete-text=t('.info_is_complete')
+        - else
+          .col
+            .alert.alert-danger{ role: 'alert' }
+              %p.alert-heading.info-is-not-complete-text=t('.info_is_not_complete')
+              %p= t('.this_info_missing')
+              %ul.missing-info
+                - @company.missing_information.each do |missing_info|
+                  %li=missing_info
+
+              %p.info-is-not-complete-explanation=t('.info_is_not_complete_explanation')
+
+    - if current_user.admin?
+      .row.db-id.admin-only
+        .col.db-id
+          = field_or_none 'db id', @company.id, tag_options: {class: 'db-id'}
+
     .row
       .col
-        - if @company.categories
+        - if @company.categories.any?
           .categories
             = render 'business_categories/as_list',
               categories: @company.business_categories.roots.distinct

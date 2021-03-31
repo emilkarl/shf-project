@@ -30,8 +30,9 @@ RSpec.describe 'selective loading of external assets on specific pages' do
       stub_template 'companies/_map_companies' => ''
       stub_template 'companies/_search_form' => ''
 
-      assign(:all_visible_companies, [])
-      assign(:all_companies, Company.all)
+      assign(:all_mappable_companies, [])
+      assign(:all_displayed_companies, Company.all)
+      assign(:one_page_of_displayed_companies, [])
       assign(:search_params, Company.ransack(nil))
       assign(:companies, Company.ransack(nil).result.page(params[:page]).per_page(10))
 
@@ -80,7 +81,8 @@ RSpec.describe 'selective loading of external assets on specific pages' do
         allow(view).to receive(:policy).and_return(double('cmpy policy',
                                                           update?: false,
                                                           index?: false,
-                                                          destroy?: false))
+                                                          destroy?: false,
+                                                          view_complete_status?: false))
 
         stub_template 'business_categories/_as_list' => ''
         stub_template 'companies/_branding_payment_status' => ''

@@ -43,7 +43,7 @@
       = f.label :addresses_city_matches_any,
                 "#{t('activerecord.attributes.address.city')}"
       = f.collection_select :addresses_city_matches_any,
-                     addresses_select_list, :city, :city,
+                     addr_cities_select_list, :itself, :itself,
                      { include_blank: false },
                      { multiple: true, size: 5, style: 'width: 100%;',
                        class: 'form-control search_field',

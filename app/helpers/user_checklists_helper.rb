@@ -4,7 +4,7 @@ module UserChecklistsHelper
 
   include DataPostCheckboxHelper
 
-  #
+  # TODO: use fa_checkbox method in ApplicationHelper
   # @return HTML safe string for a FontAwesome checkbox. Is checked if the user_checklist is complete
   #
   def fa_is_complete_checkbox(user_checklist, options = {})

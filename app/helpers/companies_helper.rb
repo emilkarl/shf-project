@@ -1,5 +1,6 @@
 module CompaniesHelper
 
+  # FIXME this should be the responsibility of the CompanyPolicy
   def payment_visible_for_user?(user, company)
     user.admin? || user.in_company_numbered?(company.company_number)
   end
@@ -90,6 +91,12 @@ module CompaniesHelper
        class: 'search_field',
        data: {language: "#{@locale}" }
   end
+
+
+  def company_display_name(company)
+    company.name.blank? ? t('name_missing') : company.name
+  end
+
 
   def company_number_entry_field(company_numbers)
     text_field_tag :company_number, company_numbers,

@@ -1,7 +1,7 @@
 Feature: View all companies: who can see which companies [CI PROBLEM SCENARIOS]
 
-  2020-09-10:  Pagination scenarios have been moved to here
-  (problem-scenarios-pagination-view_all_companies.feature). These have been causing
+  2020-09-10:  Pagination scenarios have been moved to here:
+  problem-scenarios-pagination-view_all_companies.feature . These have been causing
   intermittent failures in CI Semaphore tests.  See the note in that file for
   more info.
 
@@ -169,7 +169,7 @@ Feature: View all companies: who can see which companies [CI PROBLEM SCENARIOS]
       | u29@mutts.com | Company29    | accepted | Groomer    |
 
   @selenium @time_adjust
-  Scenario: Visitor sees all companies that have a current branding license, current members, complete information; does not see company number
+  Scenario: Visitor sees all companies that have a current branding license, current members
     Given the date is set to "2017-10-01"
     And I am Logged out
     When I am on the "landing" page
@@ -186,6 +186,7 @@ Feature: View all companies: who can see which companies [CI PROBLEM SCENARIOS]
     And I should not see "2120000142" in the list of companies
     And I should not see "5560360793" in the list of companies
     And I should not see t("companies.new_company")
+
 
   @selenium @time_adjust
   Scenario: Visitor sees multiple regions and kommuns for a company in the companies list
@@ -205,7 +206,7 @@ Feature: View all companies: who can see which companies [CI PROBLEM SCENARIOS]
     And I wait for all ajax requests to complete
 
   @time_adjust
-  Scenario: User sees all the companies that have current branding license, current members, and complete information; does not see Company number
+  Scenario: User sees all the companies that have current branding license, current members
     Given the date is set to "2017-10-01"
     Given I am logged in as "u1@mutts.com"
     And I am on the "landing" page
@@ -239,14 +240,14 @@ Feature: View all companies: who can see which companies [CI PROBLEM SCENARIOS]
 
 
   @selenium @time_adjust
-  Scenario: Admin can see all companies even if lacking branding payment or members or complete information
+  Scenario: Admin can see all companies including company number
     Given the date is set to "2017-10-01"
     And I am logged in as "admin@shf.se"
-    And I am on the "all companies" page
+    When I am on the "all companies" page
     And "items_count" should have "10" selected
-    Then I select "All" in select list "items_count"
+    And  I select "All" in select list "items_count"
     And I wait for all ajax requests to complete
-    And I should see "29" companies
+    Then I should see "29" companies
     And I should see "Company10" in the list of companies
     And I should see "Company27" in the list of companies
     And I should see "Company28" in the list of companies

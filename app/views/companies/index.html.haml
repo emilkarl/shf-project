@@ -3,7 +3,7 @@
 .entry-content
   .row
     .col-lg-4#companies_map
-      = render 'map_companies', markers: location_and_markers_for(@all_visible_companies)
+      = render 'map_companies', markers: location_and_markers_for(@all_mappable_companies)
 
     .col-lg-8
       .panel-group.m-2#accordion{ role: 'tablist' }
@@ -14,17 +14,16 @@
 
           .panel-collapse.collapse.show#toggled_search_form{ 'aria-labelledby' => 'toggle-heading', role: 'tabpanel' }
             .panel-body
-              = render 'search_form', all_companies: @all_companies,
+              = render 'search_form', all_companies: @all_displayed_companies,
                                       search_params: @search__params,
-                                      addresses_select_list: @addresses_select_list,
+                                      addr_cities_select_list: @addr_cities_select_list,
                                       language: @locale
 
-  - if @companies.empty?
+  - if @one_page_of_displayed_companies.empty?
     %strong
       #{t('.no_search_results')}
   - else
     #companies_list
-      = render 'companies_list', companies: @companies,
+      = render 'companies_list', companies: @one_page_of_displayed_companies,
                                  search_params: @search_params,
-                                 addresses_select_list: @addresses_select_list,
                                  language: @locale

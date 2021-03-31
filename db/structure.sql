@@ -102,14 +102,15 @@ CREATE TABLE public.app_configurations (
     site_meta_image_height integer DEFAULT 0 NOT NULL,
     og_type character varying DEFAULT 'website'::character varying NOT NULL,
     twitter_card_type character varying DEFAULT 'summary'::character varying NOT NULL,
-    facebook_app_id bigint DEFAULT 0 NOT NULL,
+    facebook_app_id bigint DEFAULT '1292810030791186'::bigint NOT NULL,
     site_meta_image_file_name character varying,
     site_meta_image_content_type character varying,
     site_meta_image_file_size bigint,
     site_meta_image_updated_at timestamp without time zone,
     singleton_guard integer DEFAULT 0 NOT NULL,
     payment_too_soon_days integer DEFAULT 60 NOT NULL,
-    membership_guideline_list_id bigint
+    membership_guideline_list_id bigint,
+    membership_expired_grace_period integer DEFAULT 90 NOT NULL
 );
 
 
@@ -118,6 +119,13 @@ CREATE TABLE public.app_configurations (
 --
 
 COMMENT ON COLUMN public.app_configurations.payment_too_soon_days IS 'Warn user that they are paying too soon if payment is due more than this many days away.';
+
+
+--
+-- Name: COLUMN app_configurations.membership_expired_grace_period; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.app_configurations.membership_expired_grace_period IS 'Number of days after membership expiration that a member can pay without penalty';
 
 
 --
@@ -1886,6 +1894,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200122215813'),
 ('20200205213528'),
 ('20201203180001'),
-('20201203181536');
+('20201203181536'),
+('20201214212325');
 
 

@@ -55,7 +55,6 @@ module Adapters
     # @return [Array<String] - a list of the header strings
     #
     def self.headers(year)
-
       ["#{I18n.t('activerecord.models.payment.one')} db id",
        I18n.t('name'),
        'E-post',
@@ -79,8 +78,5 @@ module Adapters
        I18n.t('notes', scope: I18N_PAYMENT_ATTRIBS)
       ]
     end
-
-
   end
-
 end

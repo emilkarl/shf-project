@@ -1,5 +1,7 @@
 @import "shf-custom-colors";
 
+// FIXME: clarify what goes here and what goes in style.scss
+
 .expire-date-background,
 .membership-status-background,
 .yes,
@@ -141,4 +143,17 @@
   padding: 0;
 }
 
+
+table {
+  .db-id {
+    font-size: smaller;
+  }
+}
+
+.col {
+  .db-id {
+    font-size: smaller;
+    line-height: 1em;
+  }
+}
 

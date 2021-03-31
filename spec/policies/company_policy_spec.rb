@@ -8,6 +8,7 @@ RSpec.describe CompanyPolicy do
   let(:admin)  { create(:user, email: 'admin@sfh.com', admin: true) }
   let(:visitor) { build(:visitor) }
   let(:company) { create(:company, company_number: '5712213304')}
+  let(:co_incomplete_info) { create(:company, name: '') }
 
   describe 'For admin' do
     subject { described_class.new(admin, company) }
@@ -38,38 +39,82 @@ RSpec.describe CompanyPolicy do
   end
 
   describe 'For a member that is not part of a company' do
-    subject { described_class.new(member, company) }
+    context 'company information IS complete' do
+      subject { described_class.new(member, company) }
 
-    it { is_expected.to permit_action :index }
-    it { is_expected.to permit_action :show }
-    it { is_expected.to forbid_action :edit }
-    it { is_expected.to forbid_action :update }
-    it { is_expected.to forbid_action :new }
-    it { is_expected.to permit_action :create }
-    it { is_expected.to forbid_action :edit_payment }
+      it { is_expected.to permit_action :index }
+      it { is_expected.to permit_action :show }
+      it { is_expected.to forbid_action :edit }
+      it { is_expected.to forbid_action :update }
+      it { is_expected.to forbid_action :new }
+      it { is_expected.to permit_action :create }
+      it { is_expected.to forbid_action :edit_payment }
+    end
+
+    context 'company information is NOT complete' do
+      subject { described_class.new(member, co_incomplete_info) }
+
+      it { is_expected.to permit_action :index }
+      it { is_expected.to forbid_action :show }
+      it { is_expected.to forbid_action :edit }
+      it { is_expected.to forbid_action :update }
+      it { is_expected.to forbid_action :new }
+      it { is_expected.to permit_action :create }
+      it { is_expected.to forbid_action :edit_payment }
+    end
   end
 
   describe 'For a user (logged in)' do
-    subject { described_class.new(user_1, company) }
 
-    it { is_expected.to permit_action :index }
-    it { is_expected.to permit_action :show }
-    it { is_expected.to forbid_action :edit }
-    it { is_expected.to forbid_action :update }
-    it { is_expected.to forbid_action :new }
-    it { is_expected.to permit_action :create }
-    it { is_expected.to forbid_action :edit_payment }
+    context 'company information IS complete' do
+      subject { described_class.new(user_1, company) }
+
+      it { is_expected.to permit_action :index }
+      it { is_expected.to permit_action :show }
+      it { is_expected.to forbid_action :edit }
+      it { is_expected.to forbid_action :update }
+      it { is_expected.to forbid_action :new }
+      it { is_expected.to permit_action :create }
+      it { is_expected.to forbid_action :edit_payment }
+    end
+
+    context 'company information is NOT complete' do
+      subject { described_class.new(user_1, co_incomplete_info) }
+
+      it { is_expected.to permit_action :index }
+      it { is_expected.to forbid_action :show }
+      it { is_expected.to forbid_action :edit }
+      it { is_expected.to forbid_action :update }
+      it { is_expected.to forbid_action :new }
+      it { is_expected.to permit_action :create }
+      it { is_expected.to forbid_action :edit_payment }
+    end
   end
 
   describe 'For a visitor (not logged in)' do
-    subject { described_class.new(visitor, company) }
 
-    it { is_expected.to permit_action :index }
-    it { is_expected.to permit_action :show }
-    it { is_expected.to forbid_action :edit }
-    it { is_expected.to forbid_action :update }
-    it { is_expected.to forbid_action :new }
-    it { is_expected.to forbid_action :create }
-    it { is_expected.to forbid_action :edit_payment }
+    context 'company information IS complete' do
+      subject { described_class.new(visitor, company) }
+
+      it { is_expected.to permit_action :index }
+      it { is_expected.to permit_action :show }
+      it { is_expected.to forbid_action :edit }
+      it { is_expected.to forbid_action :update }
+      it { is_expected.to forbid_action :new }
+      it { is_expected.to forbid_action :create }
+      it { is_expected.to forbid_action :edit_payment }
+    end
+
+    context 'company information is NOT complete' do
+      subject { described_class.new(visitor, co_incomplete_info) }
+
+      it { is_expected.to permit_action :index }
+      it { is_expected.to forbid_action :show }
+      it { is_expected.to forbid_action :edit }
+      it { is_expected.to forbid_action :update }
+      it { is_expected.to forbid_action :new }
+      it { is_expected.to forbid_action :create }
+      it { is_expected.to forbid_action :edit_payment }
+    end
   end
 end

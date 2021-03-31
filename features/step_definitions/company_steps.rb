@@ -28,7 +28,7 @@ And(/^the following company addresses exist:$/) do |table|
   end
 end
 
-And(/^I am (on )*the page for company number "([^"]*)"$/) do |grammar_fix_on, company_number|
+And(/^I am (on )*the page for company number "([^"]*)"$/) do |_grammar_fix_on, company_number|
   company = Company.find_by_company_number(company_number)
   visit path_with_locale(company_path company)
 end

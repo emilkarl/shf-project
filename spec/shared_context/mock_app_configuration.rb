@@ -127,6 +127,14 @@ class MockAppConfig
     90
   end
 
+  def self.membership_term_length
+    365
+  end
+
+  def self.membership_expiring_soon_days
+    42
+  end
+
   # ----------------------------------------------------
   #  Default results to use to stub methods
 

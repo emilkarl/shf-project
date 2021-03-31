@@ -31,6 +31,9 @@ RSpec.describe Company, type: :model, focus: true do
   let(:payment_date_2017) { Time.zone.local(2017, 10, 1) }
   let(:payment_date_2018) { Time.zone.local(2018, 11, 21) }
   let(:payment_date_2020) { Time.zone.local(2020, 3, 15) }
+  let(:jan1_2010) { Date.new(2010, 1, 1) }
+  let(:dec_12_2018) { Date.new(2018, 12, 1) }
+  let(:jan1_2019) { Date.new(2019, 1, 1) }
 
   let(:company_emp_cats) { create(:company) }
 
@@ -277,20 +280,20 @@ RSpec.describe Company, type: :model, focus: true do
     end
 
 
-    describe '.complete' do
+    describe '.information_complete' do
 
       it 'calls .has_name' do
         expect(described_class).to receive(:has_name).and_call_original
-        described_class.complete
+        described_class.information_complete
       end
 
       it 'calls .addresses_have_region' do
         expect(described_class).to receive(:addresses_have_region)
-        described_class.complete
+        described_class.information_complete
       end
 
       it 'is all Companies .has_name AND all Companies .addresses_have_region' do
-        expect(described_class.complete).to match_array(Company.has_name & Company.addresses_have_region)
+        expect(described_class.information_complete).to match_array(Company.has_name & Company.addresses_have_region)
       end
     end
 
@@ -390,19 +393,19 @@ RSpec.describe Company, type: :model, focus: true do
 
     describe '.searchable' do
 
-      it 'calls .complete' do
-        expect(described_class).to receive(:complete).and_call_original
+      it 'calls .information_complete' do
+        expect(described_class).to receive(:information_complete).and_call_original
         described_class.searchable
       end
 
       it 'calls .with_members' do
-        allow(described_class).to receive(:complete).and_call_original
+        allow(described_class).to receive(:information_complete).and_call_original
         expect(described_class).to receive(:with_members).and_call_original
         described_class.searchable
       end
 
       it 'calls .branding_licensed' do
-        allow(described_class).to receive(:complete).and_call_original
+        allow(described_class).to receive(:information_complete).and_call_original
         allow(described_class).to receive(:with_members).and_call_original
         expect(described_class).to receive(:branding_licensed).and_call_original
         described_class.searchable
@@ -499,7 +502,7 @@ RSpec.describe Company, type: :model, focus: true do
   end
 
 
-  context 'h-brand JPG cache management' do
+  describe 'h-brand JPG cache management' do
     let(:company) { create(:company) }
     let(:company2) { create(:company) }
 
@@ -507,7 +510,7 @@ RSpec.describe Company, type: :model, focus: true do
 
     it { expect(company.cache_key('h_brand')).to eq "company_#{company.id}_cache_h_brand" }
 
-    describe '#h_brand_jpg' do
+    describe 'h_brand_jpg' do
       it 'returns nil if no cached image' do
         expect(company.h_brand_jpg).to be_nil
       end
@@ -519,7 +522,7 @@ RSpec.describe Company, type: :model, focus: true do
       end
     end
 
-    describe '#h_brand_jpg=' do
+    describe 'h_brand_jpg=' do
       it 'caches image' do
         expect(company.h_brand_jpg).to be_nil
         company.h_brand_jpg = file_fixture('image.png')
@@ -528,7 +531,7 @@ RSpec.describe Company, type: :model, focus: true do
       end
     end
 
-    describe '#clear_h_brand_jpg_cache' do
+    describe 'clear_h_brand_jpg_cache' do
       it 'clears cache' do
         company.h_brand_jpg = file_fixture('image.png')
         expect(company.h_brand_jpg).to_not be_nil
@@ -658,7 +661,7 @@ RSpec.describe Company, type: :model, focus: true do
   end
 
 
-  describe 'events update management' do
+  describe '(dinkurs) events update management' do
 
     around(:each) do |example|
       travel_to(Time.zone.local(2018, 6, 1)) do
@@ -737,61 +740,139 @@ RSpec.describe Company, type: :model, focus: true do
   end
 
 
-  describe '#current_members' do
+  describe 'current_members' do
 
     it 'is empty if no members' do
-      company = create(:company)
-      expect(company.current_members).to be_empty
+      expect(build(:company).current_members).to be_empty
     end
 
     it 'is empty if all members expiration date has past' do
+      dec31_2018 = jan1_2019 - 1.day
 
-      mem1_shf = create(:shf_application, :accepted)
-      mem1_exp = mem1_shf.user
-      mem1_co  = mem1_shf.companies.first
-
+      member_1_exp = create(:member, last_day: dec31_2018, membership_status: :in_grace_period)
+      member_1_co = member_1_exp.shf_application.companies.first
       create(:payment,
              :successful,
-             user: mem1_exp,
-             company: mem1_co,
+             user: member_1_exp,
+             company: member_1_co,
              payment_type:   Payment::PAYMENT_TYPE_MEMBER,
-             notes:          'these are notes for branding payment1, mem1_co',
-             start_date:     payment_date_2017,
-             expire_date:    payment_date_2017 + 365)
+             notes:          'these are notes for member_1_exp co branding payment1',
+             start_date:     dec31_2018 - 365,
+             expire_date:    dec31_2018)
 
+      member_2_exp = create(:member, last_day: dec31_2018, membership_status: :in_grace_period,
+                            company_number: member_1_co.company_number)
+      create(:payment,
+             :successful,
+             user: member_2_exp,
+             company: member_1_co,
+             payment_type:   Payment::PAYMENT_TYPE_MEMBER,
+             notes:          'these are notes for member_2_exp co branding payment1',
+             start_date:     dec31_2018 - 365,
+             expire_date:    dec31_2018)
 
-      travel_to(Date.new(2019, 1, 1)) do
-        expect(mem1_co.current_members).to be_empty
+      travel_to(jan1_2019) do
+        expect(member_1_co.users.to_a).to match_array([member_1_exp, member_2_exp])
+        expect(member_1_co.current_members).to be_empty
       end
     end
 
     it 'only returns members with current membership' do
+      grace_period_date = jan1_2019 - 2.years
 
-      ShfApplication.all_states.reject { |s| s == :accepted }.each do |a_state|
-        create(:shf_application, state: a_state)
-      end
-
-      mem1_shf = create(:shf_application, :accepted)
-      mem1_exp = mem1_shf.user
-      mem1_co  = mem1_shf.companies.first
-
+      member_1 = create(:member, first_day: dec_12_2018)
+      mem1_co  = member_1.shf_application.companies.first
       create(:payment,
              :successful,
-             user: mem1_exp,
+             user: member_1,
              company: mem1_co,
              payment_type:   Payment::PAYMENT_TYPE_MEMBER,
              notes:          'these are notes for branding payment1,mem1_co',
-             start_date:     Date.new(2018, 12, 1),
-             expire_date:    Date.new(2018, 12, 1) + 365)
+             start_date:     dec_12_2018,
+             expire_date:    dec_12_2018 + 364)
 
-      travel_to(Date.new(2019, 1, 1)) do
-        expect(mem1_co.current_members).to match_array([mem1_exp])
+      member_2_former = create(:member, first_day: jan1_2010, membership_status: :former_member)
+      create(:payment,
+             :successful,
+             user: member_2_former,
+             company: mem1_co,
+             payment_type:   Payment::PAYMENT_TYPE_MEMBER,
+             notes:          'these are notes for member_2_former branding payment, mem1_co',
+             start_date:     jan1_2010,
+             expire_date:    jan1_2010 + 364)
+
+      member_3_grace_period = create(:member, first_day: grace_period_date, membership_status: :in_grace_period)
+      create(:payment,
+             :successful,
+             user: member_3_grace_period,
+             company: mem1_co,
+             payment_type:   Payment::PAYMENT_TYPE_MEMBER,
+             notes:          'these are notes for member_3_grace_period branding payment, mem1_co',
+             start_date:     grace_period_date,
+             expire_date:    grace_period_date + 364)
+
+      ShfApplication.all_states.reject { |s| s == :accepted }.each do |a_state|
+        create(:shf_application, state: a_state, company_number: mem1_co.company_number)
+      end
+
+      travel_to(jan1_2019) do
+        expect(mem1_co.current_members).to match_array([member_1])
       end
     end
 
   end
 
-  describe '#main_address' do
+
+  describe 'accepted_applicants' do
+
+    it 'empty if no applications' do
+      # This shouldn't really happen.
+      expect(build(:company).accepted_applicants).to be_empty
+    end
+
+    context 'there are applications' do
+
+      it 'empty if none are accepted' do
+        all_states_except_accepted = ShfApplication.all_states - [:accepted]
+        new_app1 = build(:shf_application, state: :new)
+        co = new_app1.companies.first
+
+        (all_states_except_accepted - [:new]).each do | state |
+          build(:shf_application, state: state, company_number: co.company_number)
+        end
+
+        expect(co.accepted_applicants).to be_empty
+      end
+
+
+      it 'all users from all accepted applications' do
+        app1 = create(:shf_application, :accepted)
+        co = app1.companies.first
+        user1 = app1.user
+        app2 = create(:shf_application, :accepted, company_number: co.company_number)
+        user2 = app2.user
+        create(:shf_application, :rejected, company_number: co.company_number)
+
+        expect(co.accepted_applicants).to match_array([user1, user2])
+      end
+    end
+  end
+
+
+  describe 'error_if_has_applications?' do
+    it 'false if there are no applications in any state other than being destroyed' do
+      pending
+    end
+
+    context 'there are applications in a state other than being destroyed' do
+      it 'throws an abort error with the error message' do
+        pending
+      end
+    end
+  end
+
+
+  describe 'main_address' do
 
     it 'creates a blank address if none exists' do
       company = create(:company, num_addresses: 0)
@@ -819,7 +900,7 @@ RSpec.describe Company, type: :model, focus: true do
   end
 
 
-  describe '#se_mailing_csv_str (export CSV string for postal address)' do
+  describe 'se_mailing_csv_str (export CSV string for postal address)' do
 
     it 'just commas (no data between them) if there is no address' do
       company = build(:company)
@@ -855,7 +936,7 @@ RSpec.describe Company, type: :model, focus: true do
   end
 
 
-  describe '#sanitize_website' do
+  describe 'sanitize_website' do
 
     let(:company_sani_site) { create(:company) }
 
@@ -873,7 +954,7 @@ RSpec.describe Company, type: :model, focus: true do
 
   end
 
-  describe '#sanitize_description' do
+  describe 'sanitize_description' do
 
     let(:company_sani_desc) { create(:company) }
 
@@ -893,7 +974,7 @@ RSpec.describe Company, type: :model, focus: true do
 
   context 'payment and branding license period' do
 
-    describe '#branding_expire_date' do
+    describe 'branding_expire_date' do
       it 'returns date for latest completed payment' do
         payment1_co1
         expect(complete_co1.branding_expire_date).to eq payment1_co1.expire_date
@@ -902,7 +983,7 @@ RSpec.describe Company, type: :model, focus: true do
       end
     end
 
-    describe '#branding_payment_notes' do
+    describe 'branding_payment_notes' do
       it 'returns notes for latest completed payment' do
         payment1_co1
         expect(complete_co1.branding_payment_notes).to eq payment1_co1.notes
@@ -911,7 +992,7 @@ RSpec.describe Company, type: :model, focus: true do
       end
     end
 
-    describe '#most_recent_branding_payment' do
+    describe 'most_recent_branding_payment' do
       it 'returns latest completed payment' do
         payment1_co1
         expect(complete_co1.most_recent_branding_payment).to eq payment1_co1
@@ -974,7 +1055,7 @@ RSpec.describe Company, type: :model, focus: true do
     end
   end
 
-  describe '#approved_applications_from_members' do
+  describe 'approved_applications_from_members' do
     let(:cmpy1) { create(:company, company_number: '5560360793') }
     let(:cmpy2) { create(:company, company_number: '5562252998') }
 
@@ -1030,7 +1111,50 @@ RSpec.describe Company, type: :model, focus: true do
     end
   end
 
-  context '.categories_names' do
+
+  describe 'any_visible_addresses?' do
+    it 'true if there are any visible addresses' do
+      pending
+    end
+  end
+
+
+  describe 'addresses_region_names' do
+    it 'get all region names used by addresses, with no duplicates' do
+      pending
+    end
+
+    it 'do not include regions if their addresses are not visible at that level' do
+      pending
+    end
+  end
+
+
+  describe 'kommuns_names' do
+    it 'get all kommun names used by addresses, with no duplicates' do
+      pending
+    end
+
+
+    it 'do not include kommuns if their addresses are not visible at that level' do
+      pending
+    end
+  end
+
+
+  describe 'cities_names' do
+    it 'get all city names used by addresses, with no duplicates' do
+      pending
+    end
+
+
+    it 'do not include cities if their addresses are not visible at that level' do
+      pending
+    end
+  end
+
+
+  describe '.categories_names' do
 
     let(:cat1_subcat1) { cat1.children.create(name: 'cat1_subcat1') }
     let(:cat1_subcat2) { cat1.children.create(name: 'cat1_subcat2') }
@@ -1076,7 +1200,7 @@ RSpec.describe Company, type: :model, focus: true do
 
   end
 
-  describe '#get_short_h_brand_url' do
+  describe 'get_short_h_brand_url' do
     context 'there is already a shortened url in the table' do
       it 'returns shortened url' do
         url = 'http://localhost:3000/anvandare/0/company_h_brand?company_id=1'
@@ -1100,7 +1224,7 @@ RSpec.describe Company, type: :model, focus: true do
   end
 
 
-  describe '#branding_license? always returns true || false, never nil' do
+  describe 'branding_license? always returns true || false, never nil' do
 
     context 'no payments' do
 
@@ -1206,26 +1330,27 @@ RSpec.describe Company, type: :model, focus: true do
       end # context 'not successful payments'
 
     end # context 'payments after today'
-  end # describe '#branding_license?'
+  end # describe 'branding_license?'
 
 
-  describe '#earliest_current_member_fee_paid' do
+  describe 'earliest_current_member_fee_paid' do
     #current_members.empty? ? nil : current_members.map(&:membership_start_date).sort.first'
 
     it 'is nil if there are no current members' do
       expect( (create(:company)).earliest_current_member_fee_paid ).to be_nil
     end
 
-
     it 'is the earliest membership_fee paid date for all current members' do
-
       dec_3 = Date.new(2018, 12, 3)
       dec_5 = Date.new(2018, 12, 5)
 
       member_paid_dec_3_shf_app = create(:shf_application, :accepted)
       member_paid_dec_3 = member_paid_dec_3_shf_app.user
+      member_paid_dec_3.memberships << create(:membership, user: member_paid_dec_3,
+                                   first_day: dec_3,
+                                   last_day: dec_3 + 364)
+      member_paid_dec_3.membership_status = :current_member
       co_with_1_member_expires  = member_paid_dec_3_shf_app.companies.first
-
       create(:payment,
              :successful,
              user: member_paid_dec_3,
@@ -1237,7 +1362,10 @@ RSpec.describe Company, type: :model, focus: true do
 
       member_paid_dec_5_shf_app = create(:shf_application, :accepted, company_number: co_with_1_member_expires.company_number)
       member_paid_dec_5 = member_paid_dec_5_shf_app.user
-
+      member_paid_dec_5.memberships << create(:membership, user: member_paid_dec_5,
+                                              first_day: dec_5,
+                                              last_day: dec_5 + 364)
+      member_paid_dec_5.membership_status = :current_member
       create(:payment,
              :successful,
              user: member_paid_dec_5,
@@ -1279,16 +1407,35 @@ RSpec.describe Company, type: :model, focus: true do
         expect(co_with_1_member_expires.current_members.size).to eq 1
         expect( co_with_1_member_expires.earliest_current_member_fee_paid ).to eq member_dec_5_start_time
       end
-
     end
-  end # describe '#earliest_current_member_fee_paid'
 
+  end # describe 'earliest_current_member_fee_paid'
+
+
+  describe 'information_complete?' do
+    it 'calls RequirementsForCoInfoComplete.requirements_met?' do
+      co = build(:company)
+      expect(RequirementsForCoInfoComplete).to receive(:requirements_met?)
+                                                 .with({company: co})
+      co.information_complete?
+    end
+  end
+
+
+  describe 'missing_information' do
+    it 'gets the list of missing information text from RequirementsForCoInfoComplete.missing_errors' do
+      co = build(:company)
+      expect(RequirementsForCoInfoComplete).to receive(:missing_info)
+                                                 .with({company: co})
+      co.missing_information
+    end
+  end
 
   describe 'in_good_standing?' do
     let(:co) { build(:company) }
 
     context 'required information for a company is complete' do
-      before(:each) { allow(co).to receive(:complete_information?).and_return(true) }
+      before(:each) { allow(co).to receive(:information_complete?).and_return(true) }
 
       it 'true if branding license payment is current' do
         allow(co).to receive(:branding_license_current?).and_return(true)
@@ -1302,17 +1449,17 @@ RSpec.describe Company, type: :model, focus: true do
     end
 
     it 'false if required information for a company is not complete' do
-      allow(co).to receive(:complete_information?).and_return(false)
+      allow(co).to receive(:information_complete?).and_return(false)
       expect(co.in_good_standing?).to be_falsey
     end
   end
 
 
-  describe 'complete?' do
+  describe 'information_complete?' do
     it 'is the result of RequirementsForCoInfoComplete.requirements_met?' do
       co = build(:company)
       expect(RequirementsForCoInfoComplete).to receive(:requirements_met?).with(company: co)
-      co.complete?
+      co.information_complete?
     end
   end
 
@@ -1341,7 +1488,7 @@ RSpec.describe Company, type: :model, focus: true do
   end
 
 
-  describe '#missing_region?' do
+  describe 'missing_region?' do
 
     describe 'false if all addresses have a region' do
       it 'only address has a region' do

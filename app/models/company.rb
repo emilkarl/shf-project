@@ -1,6 +1,7 @@
 require_relative File.join('..', 'services', 'address_exporter')
 
-
+# TODO data consistency check:  every company should have at least 1 application
+# FIXME: Company should use Membership (CompanyMembership < Membership)
 class Company < ApplicationRecord
   include PaymentUtility
 
@@ -65,6 +66,8 @@ class Company < ApplicationRecord
   # This includes Companies that have no addresses:
   scope :no_address_or_lacks_region, -> { where.not(id: Address.company_address.has_region.pluck(:addressable_id)) }
 
+
+  # FIXME find all calls, replace with appropriate Membership... class method
   def self.next_branding_payment_dates(company_id)
     next_payment_dates(company_id, THIS_PAYMENT_TYPE)
   end
@@ -72,21 +75,8 @@ class Company < ApplicationRecord
   after_update :clear_h_brand_jpg_cache,
                if: Proc.new { saved_change_to_name? }
 
-  def cache_key(type)
-   "company_#{id}_cache_#{type}"
-  end
+  # -----------------------------------------------------------------------------------------------
 
-  def h_brand_jpg
-   Rails.cache.read(cache_key('h_brand'))
-  end
-
-  def h_brand_jpg=(image)
-   Rails.cache.write(cache_key('h_brand'), image)
-  end
-
-  def clear_h_brand_jpg_cache
-   Rails.cache.delete(cache_key('h_brand'))
-  end
 
   def self.clear_all_h_brand_jpg_caches
     all.each do |company|
@@ -102,10 +92,10 @@ class Company < ApplicationRecord
   # A company has an address
   #  AND
   #   that address has a region
-  def self.complete
+  def self.information_complete
     has_name.addresses_have_region
   end
-  singleton_class.alias_method :complete_information, :complete
+  singleton_class.alias_method :complete_information, :information_complete
 
 
   def self.not_complete
@@ -133,7 +123,7 @@ class Company < ApplicationRecord
 
   # Criteria limiting visibility of companies to non-admin users
   def self.searchable
-    complete.with_members.branding_licensed
+    information_complete.with_members.branding_licensed
   end
 
   singleton_class.alias_method :current_with_current_members, :searchable
@@ -151,6 +141,31 @@ class Company < ApplicationRecord
     where.not(dinkurs_company_id: [nil, '']).order(:id)
   end
 
+  # The .sort_by_information_complete...   methods (=scopes) are used by the Ransack gem to
+  #   do sorting. These methods are a way to do sorting using some value that is not an attribute or association
+  #   @see https://github.com/activerecord-hackery/ransack#ransacks-sort_link-helper-creates-table-headers-that-are-sortable-links
+
+  # This is a SQL case expression that returns a boolean named 'all_is_complete' based on whether the information for a company is complete.
+  # This can be used in a select statement
+  def self.is_complete_case_boolean
+    "case when companies.name <> '' AND addresses.addressable_type = 'Company' AND addresses.region_id IS NOT NULL then TRUE else FALSE END".freeze
+  end
+
+
+  def self.sort_by_information_complete(sort_direction = :asc)
+    joins(:addresses).order(Arel.sql("#{is_complete_case_boolean} #{sort_direction.to_s.upcase}"))
+  end
+
+  def self.sort_by_information_complete_asc
+    sort_by_information_complete(:asc)
+  end
+
+  def self.sort_by_information_complete_desc
+    sort_by_information_complete(:desc)
+  end
+
+  # ===============================================================================================
+
 
   def searchable?
     branding_license_current? && current_members.any?
@@ -158,23 +173,42 @@ class Company < ApplicationRecord
   alias_method :current_with_current_members, :searchable?
 
   def in_good_standing?
-    complete_information? && branding_license_current?
+    information_complete? && branding_license_current?
   end
 
-  def complete?
+  def information_complete?
     RequirementsForCoInfoComplete.requirements_met? company: self
   end
-  alias_method :complete_information?, :complete?
+  # alias_method :information_complete?, :complete?
 
   def missing_region?
     addresses.map(&:region).include?(nil)
   end
 
+  def missing_information
+    RequirementsForCoInfoComplete.missing_info company: self
+  end
 
+
+  # FIXME user Membership current?
   def approved_applications_from_members
     # Returns ActiveRecord Relation
     shf_applications.accepted.joins(:user)
       .order('users.last_name').where('users.member = ?', true)
+  end
+
+
+  # @return all members in the company whose membership are current (paid, not expired)
+  def current_members
+    users.select(&:payments_current?) # FIXME is it ok to use membership status current_member instead?
+  end
+
+
+  # @return [Array[User]] - all users in the company with accepted applications
+  def accepted_applicants
+    return [] if shf_applications.empty?
+
+    shf_applications.select(&:accepted?).map(&:user)
   end
 
 
@@ -235,15 +269,19 @@ class Company < ApplicationRecord
   end
 
 
+  # FIXME only show if address visibility allows it
   def addresses_region_names
     addresses.joins(:region).select('regions.name').distinct.pluck('regions.name')
   end
 
 
+  # FIXME only show if address visibility allows it
   def kommuns_names
     addresses.joins(:kommun).select('kommuns.name').distinct.pluck('kommuns.name')
   end
 
+
+  # FIXME only show if address visibility allows it
   def cities_names
     addresses.select(:city).distinct.pluck(:city)
   end
@@ -253,29 +291,39 @@ class Company < ApplicationRecord
     most_recent_payment(THIS_PAYMENT_TYPE)
   end
 
-
+  # FIXME find all calls, replace with appropriate Membership... class method (current.last_day)
   def branding_expire_date
     payment_expire_date(THIS_PAYMENT_TYPE)
   end
 
-
+  # TODO this should not be the responsibility of the Company class. Need a MembershipManager class for this. (or common Membership class...)
+  # FIXME change calls to either payment_notes or current_membership.notes
   def branding_payment_notes
     payment_notes(THIS_PAYMENT_TYPE)
   end
 
-
+  # FIXME find all calls, replace with appropriate Membership... class method
   # @return [Boolean] - true only if there is a branding_expire_date and it is in the future (from today)
   def branding_license?
-    # TODO can use term_expired?(THIS_PAYMENT_TYPE)
+    # TODO can use payment_term_expired?(THIS_PAYMENT_TYPE)
     branding_expire_date&.future? == true # == true prevents this from ever returning nil
   end
   alias_method :branding_license_current?, :branding_license?
+
+
+  # TODO this should not be the responsibility of the Company class. Need a MembershipManager class for this. (or common Membership class...)
+  # FIXME change calls to either payment_notes or current_membership.notes
+  def membership_payment_notes
+    payment_notes(THIS_PAYMENT_TYPE)
+  end
 
 
   # This is used to calculate when an H-Branding fee is due if there has not been any H-Branding fee paid yet
   # TODO: this should go in a class responsible for knowing how to calculate when H-Branding fees are due (perhaps a subclass of PaymentUtility named something like CompanyPaymentsDueCalculator )
   #
   # @return nil if there are no current members else the earliest membership_start_date of all current members
+  # FIXME find all calls, replace with appropriate Membership... class?
+  #   Or does this really need to be about payments??
   def earliest_current_member_fee_paid
     current_members.empty? ? nil : current_members.map(&:membership_start_date).sort.first
   end
@@ -303,11 +351,6 @@ class Company < ApplicationRecord
 
   end
 
-
-  # @return all members in the company whose membership are current (paid, not expired)
-  def current_members
-    users.select(&:payments_current?)
-  end
 
 
   # FIXME - the company member(s) need to set this.  Picking the 'first' one is arbitrary and may be wrong
@@ -341,7 +384,24 @@ class Company < ApplicationRecord
   end
 
 
-  # ========================================================================
+  def cache_key(type)
+    "company_#{id}_cache_#{type}"
+  end
+
+  def h_brand_jpg
+    Rails.cache.read(cache_key('h_brand'))
+  end
+
+  def h_brand_jpg=(image)
+    Rails.cache.write(cache_key('h_brand'), image)
+  end
+
+  def clear_h_brand_jpg_cache
+    Rails.cache.delete(cache_key('h_brand'))
+  end
+
+
+  # ===============================================================================================
 
 
   private

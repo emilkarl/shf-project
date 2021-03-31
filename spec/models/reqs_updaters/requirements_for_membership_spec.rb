@@ -13,26 +13,38 @@ RSpec.describe RequirementsForMembership, type: :model do
   let(:yesterday) { Date.current - 1.day }
 
   describe '.requirements_excluding_payments_met?' do
-    context 'user has an approved application' do
-      before(:each) { allow(user).to receive(:has_approved_shf_application?).and_return(true) }
 
-      it 'true if membership guidelines have been agreed to' do
-        allow(subject).to receive(:membership_guidelines_checklist_done?).with(user)
-                            .and_return(true)
-        expect(subject.requirements_excluding_payments_met?(user)).to be_truthy
+    context 'user may start a new membership?' do
+      before(:each) { allow(user).to receive(:may_start_membership?).and_return(true) }
+
+      context 'user has an approved application' do
+        before(:each) { allow(user).to receive(:has_approved_shf_application?).and_return(true) }
+
+        it 'true if membership guidelines have been agreed to' do
+          allow(subject).to receive(:membership_guidelines_checklist_done?).with(user)
+                                                                           .and_return(true)
+          expect(subject.requirements_excluding_payments_met?(user)).to be_truthy
+        end
+
+        it 'false if membership guidelines have not been agreed to' do
+          allow(subject).to receive(:membership_guidelines_checklist_done?).with(user)
+                                                                           .and_return(false)
+          expect(subject.requirements_excluding_payments_met?(user)).to be_falsey
+        end
       end
 
-      it 'false if membership guidelines have not been agreed to' do
-        allow(subject).to receive(:membership_guidelines_checklist_done?).with(user)
-                            .and_return(false)
+      it 'false if user does not have an approved application' do
+        allow(user).to receive(:has_approved_shf_application?)
+                         .and_return(false)
+        expect(subject).not_to receive(:membership_guidelines_checklist_done?)
+
         expect(subject.requirements_excluding_payments_met?(user)).to be_falsey
       end
     end
 
-    it 'false if user does not have an approved application' do
-      allow(user).to receive(:has_approved_shf_application?)
-                        .and_return(false)
-      expect(subject).not_to receive(:membership_guidelines_checklist_done?)
+
+    it 'false if user may NOT start a new membership' do
+      allow(user).to receive(:may_start_membership?).and_return(false)
 
       expect(subject.requirements_excluding_payments_met?(user)).to be_falsey
     end
@@ -75,6 +87,8 @@ RSpec.describe RequirementsForMembership, type: :model do
           it 'true if membership payment made (and it has not expired)' do
             another_approved_app = create(:shf_application, :accepted)
             approved_and_paid = another_approved_app.user
+
+            expect(subject.requirements_excluding_payments_met?(approved_and_paid)).to be_truthy
 
             start_date, expire_date = User.next_membership_payment_dates(approved_and_paid.id)
             create(:membership_fee_payment,

@@ -49,7 +49,6 @@ class AbstractRequirements
     args.extend Hashie::Extensions::DeepFind  # ability to find a key in a nested Hash
 
     keys.inject(true) { |have_key, key| have_key && !args.deep_find(key).nil?}
-
   end
 
 

@@ -11,7 +11,7 @@ RSpec.describe AbstractReqsForMembership, type: :model do
   let(:subject) { AbstractReqsForMembership }
   let(:user) { build(:user) }
   let(:yesterday) { Date.current - 1.day }
-
+  let(:jan_1) { Date.new(2017,1,1) }
 
   describe '.has_expected_arguments?' do
 

@@ -31,7 +31,7 @@ class AbstractReqsForMembership < AbstractRequirements
 
   def self.requirements_met?(args)
     user = args[:user]
-    date = args[:date]
+    date = args.fetch(:date, nil).nil? ? Date.current : args[:date]  # corrects if nil is explicitly passed in
     requirements_excluding_payments_met?(user, date) &&
       payment_requirements_met?(user, date)
   end
@@ -43,6 +43,7 @@ class AbstractReqsForMembership < AbstractRequirements
 
 
   def self.payment_requirements_met?(user, date = Date.current)
+    # FIXME: must have enough unApplied (unused) payment amounts to pay for the amount of the membership.
     user.payments_current_as_of?(date)
   end
 

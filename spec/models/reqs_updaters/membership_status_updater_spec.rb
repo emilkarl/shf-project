@@ -7,7 +7,15 @@ RSpec.describe MembershipStatusUpdater, type: :model do
   let(:subject) { MembershipStatusUpdater.instance }
 
   let(:mock_log) { instance_double("ActivityLogger") }
+  let(:mock_email_msg) { instance_double('Mail::Message', deliver: true) }
+
   before(:each) do
+    allow(MemberMailer).to receive(:membership_granted)
+                              .and_return(mock_email_msg)
+    allow(MemberMailer).to receive(:membership_renewed)
+                             .and_return(mock_email_msg)
+
+    allow_any_instance_of(ApplicationMailer).to receive(:mail).and_return(mock_email_msg)
     allow(ActivityLogger).to receive(:new).and_return(mock_log)
     allow(mock_log).to receive(:info)
     allow(mock_log).to receive(:record)
@@ -43,296 +51,235 @@ RSpec.describe MembershipStatusUpdater, type: :model do
   let(:shf_app) { create(:shf_application) }
 
 
-  it '.update_requirements_checker is RequirementsForMembership' do
-    expect(described_class.update_requirements_checker).to be(RequirementsForMembership)
-  end
-
-  it '.revoke_requirements_checker is RequirementsForRevokingMembership' do
-    expect(described_class.revoke_requirements_checker).to be(RequirementsForRevokingMembership)
-  end
-
-
-  it 'shf_application_updated calls check_user_and_log with a message the shows the start up the updating process' do
+  it 'shf_application_updated calls update_membership_status with a message that the app was updated' do
     shf_app_updated = build(:shf_application, user: build(:user))
 
-    expect(subject).to receive(:check_user_and_log).with(shf_app_updated.user,
-                                                         shf_app_updated,
-                                                         subject.logmsg_user_updated,
-                                                         subject.logmsg_user_updated_start)
+    expect(subject).to receive(:update_membership_status).with(shf_app_updated.user,
+                                                               shf_app_updated,
+                                                               subject.logmsg_app_updated)
     subject.shf_application_updated(shf_app_updated)
   end
 
 
-  it 'payment_made calls check_user_and_log with a message that a payment was made and that the membership status has finished being checked' do
+  it 'payment_made calls update_membership_status with a message that a payment was made' do
     payment_for_not_expired_paid_member = build(:payment,
-                                                 user: build(:user),
-                                                 start_date: Date.current,
-                                                 expire_date: Date.current + 1.day)
+                                                user: build(:user),
+                                                start_date: Date.current,
+                                                expire_date: Date.current + 1.day)
 
-    expect(subject).to receive(:check_user_and_log).with(payment_for_not_expired_paid_member.user,
-                                                         payment_for_not_expired_paid_member,
-                                                         subject.logmsg_payment_made,
-                                                         subject.logmsg_payment_made_finished_checking)
+    expect(subject).to receive(:update_membership_status).with(payment_for_not_expired_paid_member.user,
+                                                               payment_for_not_expired_paid_member,
+                                                               subject.logmsg_payment_made)
     subject.payment_made(payment_for_not_expired_paid_member)
   end
 
 
-  it 'user_updated calls check_user_and_log with a message that the user was updated' do
-    expect(subject).to receive(:check_user_and_log).with(user, user,
-                                                         subject.logmsg_user_updated,
-                                                         subject.logmsg_user_updated)
+  it 'user_updated calls update_membership_status with a message that the user was updated' do
+    expect(subject).to receive(:update_membership_status).with(user,
+                                                               user,
+                                                               subject.logmsg_user_updated)
     subject.user_updated(user)
   end
 
 
-  it 'revoke_user_membership calls check_user_and_log with a message that membership was revoked' do
-    expect(subject).to receive(:check_user_and_log).with(user, user,
-                                                         subject.logmsg_user_updated,
-                                                         subject.logmsg_membership_revoked)
-    subject.revoke_user_membership(user)
-  end
 
+  describe 'update_membership_status' do
 
-  describe 'update_action' do
+    # ------------------------------------------------------------------
+    # Shared examples:
+    #   all assume that given_user is defined
 
-    # Note - since this is a private method, we can only do unit testing of it
-    # with RSpec if we explicitly :send the message to the subject
+    shared_examples 'potentially can become a member' do
+      context 'satisfies all requirements for becoming a member' do
+        before(:each) do
+          allow(RequirementsForMembership).to receive(:satisfied?)
+                                                .with(user: given_user)
+                                                .and_return(true)
+        end
 
-    context 'already a member' do
-      it 'does nothing' do
-        member = build(:user)
-        allow(member).to receive(:membership_status).and_return(:current)
+        it 'starts a new membership and logs that the membership status was changed' do
+          expect(given_user).to receive(:start_membership!).and_call_original
+          expect(mock_log).to receive(:info).with("update_membership_status for #{given_user.inspect}")
 
-        expect(subject).not_to receive(:renew_membership).with(member, anything)
-        expect(subject).not_to receive(:grant_membership).with(member, anything)
-        subject.send(:update_action, {user: member}) # this is equivalent to subject.update_action(new_member)
+          subject.update_membership_status(given_user)
+        end
       end
-    end
 
-    context 'in the grace period (renewal overdue)' do
-      it 'renews' do
-        in_grace_period_member = build(:user)
-        allow(in_grace_period_member).to receive(:membership_status).and_return(:in_grace_period)
+      context 'does not satisfy all the requirements for becoming a member' do
+        before(:each) do
+          allow(RequirementsForMembership).to receive(:satisfied?)
+                                                .with(user: given_user)
+                                                .and_return(false)
+        end
 
-        expect(subject).to receive(:renew_membership).with(in_grace_period_member, anything)
-        subject.send(:update_action, {user: in_grace_period_member}) # this is equivalent to subject.update_action(new_member)
-      end
-    end
-
-    context 'former member' do
-      it 'grants membership' do
-        former_member = build(:user)
-        allow(former_member).to receive(:membership_status).and_return(:past_member)
-
-        expect(subject).to receive(:grant_membership).with(former_member, anything)
-        subject.send(:update_action, {user: former_member})
-      end
-    end
-
-    context 'not a member' do
-      it 'grants membership' do
-        not_a_member = build(:user)
-        allow(not_a_member).to receive(:membership_status).and_return(:not_a_member)
-
-        expect(subject).to receive(:grant_membership).with(not_a_member, anything)
-        subject.send(:update_action, {user: not_a_member})
+        it 'does not start a new membership' do
+          expect(given_user).not_to receive(:start_membership!)
+          subject.update_membership_status(given_user)
+        end
       end
     end
 
 
-    it 'sends emails out by default' do
-      not_a_member = build(:user)
-      allow(not_a_member).to receive(:membership_status).and_return(:not_a_member)
+    # Assumes given_user is defined
+    shared_examples 'potentially can renew' do
 
-      expect(subject).to receive(:grant_membership).with(not_a_member, true)
-      subject.send(:update_action, {user: not_a_member})
+      context 'satisfies all requirements for renewing' do
+        before(:each) do
+          allow(RequirementsForRenewal).to receive(:satisfied?)
+                                             .with(user: given_user)
+                                             .and_return(true)
+        end
+
+        it 'renews membership and logs that the membership status was updated' do
+          expect(given_user).to receive(:renew!)
+          expect(mock_log).to receive(:info).with("update_membership_status for #{given_user.inspect}")
+
+          subject.update_membership_status(given_user)
+        end
+      end
+
+      context 'does not satisfy all requirements for renewing' do
+        before(:each) do
+          allow(RequirementsForRenewal).to receive(:satisfied?)
+                                             .with(user: given_user)
+                                             .and_return(false)
+        end
+
+        it 'does not renew membership' do
+          expect(given_user).not_to receive(:renew!)
+          subject.update_membership_status(given_user)
+        end
+      end
     end
-
-    it 'send_email: true sends email to the member' do
-      not_a_member = build(:user)
-      allow(not_a_member).to receive(:membership_status).and_return(:not_a_member)
-
-      expect(subject).to receive(:grant_membership).with(not_a_member, true)
-      subject.send(:update_action, {user: not_a_member, send_email: true})
-    end
-
-    it 'send_email: false does not send email to the member' do
-      not_a_member = build(:user)
-      allow(not_a_member).to receive(:membership_status).and_return(:not_a_member)
-
-      expect(subject).to receive(:grant_membership).with(not_a_member, false)
-      subject.send(:update_action, {user: not_a_member, send_email: false})
-    end
-  end
+    # ------------------------------------------------------------------
 
 
-  describe 'revoke_update_action' do
-
-    # Note - since this is a private method, we can only do unit testing of it
-    # with RSpec if we explicitly :send the message to the subject
-
-    it 'user.member? is false afterwards' do
-      member = build(:member_with_expiration_date)
-      allow(member).to receive(:membership_status).and_return(:current)
-
-      expect(member.member?).to be_truthy
-      subject.send(:revoke_update_action, {user: member}) # this is equivalent to subject.revoke_update_action({user: user})
-      expect(member.member?).to be_falsey
-    end
-
-  end
-
-
-  describe 'grant membership' do
-
-    before(:each) do
-      # mock the MemberMailer so we don't try to send emails
-      allow(MemberMailer).to receive(:membership_granted).and_return(double('MemberMailer', deliver: true))
+    context 'is not a member' do
+      it_should_behave_like 'potentially can become a member' do
+        let(:given_user) do
+          user = build(:user)
+          user.membership_status = :not_a_member
+          user
+        end
+      end
     end
 
 
-    it 'user.member? is true afterwards' do
-      not_a_member = build(:user)
-      allow(not_a_member).to receive(:issue_membership_number).and_return(1001)
-
-      expect(not_a_member.member?).to be_falsey
-      subject.send(:grant_membership, not_a_member, false) # do not send email
-      expect(not_a_member.member?).to be_truthy
-    end
-
-
-    describe 'send the Admin an email' do
-      let(:never_a_member) do
-        u = build(:user)
-        allow(u).to receive(:issue_membership_number).and_return(1001)
-        allow(u).to receive(:member).and_return(false)
-        allow(u).to receive(:membership_number).and_return(nil)
-        allow(u).to receive(:update).with(member: true, membership_number: 1001)
+    context 'is a current member' do
+      let(:user) do
+        u = build(:member_with_expiration_date, expiration_date: (Date.current + 1.day))
+        u.membership_status = :current_member
         u
       end
 
-      context 'this is the first membership for the user' do
-        before(:each) { allow(subject).to receive(:first_membership?).and_return(true) }
 
-        context 'the user belongs to at least one company' do
-          let(:co_complete_with_current_branding_license) { build(:company) }
-          before(:each) { allow(never_a_member).to receive(:companies).and_return([co_complete_with_current_branding_license]) }
-
-          it 'email sent if at least one company is in good standing' do
-            allow(co_complete_with_current_branding_license).to receive(:in_good_standing?).and_return(true)
-            expect(AdminMailer).to receive(:new_membership_granted_co_hbrand_paid).and_return(double('AdminMailer', deliver: true))
-            subject.send(:grant_membership, never_a_member, true)
-          end
-
-          it 'no email sent if no companies are in good standing' do
-            allow(co_complete_with_current_branding_license).to receive(:in_good_standing?).and_return(false)
-            expect(AdminMailer).not_to receive(:new_membership_granted_co_hbrand_paid)
-            subject.send(:grant_membership, never_a_member, true)
-          end
-        end
-
-        it 'no email sent: the user does not belong to any companies' do
-          allow(never_a_member).to receive(:companies).and_return([])
-          expect(AdminMailer).not_to receive(:new_membership_granted_co_hbrand_paid)
-          subject.send(:grant_membership, never_a_member, true)
+      it_should_behave_like 'potentially can renew' do
+        let(:given_user) do
+          user = build(:member_with_expiration_date, expiration_date: (Date.current + 1.day))
+          user.membership_status = :current_member
+          user
         end
       end
 
-      it 'no email sent: this is not the first membership for the user' do
-        allow(subject).to receive(:first_membership?).and_return(false)
-        expect(AdminMailer).not_to receive(:new_membership_granted_co_hbrand_paid)
-        subject.send(:grant_membership, never_a_member, true)
+      context 'is now in the renewal grace period' do
+        before(:each) do
+          allow(user).to receive(:membership_expired_in_grace_period?).and_return(true)
+        end
+
+        it 'starts the grace period and logs that the membership status has changed' do
+          allow(RequirementsForRenewal).to receive(:satisfied?).and_return(false)
+
+          expect(user).to receive(:start_grace_period!).and_call_original
+          expect(mock_log).to receive(:info).with("update_membership_status for #{user.inspect}")
+
+          subject.update_membership_status(user)
+        end
+
+        it 'checks to see if the requirements for renewal are satisfied' do
+          expect(RequirementsForRenewal).to receive(:satisfied?).and_return(true)
+
+          subject.update_membership_status(user)
+        end
+      end
+
+
+      context 'is past the last day of the renwal grace period' do
+        before(:each) do
+          allow(user).to receive(:membership_expired_in_grace_period?)
+                           .and_return(false)
+          allow(user).to receive(:membership_past_grace_period_end?)
+                           .and_return(true)
+        end
+
+        it 'starts the grace period AND then becomes a former member and logs changes' do
+          allow(RequirementsForRenewal).to receive(:satisfied?)
+                                             .and_return(false)
+
+          expect(user).to receive(:start_grace_period!)
+          expect(user).to receive(:make_former_member!)
+
+          # called once when the status is initialzed for the test,
+          #   once in start_grace_period!
+          #   and once in make_former_member!
+          expect(user).to receive(:membership_changed_info).exactly(3).times.
+            and_call_original
+          expect(mock_log).to receive(:info).twice.with("#{user.membership_changed_info}")
+
+          subject.update_membership_status(user)
+        end
+
+        it 'cannot renew (will not satisfy the requirements for renewal)' do
+          allow(user).to receive(:start_grace_period!)
+          allow(user).to receive(:make_former_member!)
+
+          expect(RequirementsForRenewal).to receive(:satisfied?)
+                                              .and_return(false)
+          subject.update_membership_status(user)
+        end
       end
     end
 
 
-    it 'logs a message that membership was granted to the user' do
-      not_a_member = build(:user)
-      allow(not_a_member).to receive(:issue_membership_number).and_return(1001)
-      allow(not_a_member).to receive(:update).with(member: true, membership_number: 1001)
+    context 'is in the renewal grace period' do
 
-      expect(mock_log).to receive(:record).with(:info, /#{subject.logmsg_membership_granted}/)
-      subject.send(:grant_membership, not_a_member, false) # do not send email
+      context 'date is NOT past (>) the last day of the renewal grace period' do
+        it_should_behave_like 'potentially can renew' do
+          let(:given_user) do
+            user = build(:user, membership_status: :in_grace_period)
+            allow(user).to receive(:membership_past_grace_period_end?)
+                             .and_return(false)
+            user
+          end
+        end
+      end
+
+      context 'date is now past (>) the last day of the renewal grace period' do
+        it 'becomes a former member' do
+          user = build(:user)
+          user.membership_status = :in_grace_period
+
+          expect(user).to receive(:membership_past_grace_period_end?)
+                            .and_return(true)
+          expect(user).to receive(:make_former_member!)
+          subject.update_membership_status(user)
+        end
+      end
+    end
+
+
+    context 'is a former member' do
+      it_should_behave_like 'potentially can become a member' do
+        let(:given_user) do
+          user = build(:user)
+          user.membership_status = :former_member
+          user
+        end
+      end
     end
   end
 
 
-  describe 'renew_membership' do
-
-    context 'send email' do
-      it 'sends the membership renewed email to the user' do
-        u = build(:user)
-        allow(mock_log).to receive(:record)
-
-        expect(MemberMailer).to receive(:membership_renewed)
-                                  .with(u)
-                                  .and_return(double('MemberMailer', deliver: true))
-        subject.send(:renew_membership, u, true)
-      end
-    end
-
-    context 'do not send email' do
-      it 'no email is sent' do
-        allow(mock_log).to receive(:record)
-        expect(MemberMailer).not_to receive(:membership_renewed)
-        subject.send(:renew_membership, build(:user), false)
-      end
-    end
-
-    it 'logs a message that the membership was renewed' do
-      expect(mock_log).to receive(:record)
-                            .with(:info, /#{subject.logmsg_membership_renewed}/)
-      subject.send(:renew_membership, build(:user), false)
-    end
+  it 'send_email default is true' do
+    expect(subject.send_email).to be_truthy
   end
-
-
-  describe 'check_user_and_log' do
-
-    it 'checks the requirements and acts' do
-      u = build(:user)
-      allow(mock_log).to receive(:record)
-      expect(subject).to receive(:check_requirements_and_act).with(user: u)
-      subject.send(:check_user_and_log, u, 'blorf', 'action', 'testing that checks the reqiurements and acts happens')
-    end
-
-    it 'logs the reason that the check happened and who sent the action to check the user' do
-      u = build(:user)
-      allow(subject).to receive(:check_requirements_and_act).with(user: u)
-      expect(mock_log).to receive(:record)
-                            .with(:info,
-                                  'testing that checks the reqiurements and acts happens: "blorf"')
-      subject.send(:check_user_and_log, u, 'blorf', 'action', 'testing that checks the reqiurements and acts happens')
-    end
   end
-
-
-  describe 'first_membership?(previous_membership_status, previous_membership_number)' do
-
-    context 'previous membership status = true' do
-
-      it 'false if previous membership number not nil' do
-        expect(subject.send(:first_membership?, true, 'blorf') ).to be_falsey
-      end
-
-      it  'false if previous membership number is nil'  do
-        expect(subject.send(:first_membership?, true, nil) ).to be_falsey
-        expect(subject.send(:first_membership?, true) ).to be_falsey
-      end
-    end
-
-    context 'previous membership status = false' do
-
-      it 'false if previous membership number not nil' do
-        expect(subject.send(:first_membership?, false, '') ).to be_falsey
-      end
-
-      it 'true if previous membership number is nil'  do
-        expect(subject.send(:first_membership?, false, nil) ).to be_truthy
-        expect(subject.send(:first_membership?, false) ).to be_truthy
-      end
-    end
-
-  end
-
-end

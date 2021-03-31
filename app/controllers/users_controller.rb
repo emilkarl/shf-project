@@ -73,7 +73,12 @@ class UsersController < ApplicationController
   end
 
 
-  # Change the membership status
+  # Manually change the membership status
+  #   Currently this just changes the date on a Payment.
+  #
+  # FIXME - What should happen when a User's actual membership status is changed (no longer just a payment date change)?
+  #   If this is manually set, will it be 'undone' when the MembershipStatusUpdater checks things and tries to logically update?
+  #   Should we have a 'lock status' flag?
   def edit_status
     raise 'Unsupported request' unless request.xhr?
     authorize User

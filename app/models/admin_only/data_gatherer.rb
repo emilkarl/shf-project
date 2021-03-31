@@ -110,11 +110,11 @@ module AdminOnly
       @app_states_translated = ShfApplication.group(:state).count.transform_keys {
           |k| I18n.t "activerecord.attributes.shf_application.state/#{k}"
       }
-      @apps_without_uploads = ShfApplication.no_uploaded_files
+      @apps_without_uploads = ShfApplication.decided_with_no_uploaded_files
       @apps_approved_member_fee_not_paid = User.all.select(&method(:membership_fee_due?))
 
       @companies_branding_not_paid = Company.all.reject(&:branding_license?)
-      @companies_info_not_completed = Company.all - Company.complete
+      @companies_info_not_completed = Company.all - Company.information_complete
 
       @total_users = User.all.count
       @total_members = User.members.count

@@ -72,6 +72,7 @@ class Company < ApplicationRecord
     next_payment_dates(company_id, THIS_PAYMENT_TYPE)
   end
 
+
   after_update :clear_h_brand_jpg_cache,
                if: Proc.new { saved_change_to_name? }
 

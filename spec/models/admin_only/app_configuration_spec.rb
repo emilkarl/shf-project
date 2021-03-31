@@ -109,14 +109,12 @@ RSpec.describe AdminOnly::AppConfiguration, type: :model do
             expect(app_configuration).not_to be_valid
           end
         end
-
       end
 
       it 'site meta image must be present' do
         is_expected.to validate_attachment_presence('site_meta_image')
       end
     end
-
   end
 
 

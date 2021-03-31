@@ -29,6 +29,7 @@ class User < ApplicationRecord
                  saved_change_to_last_name? ||
                  saved_change_to_membership_number? }
 
+
   has_one :shf_application, dependent: :destroy
   accepts_nested_attributes_for :shf_application, update_only: true
 
@@ -135,7 +136,7 @@ class User < ApplicationRecord
 
     event :start_membership do
       transitions from: [:not_a_member, :current_member, :former_member], to: :current_member, after:  Proc.new {|*args| start_membership_on(*args) }
-  end
+    end
 
     event :renew do
       transitions from: [:current_member, :in_grace_period], to: :current_member, after: Proc.new {|*args| renew_membership_on(*args) }
@@ -284,7 +285,7 @@ class User < ApplicationRecord
 
 
 
-  # The membership term has expired, but are they  still within a 'grace period'?
+  # The membership term has expired, but are they still within a 'grace period'?
   def membership_expired_in_grace_period?(this_date = Date.current)
     memberships_manager.membership_in_grace_period?(self, this_date)
   end
@@ -346,7 +347,7 @@ class User < ApplicationRecord
   # A user can pay a renewal membership fee if
   #   they are a current member OR are within the renewal grace period
   #   AND they have met all of the requirements for renewing,
-  #  excluding any payment required.
+  #     excluding any payment required.
   def allowed_to_pay_renewal_member_fee?
     return false if admin?
 
@@ -357,7 +358,7 @@ class User < ApplicationRecord
   # A user can pay a (new) membership fee if:
   #   they are not a member OR they are a former member
   #   AND they have met all of the requirements for membership,
-  #  excluding any payment required.
+  #     excluding any payment required.
   def allowed_to_pay_new_membership_fee?
     return false if admin?
 
@@ -494,6 +495,7 @@ class User < ApplicationRecord
     update(date_membership_packet_sent: new_sent_time)
   end
 
+
   # TODO this doesn't belong in User.  but not sure yet where it does belong.
   def file_uploaded_during_this_membership_term?
     return false unless current_member? || in_grace_period?
@@ -503,7 +505,7 @@ class User < ApplicationRecord
     else
       # is in_grace_period
       file_uploaded_on_or_after?(memberships_manager.most_recent_membership(self).first_day)
-  end
+    end
   end
 
 

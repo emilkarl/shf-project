@@ -341,10 +341,10 @@ sv:
         member_number: *membership_number
         notes: Notes
         status:
-          current: Current
+          current_member: Current
           expires_soon: Expires Soon
           in_grace_period: Renewal Overdue (In Grace Period)
-          past_member: Former Member
+          former_member: Former Member
           not_a_member: Not a Member
 
 

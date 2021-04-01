@@ -109,12 +109,18 @@ module SeedHelper
       make_predefined_with(lastname: lastname, number: number, firstname: firstname) do |member|
         term_first_day = term_first_day.nil? ? Membership.first_day_from_last(term_last_day) : term_first_day
 
+        # Create the Ethical Guidelines checklist and complete it. (make_n_save_app may or may not set them to complete)
+        guidelines_list = UserChecklistManager.find_or_create_membership_guidelines_list_for(member)
+        guidelines_list.set_complete_including_children(term_first_day)
+
         make_n_save_app(member, MA_ACCEPTED_STATE) # Make app, payments, start membership
+        member.reload
         membership_payment = member.most_recent_membership_payment
         membership_payment.update(expire_date: term_last_day, start_date: term_first_day)
         hmarkt_payment = member.companies.first.most_recent_branding_payment
         hmarkt_payment.update(expire_date: term_last_day, start_date: term_first_day)
         member.most_recent_membership&.update(first_day: term_first_day, last_day: term_last_day) if member.current_membership
+        member.reload
         MembershipStatusUpdater.instance.update_membership_status(member)
       end
     end

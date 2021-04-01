@@ -27,11 +27,12 @@ RSpec.describe PaymentsHelper, type: :helper do
 
     context 'user' do
 
+      let(:member) { create(:member, expiration_date: Date.current + 1.month + 2.days) }
+
       # which CSS class is tested by the payment_due_now_hint_css_class spec below
       it 'returns the expiration date with the css class set' do
-        user_payment.update(expire_date: Time.zone.today + 1.month + 2.days)
-        response = /class="([^"]*)".*#{user_payment.expire_date}/
-        expect(helper.expire_date_label_and_value(user)).to match response
+        response = /class="([^"]*)".*#{member.membership_expire_date}/
+        expect(helper.expire_date_label_and_value(member)).to match response
       end
 
       # it 'returns date with style "yes" if expire_date more than a month away' do
@@ -53,9 +54,8 @@ RSpec.describe PaymentsHelper, type: :helper do
       # end
 
       it 'returns tooltip explaining expiration date' do
-        user_payment.update(expire_date: Time.zone.today)
         response = /#{t('users.show.membership_expire_date_tooltip')}/
-        expect(helper.expire_date_label_and_value(user)).to match response
+        expect(helper.expire_date_label_and_value(member)).to match response
       end
 
       it 'no expire date will show Paid through: None' do
@@ -70,8 +70,8 @@ RSpec.describe PaymentsHelper, type: :helper do
       # which CSS class is tested by the payment_due_now_hint_css_class spec below
       it 'returns the expiration date with the css class set' do
         brand_payment.update(expire_date: Time.zone.today + 1.month + 2.days)
-        response = /class="([^"]*)".*#{user_payment.expire_date}/
-        expect(helper.expire_date_label_and_value(user)).to match response
+        response = /class="([^"]*)".*#{brand_payment.expire_date}/
+        expect(helper.expire_date_label_and_value(brand_payment.company)).to match response
       end
 
       # it 'returns date with style "yes" if expire_date more than a month away' do

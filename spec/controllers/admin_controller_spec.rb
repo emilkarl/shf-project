@@ -189,45 +189,26 @@ RSpec.describe AdminController, type: :controller do
       describe 'columns correct with simple results' do
 
 
-        let(:u1) { FactoryBot.create(:user,
+        let(:u1) { FactoryBot.create(:member,
                                      first_name:        "u1",
                                      email:             "user1@example.com",
                                      membership_number: '1234567890',
-                                     date_membership_packet_sent: '2019-07-07')
+                                     date_membership_packet_sent: '2019-07-07',
+                                     expiration_date: payment_expiry_20191108,
+                                     contact_email: 'u1@example.com')
         }
-
-        let(:c1) { FactoryBot.create(:company) }
-
-        let(:membership_app) do
-          FactoryBot.create :shf_application,
-                            contact_email: "u1@example.com",
-                            state:         :accepted,
-                            user:          u1,
-                            company_number: c1.company_number
-
-        end
-
-        let(:membership_payment) do
-          FactoryBot.create(:payment,
-                            status:      payment_successful,
-                            user:        u1,
-                            expire_date: payment_expiry_20191108)
-        end
 
         let(:branding_payment) do
           FactoryBot.create(:payment,
                             status:       payment_successful,
                             user:         u1,
-                            company:      membership_app.companies.first,
+                            company:      u1.companies.first,
                             payment_type: Payment::PAYMENT_TYPE_BRANDING,
                             expire_date:  payment_expiry_20191108)
         end
 
 
         let(:csv_response) do
-
-          membership_app.save
-          membership_payment.save
           branding_payment.save
 
           post :export_ansokan_csv

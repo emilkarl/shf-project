@@ -1,0 +1,13 @@
+-# This partial shows steps for how to edit companies,
+-# including the the link to log in (with a reminder about the email to use),
+-# The partial expects these locals:
+-#   email - the email address for logging in
+-#
+%li.step-1.login
+  = "Log in."
+  = render 'mailers_shared/login_here_with_email', email: email
+%li.step-2.edit-companies
+  = I18n.t('mailers.how_to_edit_companies.go_to_my_cos_menu')
+  %ul.step-2-substeps
+    %li= I18n.t('mailers.how_to_edit_companies.see_click_co_name')
+    %li= I18n.t('mailers.how_to_edit_companies.view_then_edit')

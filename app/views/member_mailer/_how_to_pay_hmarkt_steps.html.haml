@@ -1,0 +1,19 @@
+-# This partial shows the steps for how to pay the H-Markt licensing fee,
+-# the link to log in (with a reminder about the email to use), and a link
+-# to the company that needs the H-markt paid (that's the page where it's paid).
+-#
+-# The partial expects these locals:
+-#   email - the email address for logging in
+-#   company - the company (object); used for displaying the name and the url
+-#
+%li.step-1.login
+  = "Log in."
+  = render 'mailers_shared/login_here_with_email', email: email
+%li.step-2.pay-hmarkt
+  = I18n.t('mailers.pay_hmarkt_step')
+  = I18n.t('mailers.find_co_in_my_cos')
+  - unless company.nil?
+    = I18n.t('mailers.here_is_co_page')
+    = link_to(company.name,  company_url(company), target: '_blank')
+  %br= I18n.t('mailers.h_brand_exp_shown')
+

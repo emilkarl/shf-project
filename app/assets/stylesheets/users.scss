@@ -149,8 +149,8 @@ $highlight-yellow: #ffffe0;
 
 }
 
-.expire-date-background.current,
-.membership-status.current {
+.expire-date-background.current-member,
+.membership-status.current-member {
   background-color:$yes-background-green;
 }
 
@@ -164,8 +164,8 @@ $highlight-yellow: #ffffe0;
   background-color: $in-grace-period-color;
 }
 
-.expire-date-background.past-member,
-.membership-status.past-member {
+.expire-date-background.former-member,
+.membership-status.former-member {
   background-color: $past-member-color;
   font-style: italic;
 }

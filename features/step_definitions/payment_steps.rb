@@ -17,6 +17,7 @@ Given(/^the following payments exist$/) do |table|
   end
 end
 
+# FIXME: this needs to call the process that updates (things) after a payment is made
 And(/^I complete the membership payment$/) do
   # Emulate webhook payment-update and direct to "success" action
 
@@ -32,6 +33,8 @@ And(/^I complete the membership payment$/) do
                               status: Payment.order_to_payment_status('successful'),
                               start_date: start_date, expire_date: expire_date)
 
+  # update the membership status
+  MembershipStatusUpdater.instance.payment_made(payment)
   visit payment_success_path(user_id: @user.id, id: payment.id)
 end
 

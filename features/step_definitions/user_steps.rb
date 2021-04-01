@@ -34,6 +34,7 @@ Given(/^the following users exist(?:[:])?$/) do |table|
     user.delete('last_name') if user['last_name'].blank?
     user.delete('first_name') if user['first_name'].blank?
     user['sign_in_count'] = 0 if user['sign_in_count'].blank?
+    user['membership_status'] = 'not_a_member' if user['membership_status'].blank?
 
     user_agreed_to_membership_guidelines = user['agreed_to_membership_guidelines'].blank? ? false : user['agreed_to_membership_guidelines']
     user.delete('agreed_to_membership_guidelines') # this is not an attribute of User so we need to remove it
@@ -152,3 +153,51 @@ And("the profile picture filename is {capture_string} for {capture_string}") do 
   expect(user).not_to be_nil, "The user #{user_email} could not be found."
   expect(user.member_photo.original_filename).to eq(filename), "The profile picture filename was expected to be '#{filename}' but instead is '#{user.member_photo.original_filename}'"
 end
+
+
+# ----------------------------------------------------------------------------------------
+# Membership status
+
+And("I am not a( current) member") do
+  @user.membership_status = :not_a_member
+end
+
+And("I am a( current) member") do
+  @user.membership_status = :current_member
+end
+
+And("I am in the( renewal) grace period") do
+  @user.membership_status = :in_grace_period
+end
+
+And("I am a former member") do
+  @user.membership_status = :former_member
+end
+
+
+# This matches:
+#  I should be a member
+#  I should be a current member
+#  I should not be a member
+#  I should not be a current member
+Then("I should{negate} be a( current) member") do | negation |
+  @user.reload
+  expect(@user.current_member?).to(negation ? be_falsey : be_truthy)
+end
+
+And("I should{negate} be in the( renewal) grace period") do | negation |
+  @user.reload
+  expect(@user.in_grace_period?).to(negation ? be_falsey : be_truthy)
+end
+
+And("I should{negate} be a former member") do | negation |
+  @user.reload
+  expect(@user.former_member?).to(negation ? be_falsey : be_truthy)
+end
+
+And("I should not be a( current) member") do
+  @user.reload
+  expect(@user.not_a_member?).to be_truthy
+end
+
+# ----------------------------------------------------------------------------------------

@@ -131,6 +131,7 @@ RSpec.shared_examples 'it shows the user the login page and their login email' d
 end
 
 # Assumes that 'email_created' exists e.g. via a let(:..) (which might be within a block)
+#  and 'company' exists  e.g. via a let(:..) (which might be within a block)
 RSpec.shared_examples 'it shows how to login and the page to pay the H-markt fee' do
   it_behaves_like 'it shows the user the login page and their login email'
 

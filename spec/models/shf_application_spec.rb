@@ -627,8 +627,9 @@ RSpec.describe ShfApplication, type: :model do
 
 
   describe 'not_a_member?' do
-    it 'opposite of whether the user is a member' do
-      pending
+    it 'true only if the user is not_a_member' do
+      not_member_app = build(:shf_application)
+      expect(not_member_app.not_a_member?).to be_truthy
     end
   end
 

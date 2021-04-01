@@ -192,8 +192,9 @@ class ShfApplication < ApplicationRecord
   end
 
 
+  # FIXME where is this used?
   def not_a_member?
-    !user.member? # FIXME - use current_member? (or member_current?)
+    user.not_a_member? # TODO should delegate
   end
 
   def company_numbers

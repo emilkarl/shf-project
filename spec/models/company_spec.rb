@@ -1334,7 +1334,6 @@ RSpec.describe Company, type: :model, focus: true do
 
 
   describe 'earliest_current_member_fee_paid' do
-    #current_members.empty? ? nil : current_members.map(&:membership_start_date).sort.first'
 
     it 'is nil if there are no current members' do
       expect( (create(:company)).earliest_current_member_fee_paid ).to be_nil

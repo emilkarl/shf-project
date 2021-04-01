@@ -356,6 +356,7 @@ module ApplicationHelper
   end
 
 
+  # TODO is this used?  Should it be used?
   # @return [String] HTML safe string for a FontAwesome checkbox with the text = displayed_text
   #   Use a square checkbox by default. if use_circle: true, use a circular one
   def fa_checkbox(is_checked = false, displayed_text = '',
@@ -366,7 +367,6 @@ module ApplicationHelper
     checkbox_icon_method = "#{icon_method}#{append_sq_str}_icon".to_sym
     self.send(checkbox_icon_method, text: displayed_text, html_options: html_options)
   end
-
 
   # @param [String] title - title for the entire legend
   # @param [Array[String]] title_classes - list of CSS classes for the title. These will be applied
@@ -390,7 +390,6 @@ module ApplicationHelper
       legend_entries.each{|entry| concat entry}.join(' ')
     end
   end
-
 
   # @return [String] - HTML formatted to display a legend entry: a span with the given
   #   CSS classes AND the default CSS classes for a legend entry

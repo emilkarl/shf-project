@@ -586,53 +586,6 @@ RSpec.describe ApplicationHelper, type: :helper do
   end
 
 
-  describe 'legend' do
-    context 'title is empty' do
-
-      context 'no legend entries' do
-        it 'returns empty String' do
-          expect(helper.legend).to eq ''
-        end
-      end
-
-      it 'returns the HTML for the legend without a title' do
-        expect(helper.legend(entries: [{title: 'this'}])).not_to be_empty
-      end
-    end
-
-    context 'title is not empty' do
-      let(:entries) do
-        legend_titles = ['Current', 'Expires soon', 'Not a member']
-        legend_titles.map{ |entry_title| { title: entry_title, css_classes: ["#{entry_title.parameterize}"] } }
-      end
-
-      let(:result) { helper.legend(title: 'Legend Title', title_classes: ['title-class'],
-                                   legend_classes: %w[class1 class2], entries: entries) }
-
-      it 'puts everything in a div with the class legend' do
-        expect(result).to match(/^<div class="([^"])*legend([^"])*">/)
-      end
-
-      it 'given legend classes are also in the div' do
-        expect(result).to match(/^<div class="([^"])*class1([^"])*">/)
-        expect(result).to match(/^<div class="([^"])*class2([^"])*">/)
-      end
-
-      it 'the title is surrounded by a span with the title css classes given' do
-        expect(result).to match(/<span class="title-class">Legend Title<\/span>/)
-      end
-
-      it 'legend_entry is called to create the HTML for each entry' do
-        expect(helper).to receive(:legend_entry).with('Current', ['current'])
-        expect(helper).to receive(:legend_entry).with('Expires soon', ['expires-soon'])
-        expect(helper).to receive(:legend_entry).with('Not a member', ['not-a-member'])
-        helper.legend(title: 'Title', entries: entries)
-      end
-    end
-  end
-
-
-
   describe 'fa_checkbox' do
     let(:fa_unchecked_square) { not_complete_check_sq_fa_icon_name }
     let(:fa_checked_square) { complete_check_sq_fa_icon_name}
@@ -679,6 +632,52 @@ RSpec.describe ApplicationHelper, type: :helper do
       it 'displays the circle (unchecked) with displayed text if use_circle: true' do
         expect(helper).to receive(:not_complete_check_icon)
         helper.fa_checkbox(false, 'displayed string', use_circle: true)
+      end
+    end
+  end
+
+
+  describe 'legend' do
+    context 'title is empty' do
+
+      context 'no legend entries' do
+        it 'returns empty String' do
+          expect(helper.legend).to eq ''
+        end
+      end
+
+      it 'returns the HTML for the legend without a title' do
+        expect(helper.legend(entries: [{title: 'this'}])).not_to be_empty
+      end
+    end
+
+    context 'title is not empty' do
+      let(:entries) do
+        legend_titles = ['Current', 'Expires soon', 'Not a member']
+        legend_titles.map{ |entry_title| { title: entry_title, css_classes: ["#{entry_title.parameterize}"] } }
+      end
+
+      let(:result) { helper.legend(title: 'Legend Title', title_classes: ['title-class'],
+                                   legend_classes: %w[class1 class2], entries: entries) }
+
+      it 'puts everything in a div with the class legend' do
+        expect(result).to match(/^<div class="([^"])*legend([^"])*">/)
+      end
+
+      it 'given legend classes are also in the div' do
+        expect(result).to match(/^<div class="([^"])*class1([^"])*">/)
+        expect(result).to match(/^<div class="([^"])*class2([^"])*">/)
+      end
+
+      it 'the title is surrounded by a span with the title css classes given' do
+        expect(result).to match(/<span class="title-class">Legend Title<\/span>/)
+      end
+
+      it 'legend_entry is called to create the HTML for each entry' do
+        expect(helper).to receive(:legend_entry).with('Current', ['current'])
+        expect(helper).to receive(:legend_entry).with('Expires soon', ['expires-soon'])
+        expect(helper).to receive(:legend_entry).with('Not a member', ['not-a-member'])
+        helper.legend(title: 'Title', entries: entries)
       end
     end
   end

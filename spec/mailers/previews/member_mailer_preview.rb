@@ -14,15 +14,9 @@ class MemberMailerPreview < ActionMailer::Preview
     MemberMailer.membership_granted(approved_app.user)
   end
 
-  def membership_renewed
-    approved_app = ShfApplication.where(state: :accepted).first
-    check_co_name(approved_app.companies.first)
-    MemberMailer.membership_renewed(approved_app.user)
-  end
-
 
   def membership_expiration_reminder
-    member = User.where(member: true).first
+    member = User.current_member.first
     MemberMailer.membership_expiration_reminder(member)
   end
 
@@ -52,26 +46,14 @@ class MemberMailerPreview < ActionMailer::Preview
 
 
   def membership_lapsed
-
-    lapsed_members = User.joins(:payments).where("payments.status = '#{Payment::SUCCESSFUL}' AND " +
-                                                     "payments.payment_type = ? AND " +
-                                                     " payments.expire_date < ?", Payment::PAYMENT_TYPE_MEMBER, Date.current)
-        .joins(:shf_application).where(shf_applications: { state: 'accepted' })
-
-    lapsed_member = if lapsed_members.size > 0
-      lapsed_members.last
+    if User.in_grace_period.count == 0
+      # take a current member and put them into the grace period
+      lapsed_member = User.current_member.second
+      current_membership = lapsed_member.memberships_manager.most_recent_membership(lapsed_member)
+      current_membership.update(last_day: Date.current - 3)
+      lapsed_member.start_grace_period!
     else
-      # take a current member and make their term expired!
-      current = User.current_members
-      if current.size > 0
-        member = current.last
-        most_recent_payment = member.most_recent_membership_payment
-        most_recent_payment.update(expire_date: Date.current - 3)
-        member
-      else
-        # Uh oh.  you have NO current members in the db.  You need to put some there so you can preview emails.
-        #  This will throw an error but it's not important enough to spend development time on.
-      end
+      lapsed_member = User.in_grace_period.first
     end
 
     MemberMailer.membership_lapsed(lapsed_member)
@@ -124,6 +106,39 @@ class MemberMailerPreview < ActionMailer::Preview
     shf_app.update(state: 'accepted')
 
     MemberMailer.first_membership_fee_owed(new_approved_user)
+  end
+
+
+  def membership_renewed
+    # Select a current member
+    member_to_renew = User.current_member.sort_by(&:membership_expire_date).first
+
+    unless member_to_renew.companies.find{ |co| !co.information_complete? }
+      incomplete_company = FactoryBot.create(:company, name: 'Incomplete (no region)')
+      incomplete_company.addresses.first.update(region: nil)
+      member_to_renew.shf_application.companies << incomplete_company
+    end
+
+    unless member_to_renew.companies.find{ |co| co.payment_term_expired? }
+      expired_company = FactoryBot.create(:company, name: 'Expired')
+      # TODO when Company uses Membership, then change this to (from using payments)
+      FactoryBot.create(:h_branding_fee_payment, user: member_to_renew,
+                        company: expired_company,
+                        expire_date: Date.current - 1.day )
+      member_to_renew.shf_application.companies << expired_company
+    end
+
+    unless member_to_renew.companies.find{ |co| co.payment_term_expired? && !co.information_complete? }
+      expired_and_incomplete_company = FactoryBot.create(:company, name: 'Expired and Incomplete Co.')
+      # TODO when Company uses Membership, then change this to (from using payments)
+      FactoryBot.create(:h_branding_fee_payment, user: member_to_renew,
+                        company: expired_and_incomplete_company,
+                        expire_date: Date.current - 1.day )
+      expired_and_incomplete_company.addresses.first.update(region: nil)
+      member_to_renew.shf_application.companies << expired_and_incomplete_company
+    end
+
+    MemberMailer.membership_renewed(member_to_renew)
   end
 
 

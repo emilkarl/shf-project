@@ -14,8 +14,27 @@
 # TODO should this be renamed to MembershipsTermManager?  This is mostly about dates for the term
 class MembershipsManager
 
+  EXPIRES_SOON_STATUS = :expires_soon
+
+  # Informational statuses are those that are _not_ used when determining the next status
+  # (membership statuses that are transitioned from/to). They are just helpful information
+  # presented to admins, users, members.
+  #   TODO is there a better name for these?
+  INFORMATIONAL_MEMBERSHIP_STATUSES = [EXPIRES_SOON_STATUS]
+
   MOST_RECENT_MEMBERSHIP_METHOD = :last_day
-  # IS_EXPIRING_SOON_AMOUNT = 1.month
+
+  # =============================================================================================
+
+  def self.expires_soon_status
+    EXPIRES_SOON_STATUS
+  end
+
+
+  def self.informational_statuses
+    INFORMATIONAL_MEMBERSHIP_STATUSES
+  end
+
 
   def self.most_recent_membership_method
     MOST_RECENT_MEMBERSHIP_METHOD

@@ -9,6 +9,17 @@ RSpec.describe MembershipsManager, type: :model do
     allow(user).to receive(:memberships).and_return(mock_memberships)
   end
 
+
+  it '.expires_soon_status is :expires_soon' do
+    expect(described_class.expires_soon_status).to eq(:expires_soon)
+  end
+
+
+  it '.informational_statuses is the list containing expires soon status' do
+    expect(described_class.informational_statuses).to match_array([described_class.expires_soon_status])
+  end
+
+
   describe '.most_recent_membership_method' do
     it 'is :last_day ' do
       expect(described_class.most_recent_membership_method).to eq :last_day

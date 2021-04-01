@@ -141,21 +141,6 @@ RSpec.describe 'PaymentUtility', type: :model do
       expect(u_co.payment_term_expired?).to be_falsey
     end
 
-    it 'uses the given list of payments' do
-      given_list_of_payments = ['some', :payments]
-      expect(user_paid_lastyear_nov_29).to receive(:payment_expire_date)
-                                             .with(anything, given_list_of_payments)
-                                             .and_return(dec_1)
-      user_paid_lastyear_nov_29.payment_term_expired?(list_of_payments: given_list_of_payments)
-    end
-
-    it 'default list of payments is the list of all payments for the object' do
-      user_paid_lastyear_nov_29_payments = user_paid_lastyear_nov_29.payments
-      expect(user_paid_lastyear_nov_29).to receive(:payment_expire_date)
-                                             .with(anything, user_paid_lastyear_nov_29_payments)
-                                             .and_call_original
-      user_paid_lastyear_nov_29.payment_term_expired?
-    end
   end
 
 

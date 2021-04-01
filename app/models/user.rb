@@ -9,6 +9,8 @@
 #   TODO: should any of the methods be delegated to the MembershipsManager?
 #   Next steps will be to call MembershipManager methods directly where needed.
 #
+# TODO: should 'expires_soon' be a membership status instead of just 'informational' ?
+#
 # TODO: refactor proof of membership image stuff to separate class
 #
 class User < ApplicationRecord
@@ -125,6 +127,13 @@ class User < ApplicationRecord
     aasm.states.map(&:name)
   end
 
+  # All memberships statuses _and_ 'expires_soon' ('Expires soon' is not a "real" status. It is not
+  #   used to track or transition to/from statuses, but it is informative to show to admins and
+  #   members.  It is just _informational_.
+  def self.membership_statuses_incl_informational
+    aasm.states.map(&:name) + MembershipsManager.informational_statuses
+  end
+
   # ----------------------------------------------------------------------------------------------
   # Act As State Machine (AASM)
 
@@ -148,11 +157,11 @@ class User < ApplicationRecord
     end
 
     event :start_grace_period do
-      transitions from: :current_member, to: :in_grace_period, after: :enter_grace_period
+      transitions from: :current_member, to: :in_grace_period, after: Proc.new {|*args| enter_grace_period(*args) }
     end
 
     event :make_former_member do
-      transitions from: :in_grace_period, to: :former_member, after: :become_former_member
+      transitions from: :in_grace_period, to: :former_member, after: Proc.new {|*args| become_former_member(*args) }
     end
   end
 
@@ -171,12 +180,17 @@ class User < ApplicationRecord
     @memberships_manager ||= MembershipsManager.new
   end
 
-  # @return [nil | Members] - the oldest membership that covers today (Date.current)
+  # @return [nil | Membership] - the oldest membership that covers today (Date.current)
   #   nil if no memberships are found
   def current_membership
     memberships_manager.membership_on(self, Date.current)
   end
 
+
+  # @return [nil | Membership] - the most recent membership (the current membership may have expired)
+  def most_recent_membership
+    memberships_manager.most_recent_membership(self)
+  end
 
   def cache_key(type)
     "user_#{id}_cache_#{type}"
@@ -227,17 +241,16 @@ class User < ApplicationRecord
   end
 
 
-  def enter_grace_period
+  def enter_grace_period(date: Date.current)
     # TODO send email for enter_grace_period (renewal overdue!)?
-    # Memberships::IndividualMembershipEnterGracePeriodActions.for_user(self)
+    Memberships::IndividualMembershipEnterGracePeriodActions.for_user(self, first_day: date)
   end
 
 
-  def become_former_member
+  def become_former_member(date: Date.current)
     # TODO send email?
-    # # Memberships::BecomeFormerIndividualMemberActions.for_user(self, date: date)
+    Memberships::BecomeFormerIndividualMemberActions.for_user(self, first_day: date)
   end
-
 
 
   # Returns the first day of the most recent membership, where "most recent" means
@@ -280,6 +293,11 @@ class User < ApplicationRecord
   alias_method :payments_current?, :membership_current?
 
 
+  def membership_expires_soon?(this_membership = most_recent_membership)
+    memberships_manager.expires_soon?(self, this_membership)
+  end
+
+
   # TODO this should not be the responsibility of the User class. Need a MembershipManager class for this.
   def payments_current_as_of?(this_date)
     return false if this_date.nil?
@@ -317,6 +335,19 @@ class User < ApplicationRecord
   # def days_can_renew_early
   #   memberships_manager.days_can_renew_early
   # end
+
+
+  # @return [Symbol] - the membership status.
+  # If the membership status is current AND the given Date
+  # is on or after the date that it expires soon, return the informational status 'expires_soon'
+  #
+  def membership_status_incl_informational(this_membership = most_recent_membership)
+    if membership_expires_soon?(this_membership)
+      MembershipsManager.expires_soon_status
+    else
+      membership_status
+    end
+  end
 
 
   def today_is_valid_renewal_date?
@@ -509,7 +540,7 @@ class User < ApplicationRecord
       file_uploaded_on_or_after?(current_membership.first_day)
     else
       # is in_grace_period
-      file_uploaded_on_or_after?(memberships_manager.most_recent_membership(self).first_day)
+      file_uploaded_on_or_after?(most_recent_membership.first_day)
     end
   end
 

@@ -1762,6 +1762,35 @@ RSpec.describe User, type: :model do
   end
 
 
+  describe 'membership_status_incl_informational' do
+
+    context 'the given membership expires soon' do
+      it 'is the expires soon status' do
+        member = create(:member, expiration_date: Date.current - 1.day)
+        mock_memberships_mgr = double(MembershipsManager, membership_on: member.most_recent_membership)
+        allow(member).to receive(:memberships_manager).and_return(mock_memberships_mgr)
+        allow(mock_memberships_mgr).to receive(:most_recent_membership).and_return(member.memberships.last)
+
+        expect(mock_memberships_mgr).to receive(:expires_soon?).and_return(true)
+        expect(member.membership_status_incl_informational).to eq(MembershipsManager.expires_soon_status)
+      end
+    end
+
+    context 'the given membership does not expire soon' do
+      it 'is the membership status of the given membership' do
+        member = create(:member, expiration_date: Date.current - 1.day)
+        mock_memberships_mgr = double(MembershipsManager, membership_on: member.current_membership)
+        allow(member).to receive(:memberships_manager).and_return(mock_memberships_mgr)
+        allow(mock_memberships_mgr).to receive(:most_recent_membership).and_return(member.memberships.last)
+
+        expect(mock_memberships_mgr).to receive(:expires_soon?).and_return(false)
+        expect(member.membership_status_incl_informational).to eq('not_a_member')
+      end
+    end
+  end
+
+
+
   describe 'membership_expired_in_grace_period?' do
     let(:member) { build(:user) }
     let(:grace_3_days) { ActiveSupport::Duration.days(3) }

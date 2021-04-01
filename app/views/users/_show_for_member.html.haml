@@ -3,7 +3,7 @@
 
 = render partial: 'show_login_email_row_cols', locals: { user: user }
 
-- showing_renewal_info = user.can_renew_today?
+- show_renewal_info = user.today_is_valid_renewal_date?
 
 .membership
   .row
@@ -26,14 +26,14 @@
   = render partial: 'admin_only_payments', locals: { entity: user }
 
 
-= render partial: 'renewal', locals: { user: user } if showing_renewal_info
+= render partial: 'renewal', locals: { user: user } if show_renewal_info
 
 = render partial: 'show_application_section_row_cols', locals: { user: user }
 
 = render partial: 'shf_applications/show_business_categories',
                   locals: { shf_application: user.shf_application }
 
-%p.membership-guidelines-checklist= render partial: 'ethical_guidelines_link_or_checklist', locals: {user: user} unless showing_renewal_info
+%p.membership-guidelines-checklist= render partial: 'ethical_guidelines_link_or_checklist', locals: {user: user} unless show_renewal_info
 
 = render partial: 'show_uploaded_files_section_row_cols',  locals: { user: user }
 

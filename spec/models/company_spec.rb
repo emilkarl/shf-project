@@ -861,12 +861,12 @@ RSpec.describe Company, type: :model, focus: true do
 
   describe 'error_if_has_applications?' do
     it 'false if there are no applications in any state other than being destroyed' do
-      pending
+      skip
     end
 
     context 'there are applications in a state other than being destroyed' do
       it 'throws an abort error with the error message' do
-        pending
+        skip
       end
     end
   end
@@ -1114,42 +1114,42 @@ RSpec.describe Company, type: :model, focus: true do
 
   describe 'any_visible_addresses?' do
     it 'true if there are any visible addresses' do
-      pending
+      skip
     end
   end
 
 
   describe 'addresses_region_names' do
     it 'get all region names used by addresses, with no duplicates' do
-      pending
+      skip
     end
 
     it 'do not include regions if their addresses are not visible at that level' do
-      pending
+      skip
     end
   end
 
 
   describe 'kommuns_names' do
     it 'get all kommun names used by addresses, with no duplicates' do
-      pending
+      skip
     end
 
 
     it 'do not include kommuns if their addresses are not visible at that level' do
-      pending
+      skip
     end
   end
 
 
   describe 'cities_names' do
     it 'get all city names used by addresses, with no duplicates' do
-      pending
+      skip
     end
 
 
     it 'do not include cities if their addresses are not visible at that level' do
-      pending
+      skip
     end
   end
 

@@ -30,8 +30,6 @@ RSpec.describe MembershipExpireAlert do
           allow(is_a_member).to receive(:membership_expire_date).and_return(DateTime.new(2018, 12, 31))
 
           expect(is_a_member).to receive(:current_member?).and_return(true)
-          expect(is_a_member).to receive(:payments_current?).and_return(true) # TODO is this correct?  Do we need to check this?
-
           expect(described_class).to receive(:days_today_is_away_from)
                                          .with(is_a_member.membership_expire_date, timing)
                                          .and_return(30)
@@ -52,7 +50,6 @@ RSpec.describe MembershipExpireAlert do
           allow(not_a_member).to receive(:membership_expire_date).and_return(DateTime.new(2018, 12, 31))
 
           expect(not_a_member).to receive(:current_member?).and_return(false)
-          expect(not_a_member).to receive(:payments_current?).and_return(false) # TODO is this correct? do we need to check this? (Or is it out of date)
           expect(described_class).not_to receive(:days_today_is_away_from)
           expect(subject).not_to receive(:send_on_day_number?)
 

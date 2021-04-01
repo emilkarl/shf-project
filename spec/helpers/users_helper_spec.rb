@@ -84,7 +84,7 @@ RSpec.describe UsersHelper, type: :helper do
   end
 
   describe 'short_proof_of_membership_url' do
-    it 'calls #proof_of_membership_jpg_url and returns value returned by #get_short_proof_of_membership_url' do
+    it 'calls proof_of_membership_jpg_url and returns value returned by #get_short_proof_of_membership_url' do
       url = proof_of_membership_jpg_url(user.id)
       allow(user).to receive(:get_short_proof_of_membership_url).with(url).and_return(url)
       expect(short_proof_of_membership_url(user)).to eq(url)
@@ -131,6 +131,7 @@ RSpec.describe UsersHelper, type: :helper do
     it 'is t(not_sent) if the package was not sent' do
       expect(membership_packet_status_str(false)).to eq I18n.t('not_sent', scope: i18n_scope)
     end
+
   end
 
 

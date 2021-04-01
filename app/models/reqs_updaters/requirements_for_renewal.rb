@@ -40,5 +40,4 @@ class RequirementsForRenewal < AbstractReqsForMembership
   def self.max_days_can_still_renew
     AdminOnly::AppConfiguration.config_to_use.membership_expired_grace_period
   end
-
 end

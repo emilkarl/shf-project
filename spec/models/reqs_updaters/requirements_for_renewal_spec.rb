@@ -34,7 +34,6 @@ RSpec.describe RequirementsForRenewal, type: :model do
 
       context 'user can renew on the given date' do
         before(:each) {  allow(user).to receive(:may_renew?).and_return(true) }
-        before(:each) {  allow(user).to receive(:membership_can_renew_on?).and_return(true) } # TODO use this line or the one above?
 
         context 'user can renew on the given date' do
           before(:each) do
@@ -80,7 +79,6 @@ RSpec.describe RequirementsForRenewal, type: :model do
 
         it 'false if user cannot renew on the given date' do
           allow(user).to receive(:valid_date_for_renewal?).and_return(false)
-          allow(user).to receive(:membership_can_renew_on?).and_return(false) # TODO use this line or the one above?
 
           expect(user).not_to receive(:has_approved_shf_application?)
           expect(subject).not_to receive(:membership_guidelines_checklist_done?)
@@ -127,9 +125,9 @@ RSpec.describe RequirementsForRenewal, type: :model do
 
   describe '.payment_requirements_met?' do
 
-    it 'true if a payment has been made and the expiration date is in the future' do
+    it 'true if all payments are current' do
       u = build(:user)
-      expect(u).to receive(:payments_current?).and_return(true)
+      expect(u).to receive(:payments_current_as_of?).and_return(true)
       expect(subject.payment_requirements_met?(u)).to be_truthy
     end
 
@@ -235,13 +233,12 @@ RSpec.describe RequirementsForRenewal, type: :model do
 
               travel_to(last_day - 3) do
                 expect(approved_and_paid.today_is_valid_renewal_date?).to be_truthy
-                expect(approved_and_paid.membership_can_renew_on?(Date.current)).to be_truthy # TODO is this the right check? and/or the line above?
                 expect(approved_and_paid.membership_guidelines_checklist_done?).to be_truthy
 
                 expect(approved_and_paid.has_approved_shf_application?).to be_truthy
                 expect(subject.doc_uploaded_during_this_membership_term?(approved_and_paid)).to be_falsey
 
-                expect(subject.requirements_excluding_payments_met?(approved_and_paid)).to be_truthy
+                expect(subject.requirements_excluding_payments_met?(approved_and_paid)).to be_falsey
                 expect(subject.payment_requirements_met?(approved_and_paid)).to be_truthy
 
                 expect(subject.requirements_met?({ user: approved_and_paid })).to be_falsey
@@ -312,7 +309,7 @@ RSpec.describe RequirementsForRenewal, type: :model do
     end
 
     it 'false if user cannot renew on the given date' do
-      allow(user).to receive(:membership_can_renew_on?).and_return(false)
+      allow(user).to receive(:today_is_valid_renewal_date?).and_return(false)
 
       expect(user).not_to receive(:has_approved_shf_application?)
       expect(subject).not_to receive(:membership_guidelines_checklist_done?)

@@ -141,11 +141,8 @@ RSpec.describe UsersHelper, type: :helper do
 
 
   describe 'expire_date_css_class' do
-
-    it 'makes the status dasherized: lowercase and has dashes for spaces' do
-      u = double(User)
-      allow(u).to receive(:membership_status).and_return(:this_is_some_status)
-      expect(helper.expire_date_css_class(u)).to eq('this-is-some-status')
+    it 'makes the status dasherized: becomes lowercase and has dashes for spaces' do
+      expect(helper.expire_date_css_class(:this_is_some_status_as_symbol)).to eq('this-is-some-status-as-symbol')
     end
   end
 
@@ -153,7 +150,7 @@ RSpec.describe UsersHelper, type: :helper do
   describe 'membership_status_legend' do
 
     it 'gets the list of membership statuses from User' do
-      expect(User).to receive(:membership_statuses).and_return([])
+      expect(User).to receive(:membership_statuses_incl_informational).and_return([])
       helper.membership_status_legend
     end
 
@@ -165,11 +162,11 @@ RSpec.describe UsersHelper, type: :helper do
     describe 'legend entries' do
       let(:result) { helper.membership_status_legend }
 
-      it "includes 'expires soon' as a status" do
+      it "includes 'expires soon' (an informational status) as a status" do
         expect(result).to match(/#{t('activerecord.attributes.membership.status.expires_soon')}/)
       end
 
-      membership_statuses = User.membership_statuses
+      membership_statuses = User.membership_statuses_incl_informational
       membership_statuses.each do |status|
 
         it "legend entry title for #{status} is surrounded by span with legend-item" do

@@ -54,7 +54,7 @@ module Seeders
       app_config.email_admin_new_app_received_enabled = true
 
       app_config.payment_too_soon_days = 60
-      app_config.membership_expired_grace_period = 90
+      app_config.membership_expired_grace_period = (365 * 2)
       app_config.membership_term_length = 365
       app_config.membership_expiring_soon_days = 31
 

@@ -128,6 +128,7 @@ begin
         log.info(MSG_APPCONFIG_NEEDS_SITEMETAIMAGE) unless AdminOnly::AppConfiguration.last.site_meta_image.exists?
       end
 
+      # TODO: should this be here, or come after all users have been seeded?
       User.all.each do |user|
         AdminOnly::UserChecklistFactory.create_member_guidelines_checklist_for(user) unless user.admin?
       end

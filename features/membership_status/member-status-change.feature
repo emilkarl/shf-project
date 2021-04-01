@@ -12,6 +12,7 @@ Feature: Membership status updated due to payments or expiration
   Background:
 
     Given the App Configuration is not mocked and is seeded
+    And the grace period is 4 days
 
     And the Membership Ethical Guidelines Master Checklist exists
 
@@ -33,6 +34,11 @@ Feature: Membership status updated due to payments or expiration
       | emma@mutts.com      | 2120000142     | rehab         | accepted |
       | bob@snarkybarky.com | 5560360793     | grooming      | accepted |
       | lars@newapp.com     | 5562252998     | rehab         | new      |
+
+
+    Given the following memberships exist:
+      | email          | first_day  | last_day   |
+      | emma@mutts.com | 2017-12-31 | 2018-12-31 |
 
 
     Given the date is set to "2017-12-31"
@@ -58,14 +64,16 @@ Feature: Membership status updated due to payments or expiration
   Scenario: Membership payment made before membership expires (but not too early)
     Given the date is set to "2018-11-30"
     And I am logged in as "emma@mutts.com"
+    And I am a member
     And I am on the "user details" page for "emma@mutts.com"
-    Then I should be a member
+#    Then I should be a member
     And My membership expiration date is 2018-12-31
     And I should see "1001"
     Then I click on t("menus.nav.members.pay_membership")
     And I complete the membership payment
     And I should see t("payments.success.success")
-    And I should be a member
+#    And I should be a member
+    And I am a member
     And My membership expiration date is 2019-12-31
     And I should see "2019-12-31"
 
@@ -75,26 +83,31 @@ Feature: Membership status updated due to payments or expiration
     Given the date is set to "2019-01-01"
     And I am logged in as "emma@mutts.com"
     And I am on the "user details" page for "emma@mutts.com"
-    And I should not be a member
+#    And I should not be a member
+    And I am not a member
     Then I click on t("menus.nav.members.pay_membership")
     And I complete the membership payment
     And I should see t("payments.success.success")
-    And I should be a member
+#    And I should be a member
+    And I am a member
     And My membership expiration date is 2019-12-31
     And I should see "2019-12-31"
 
 
+    #TODO should this be ...is made on the last day ?
   @time_adjust
   Scenario: Membership payment is made on expiration date
     Given the date is set to "2018-12-31"
     And I am logged in as "emma@mutts.com"
     And I am on the "user details" page for "emma@mutts.com"
-    And I should not be a member
+#    And I should not be a member
+    And I am not a member
     Then I click on t("menus.nav.members.pay_membership")
     And I complete the membership payment
     And I should see t("payments.success.success")
     And I should see "2019-12-30"
-    And I should be a member
+#    And I should be a member
+    And I am a member
     And My membership expiration date is 2019-12-30
 
 
@@ -103,12 +116,14 @@ Feature: Membership status updated due to payments or expiration
     Given the date is set to "2019-01-01"
     And I am logged in as "emma@mutts.com"
     And I am on the "user details" page for "emma@mutts.com"
-    And I should not be a member
+#    And I should not be a member
+    And I am in the grace period
     Then I click on t("menus.nav.members.pay_membership")
     And I complete the membership payment
     And I should see t("payments.success.success")
     And I should see "2019-12-31"
-    And I should be a member
+#    And I should be a member
+    And I am a member
     And My membership expiration date is 2019-12-31
 
 
@@ -117,7 +132,8 @@ Feature: Membership status updated due to payments or expiration
     Given the date is set to "2020-01-01"
     And I am logged in as "emma@mutts.com"
     And I am on the "user details" page for "emma@mutts.com"
-    And I should not be a member
+#    And I should not be a member
+    And I am a former member
     Then I click on t("menus.nav.members.pay_membership")
     And I complete the membership payment
     And I should see t("payments.success.success")

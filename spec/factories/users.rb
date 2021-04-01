@@ -79,13 +79,14 @@ FactoryBot.define do
         last_day { nil }
         expiration_date { nil }
         has_uploaded_docs { true } # Do they have uploaded documents for the current membership term?
+        contact_email { email }
       end
 
       after(:build) do |member, evaluator|
 
         create_list(:shf_application, 1, :accepted, user: member,
                     company_number: evaluator.company_number,
-                    contact_email: evaluator.email)
+                    contact_email: evaluator.contact_email)
 
         if evaluator.first_day.nil?
           # in case expiration_date was used. TODO switch these all to use first_day and last_day

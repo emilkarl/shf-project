@@ -229,6 +229,24 @@ RSpec.describe PaymentsHelper, type: :helper do
   end
 
 
+
+
+  describe 'expires_soon_hint_css_class' do
+
+    it 'returns yes css class if expire_date more than a month away' do
+      expect(expires_soon_hint_css_class(Time.zone.today + 2.months)).to eq helper.yes_css_class
+    end
+
+    it 'returns maybe css class if expire_date less than a month away' do
+      expect(expires_soon_hint_css_class(Time.zone.today + 2.days)).to eq helper.maybe_css_class
+    end
+
+    it 'returns no css class if expire_date has passed' do
+      expect(expires_soon_hint_css_class(Time.zone.today - 2.days)).to eq helper.no_css_class
+    end
+  end
+
+
   describe 'payment_button_classes' do
 
     it 'default is to return %w(btn btn-secondary btn-sm)' do

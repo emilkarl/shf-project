@@ -57,7 +57,9 @@ module PaymentsHelper
   end
 
 
-
+  # Another possible name for this method: payment_status_ok_indicator_css_class
+  # The word "indicator" is good. It's possibly better than "hint"
+  #
   # This method name ends with '_css_class' to make it clear that this returns
   # a CSS class as opposed to a normal Ruby class.
   #
@@ -70,6 +72,19 @@ module PaymentsHelper
       when :due, :past_due then no_css_class
       else maybe_css_class
     end
+  end
+
+
+  def expires_soon_hint_css_class(expire_date)
+    today = Time.zone.today
+    if today < expire_date.months_ago(1) # expire_date minus one month
+      value_class = yes_css_class
+    elsif today >= expire_date
+      value_class = no_css_class
+    else
+      value_class = maybe_css_class
+    end
+    value_class
   end
 
 
@@ -91,6 +106,7 @@ module PaymentsHelper
   # @return [String] - HTML to display a label and value for payment notes
   def payment_notes_label_and_value(notes = '')
     display_text = notes.blank? ? t('none_plur') : notes
+
     field_or_none("#{t('activerecord.attributes.payment.notes')}",
                   display_text, tag: :div)
   end

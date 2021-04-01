@@ -1,16 +1,16 @@
 # Log messages:
 #
-LOGMSG_APP_UPDATED = 'SHF_application updated'
-LOGMSG_APP_UPDATED_CHECKREASON = 'Membership checked because this shf_application was updated: '
-LOGMSG_PAYMENT_MADE = 'Payment made'
-LOGMSG_PAYMENT_MADE_CHECKREASON = 'Finished checking membership status because this payment was made: '
-LOGMSG_APP_UPDATED = 'ShfApplication updated'
-LOGMSG_USER_UPDATED = 'User updated'
-LOGMSG_USER_UPDATED_CHECKREASON = 'User updated: '
+LOGMSG_APP_UPDATED = 'SHF_application updated' unless defined? LOGMSG_APP_UPDATED
+LOGMSG_APP_UPDATED_CHECKREASON = 'Membership checked because this shf_application was updated: ' unless defined? LOGMSG_APP_UPDATED_CHECKREASON
+LOGMSG_PAYMENT_MADE = 'Payment made' unless defined? LOGMSG_PAYMENT_MADE
+LOGMSG_PAYMENT_MADE_CHECKREASON = 'Finished checking membership status because this payment was made: ' unless defined? LOGMSG_PAYMENT_MADE_CHECKREASON
+LOGMSG_APP_UPDATED = 'ShfApplication updated' unless defined? LOGMSG_APP_UPDATED
+LOGMSG_USER_UPDATED = 'User updated' unless defined? LOGMSG_USER_UPDATED
+LOGMSG_USER_UPDATED_CHECKREASON = 'User updated: ' unless defined? LOGMSG_USER_UPDATED_CHECKREASON
 
-LOGMSG_MEMBERSHIP_GRANTED = 'Membership granted'
-LOGMSG_MEMBERSHIP_RENEWED = 'Membership renewed'
-LOGMSG_MEMBERSHIP_REVOKED = 'Membership revoked'
+LOGMSG_MEMBERSHIP_GRANTED = 'Membership granted' unless defined? LOGMSG_MEMBERSHIP_GRANTED
+LOGMSG_MEMBERSHIP_RENEWED = 'Membership renewed' unless defined? LOGMSG_MEMBERSHIP_RENEWED
+LOGMSG_MEMBERSHIP_REVOKED = 'Membership revoked' unless defined? LOGMSG_MEMBERSHIP_REVOKED
 
 
 #--------------------------
@@ -106,6 +106,10 @@ class MembershipStatusUpdater
       if user.not_a_member? || user.former_member?
         if RequirementsForMembership.satisfied?(user: user)
           user.start_membership!(date: today)
+          log.info( user.membership_changed_info)
+        elsif user.membership_expired_in_grace_period?(today)
+          # This shouldn't happen, but in case it does:
+          user.start_grace_period!
           log.info( user.membership_changed_info)
         end
 

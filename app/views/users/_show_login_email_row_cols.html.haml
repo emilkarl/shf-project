@@ -6,4 +6,5 @@
 .login-name
   .row
     .col
-      = field_or_none("#{ t('.email') }", mail_to(user.email))
+      = field_or_none("#{ t('.email') }", mail_to(user.email),
+      value_class: 'login-email')

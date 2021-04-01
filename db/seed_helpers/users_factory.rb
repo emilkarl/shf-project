@@ -96,12 +96,16 @@ module SeedHelper
 
     end
 
-    def self.make_member_paid_through(last_payment_expiry, lastname: MEMBER_LNAME, number: 1, firstname: 'PaidThrough')
+    def self.make_member_paid_through(term_last_day, lastname: MEMBER_LNAME, number: 1, firstname: 'PaidThrough')
       make_predefined_with(lastname: lastname, number: number, firstname: firstname) do |member|
         payment_ends_tomorrow = make_n_save_app(member, MA_ACCEPTED_STATE) # Make app, payments, start membership
+        term_first_day = Membership.first_day_from_last(term_last_day)
         membership_payment = payment_ends_tomorrow.most_recent_membership_payment
-        membership_payment.update(expire_date: last_payment_expiry, start_date: User.start_date_for_expire_date(last_payment_expiry))
-        member.current_membership&.update(first_day: last_payment_expiry - 30.days, last_day: last_payment_expiry)
+        membership_payment.update(expire_date: term_last_day, start_date: term_first_day)
+        hmarkt_payment = member.companies.first.most_recent_branding_payment
+        hmarkt_payment.update(expire_date: term_last_day, start_date: term_first_day)
+
+        member.current_membership&.update(first_day: term_first_day, last_day: term_last_day) if member.current_membership
       end
     end
 

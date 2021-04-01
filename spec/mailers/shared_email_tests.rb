@@ -143,11 +143,6 @@ RSpec.shared_examples 'it shows how to login and the page to pay the H-markt fee
     expect(email_created).to have_body_text(I18n.t('mailers.pay_hmarkt_step'))
   end
 
-  it 'has a link to the company page' do
-    expect(email_created).to have_body_text(I18n.t('mailers.here_is_co_page'))
-    expect(email_created).to have_body_text("<a target=\"_blank\" href=\"#{company_url(company)}\">#{company.name}</a>")
-  end
-
   it 'has a line explaining that they can see the H-markt expiration on the company page' do
     expect(email_created).to have_body_text(I18n.t('mailers.h_brand_exp_shown'))
   end

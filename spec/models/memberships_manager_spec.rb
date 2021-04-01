@@ -45,7 +45,10 @@ RSpec.describe MembershipsManager, type: :model do
 
   describe '.create_archived_memberships_for' do
     it 'creates an ArchivedMembership for every Membership for a user' do
-      pending
+      expect(ArchivedMembership.count).to eq(0)
+      member = create(:member)
+      create(:membership, user: member, last_day: member.membership_expire_date - 1.day)
+      expect { described_class.create_archived_memberships_for(member) }.to change(ArchivedMembership, :count).by(2)
     end
   end
 
@@ -97,16 +100,15 @@ RSpec.describe MembershipsManager, type: :model do
 
 
   describe 'most_recent_membership_first_day' do
-    it 'gets the most recent membership' do
-      pending
-    end
-
     it 'nil if there are no memberships' do
-      pending
+      allow(subject).to receive(:most_recent_membership).and_return(nil)
+      expect(subject.most_recent_membership_first_day(user)).to be_nil
     end
 
     it 'is the first day for the most recent membership' do
-      pending
+      expect(mock_membership).to receive(:first_day).and_return(Date.current - 3)
+      expect(subject).to receive(:most_recent_membership).and_return(mock_membership)
+      expect(subject.most_recent_membership_first_day(user)).to eq(Date.current - 3)
     end
 
   end

@@ -2010,6 +2010,28 @@ RSpec.describe User, type: :model do
   end
 
 
+  describe 'files_uploaded_during_this_membership' do
+
+    it 'empty list if no files uploaded' do
+      expect(build(:user).files_uploaded_during_this_membership).to be_empty
+    end
+
+    it 'only files uploaded on or after the first day of the current term' do
+      member = create(:member)
+      current_first_day = member.current_membership.first_day
+      create(:membership, user: member, first_day: current_first_day - 30.days, last_day: current_first_day - 1.day)
+      uploaded_file1 = member.uploaded_files.first
+      uploaded_file2 = create(:uploaded_file, :png, user: member)
+      uploaded_file2.update(updated_at: current_first_day)
+
+      uploaded_past_membership = create(:uploaded_file, :jpg, user: member)
+      uploaded_past_membership.update(updated_at: current_first_day - 1.day)
+
+      expect(member.files_uploaded_during_this_membership.to_a).to match_array([uploaded_file1, uploaded_file2])
+    end
+  end
+
+
   describe 'most_recent_uploaded_file' do
     let(:yesterday) { Date.current - 1.day }
     let(:tomorrow) { Date.current + 1.day }

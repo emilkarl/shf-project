@@ -520,6 +520,14 @@ class User < ApplicationRecord
     most_recent_uploaded_file.send(most_recent_upload_method) >= the_date
   end
 
+
+  def files_uploaded_during_this_membership
+    return uploaded_files if uploaded_files.empty? || current_membership.nil?
+
+    uploaded_files.select{|file| file.updated_at >= current_membership.first_day}
+  end
+
+
   def most_recent_uploaded_file
     uploaded_files.order(most_recent_upload_method)&.last
   end

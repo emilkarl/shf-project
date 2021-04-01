@@ -1,5 +1,5 @@
 require 'rails_helper'
-require_relative File.join(Rails.root, 'db', 'seed_helpers', 'app_configuration_seeder')
+require_relative File.join(Rails.root, 'db', 'seeders', 'app_configuration_seeder')
 
 ENV_ADMIN_EMAIL_KEY = 'SHF_ADMIN_EMAIL' unless defined?(ENV_ADMIN_EMAIL_KEY)
 ENV_ADMIN_PASSWORD_KEY = 'SHF_ADMIN_PWD' unless defined?(ENV_ADMIN_PASSWORD_KEY)

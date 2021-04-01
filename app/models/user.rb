@@ -120,6 +120,11 @@ class User < ApplicationRecord
   end
 
 
+  # encapsulate how to get a list of all states as symbols
+  def self.membership_statuses
+    aasm.states.map(&:name)
+  end
+
   # ----------------------------------------------------------------------------------------------
   # Act As State Machine (AASM)
 

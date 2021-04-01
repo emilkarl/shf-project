@@ -90,10 +90,12 @@ module UsersHelper
   end
 
 
+  # Include 'expires soon' as one of the statuses displayed in the legend. It's not an actual
+  #   membership status, but it is a useful category to show in the legend and in a view.
   # @return [String] - return the HTML code to display the legend for the Membership Status formatting
   def membership_status_legend
     expire_background_css = 'membership-status'
-    membership_statuses = User.membership_statuses
+    membership_statuses = User.membership_statuses << :expires_soon
 
     legend_entries = membership_statuses.map do |status|
        { title: t("activerecord.attributes.membership.status.#{status}"),

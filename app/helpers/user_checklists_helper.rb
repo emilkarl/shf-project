@@ -23,6 +23,7 @@ module UserChecklistsHelper
 
 
   # Checkbox for whether or not a UserChecklist is completed.
+  #  TODO: is this used?
   #
   # @param [UserChecklist] user_checklist - the user checklist that may or may not be completed
   #

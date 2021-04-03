@@ -19,7 +19,7 @@ module PaymentUtility
 
   class_methods do
 
-    # TODO this should go in a 'Membership ...' class that is responsible for membership information.
+    # FIXME get from AppConfiguration or Membership... class
     MEMBERSHIP_TERM_DURATION = 1.year
 
     def membership_term_duration
@@ -173,6 +173,7 @@ module PaymentUtility
         :due
       end
     end
+
 
 
     # This is our current rule:  an admin cannot edit the membership status if there are no successful payments in this system [2019-12-05];

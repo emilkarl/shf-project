@@ -43,7 +43,6 @@ class AbstractReqsForMembership < AbstractRequirements
 
 
   def self.payment_requirements_met?(user, date = Date.current)
-    # FIXME: must have enough unApplied (unused) payment amounts to pay for the amount of the membership.
     user.payments_current_as_of?(date)
   end
 

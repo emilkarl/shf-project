@@ -158,19 +158,23 @@ end
 # ----------------------------------------------------------------------------------------
 # Membership status
 
-And("I am not a( current) member") do
+# FIXME: call transition/event methods instead of just setting status?
+And("I am( now) not a( current) member") do
   @user.membership_status = :not_a_member
 end
 
-And("I am a( current) member") do
+And("I am( now) a( current) member") do
+  @user.start_membership_on(date: Date.current)
   @user.membership_status = :current_member
 end
 
-And("I am in the( renewal) grace period") do
+And("I am( now) in the( renewal) grace period") do
+  @user.enter_grace_period(date: Date.current)
   @user.membership_status = :in_grace_period
 end
 
-And("I am a former member") do
+And("I am( now) a former member") do
+  @user.become_former_member(date: Date.current)
   @user.membership_status = :former_member
 end
 
@@ -182,22 +186,46 @@ end
 #  I should not be a current member
 Then("I should{negate} be a( current) member") do | negation |
   @user.reload
-  expect(@user.current_member?).to(negation ? be_falsey : be_truthy)
+  if negation
+    expect(@user.current_member?).to be_falsey
+    expect(@user.not_a_member?).to be_truthy
+  else
+    expect(@user.current_member?).to  be_truthy
+  end
 end
+
+Then("{capture_string} should{negate} be a( current) member") do | user_email, negation |
+  user = User.find_by(email: user_email)
+  if negation
+    expect(user.current_member?).to be_falsey
+    expect(user.not_a_member?).to be_truthy
+  else
+    expect(user.current_member?).to  be_truthy
+  end
+end
+
 
 And("I should{negate} be in the( renewal) grace period") do | negation |
   @user.reload
   expect(@user.in_grace_period?).to(negation ? be_falsey : be_truthy)
 end
 
+And("{capture_string} should{negate} be in the( renewal) grace period") do | user_email,  negation |
+  user = User.find_by(email: user_email)
+  expect(user.in_grace_period?).to(negation ? be_falsey : be_truthy)
+end
+
+
 And("I should{negate} be a former member") do | negation |
   @user.reload
   expect(@user.former_member?).to(negation ? be_falsey : be_truthy)
 end
 
-And("I should not be a( current) member") do
-  @user.reload
-  expect(@user.not_a_member?).to be_truthy
+And("{capture_string} should{negate} be a former member") do | user_email, negation |
+  user = User.find_by(email: user_email)
+  expect(user.former_member?).to(negation ? be_falsey : be_truthy)
 end
+
+
 
 # ----------------------------------------------------------------------------------------

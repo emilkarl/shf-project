@@ -8,9 +8,9 @@
 .admin-only
 
   .row.mt-2
-    .col.d-flex.pt-2.payment-notes
+    .col.d-flex.pt-2.membership-notes
       .flex.pr-3
-        = payment_notes_label_and_value(entity.payment_notes)
+        = membership_notes_label_and_value(entity.current_membership&.notes)
 
 .row.mt-2
   .col.d-flex.pt-2.pr-3

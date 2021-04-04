@@ -33,15 +33,13 @@ module Memberships
 
       # create a new Membership for the user
       last_day = Membership.last_day_from_first(first_day)
-      new_membership = Membership.create!(user: user, first_day: first_day, last_day: last_day)
+      user.memberships << Membership.create!(user: user, first_day: first_day, last_day: last_day)
 
       # set the membership number for the user
       user.update!(member: true, membership_number: user.issue_membership_number) # FIXME User should not be responsible for the new membership number
 
-      if send_email
-        MemberMailer.membership_granted(user).deliver
-        email_admin_if_first_membership_with_good_co(new_membership)
-      end
+      AdminAlerter.instance.new_membership_granted(user, deliver_email: send_email)
+      MemberMailer.membership_granted(user).deliver if send_email
     end
 
 

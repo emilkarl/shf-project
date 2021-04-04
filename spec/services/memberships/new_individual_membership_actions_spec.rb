@@ -61,10 +61,10 @@ RSpec.describe Memberships::NewIndividualMembershipActions do
         described_class.accomplish_actions(given_user, send_email: true, first_day: Date.current)
       end
 
-      it 'calls email_admin_if_first_membership_with_good_co' do
+      it 'calls AdminAlerter with the user and deliver_email: the send_email status' do
         allow(MemberMailer).to receive(:membership_granted).and_return(mock_email_msg)
 
-        expect(described_class).to receive(:email_admin_if_first_membership_with_good_co)
+        expect(AdminAlerter.instance).to receive(:new_membership_granted).with(given_user, deliver_email: true)
         described_class.accomplish_actions(given_user, send_email: true, first_day: Date.current)
       end
     end

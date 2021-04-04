@@ -1,17 +1,14 @@
 # Log messages:
 #
 LOGMSG_APP_UPDATED = 'SHF_application updated' unless defined? LOGMSG_APP_UPDATED
-LOGMSG_APP_UPDATED_CHECKREASON = 'Membership checked because this shf_application was updated: ' unless defined? LOGMSG_APP_UPDATED_CHECKREASON
 LOGMSG_PAYMENT_MADE = 'Payment made' unless defined? LOGMSG_PAYMENT_MADE
-LOGMSG_PAYMENT_MADE_CHECKREASON = 'Finished checking membership status because this payment was made: ' unless defined? LOGMSG_PAYMENT_MADE_CHECKREASON
-LOGMSG_APP_UPDATED = 'ShfApplication updated' unless defined? LOGMSG_APP_UPDATED
+LOGMSG_CHECKLIST_COMPLETED = 'Checklist completed' unless defined? LOGMSG_CHECKLIST_COMPLETED
+
 LOGMSG_USER_UPDATED = 'User updated' unless defined? LOGMSG_USER_UPDATED
-LOGMSG_USER_UPDATED_CHECKREASON = 'User updated: ' unless defined? LOGMSG_USER_UPDATED_CHECKREASON
 
 LOGMSG_MEMBERSHIP_GRANTED = 'Membership granted' unless defined? LOGMSG_MEMBERSHIP_GRANTED
 LOGMSG_MEMBERSHIP_RENEWED = 'Membership renewed' unless defined? LOGMSG_MEMBERSHIP_RENEWED
 LOGMSG_MEMBERSHIP_REVOKED = 'Membership revoked' unless defined? LOGMSG_MEMBERSHIP_REVOKED
-
 
 #--------------------------
 #
@@ -24,10 +21,19 @@ LOGMSG_MEMBERSHIP_REVOKED = 'Membership revoked' unless defined? LOGMSG_MEMBERSH
 #
 #    This is a Singleton.  Only 1 is needed for the system.
 #
-#
 # @author Ashley Engelund (ashley@ashleycaroline.com  weedySeaDragon @ github)
 # @date   12/21/17
 # @file membership_status_updater.rb
+#
+# Only check to see if requirements have been satisfied for Renewal or Membership when:
+#   * a payment is made
+#   * a checklist is completed
+#
+# Otherwise each time the requirements for renewal or membership are checked (e.g. at login),
+# the payment and non-payment requirements will be satisfied and membership or renewal will be
+# incorrectly granted again.
+# In other words, the only time that we _should_ check to see if membership or renewal can be granted
+# is when a payment is made.
 #
 #
 # The Observer pattern is used to send notifications (methods) when something
@@ -60,9 +66,7 @@ LOGMSG_MEMBERSHIP_REVOKED = 'Membership revoked' unless defined? LOGMSG_MEMBERSH
 class MembershipStatusUpdater
   include Singleton
 
-
   SEND_EMAIL_DEFAULT = true
-
 
   # -----------------------------------------------------------------------------------
   # Notifications received from observed classes:
@@ -76,8 +80,15 @@ class MembershipStatusUpdater
   end
 
 
+  # Check to see if the user can now be granted membership or renewed.
   def payment_made(payment)
-    update_membership_status(payment.user, payment, logmsg_payment_made)
+    check_grant_membership_or_renew(payment.user, payment, logmsg_payment_made) if payment.membership_payment?
+  end
+
+
+  # Check to see if the user can now be granted membership or renewed.
+  def checklist_completed(checklist_root)
+    check_grant_membership_or_renew(checklist_root.user, checklist_root, logmsg_checklist_completed)
   end
 
 
@@ -85,69 +96,75 @@ class MembershipStatusUpdater
     update_membership_status(user, user, logmsg_user_updated)
   end
 
-
-  # FIXME should checklist_completed...  be added?
   # end of Notifications received from observed classes
   # -----------------------------------------------------------------------------------
+
+
+  def check_grant_membership_or_renew(user, notifier = nil, reason_update_happened = nil)
+    today = Date.current
+
+    log_and_check("#{__method__}", user, [notifier], notifier, reason_update_happened) do |user, _other_args, log|
+      # next_membership_start_date =  user.membership_expire_date.nil? ? Date.current : user.membership_expire_date + 1.day
+      if  user.membership_expire_date.nil? || user.membership_expire_date < Date.current
+        next_membership_start_date = Date.current
+      else
+        next_membership_start_date = user.membership_expire_date + 1
+      end
+
+      if user.not_a_member? || user.former_member?
+        if RequirementsForMembership.satisfied?(user: user)
+          user.start_membership!(date: next_membership_start_date)
+          log.info(user.membership_changed_info)
+        end
+
+      elsif user.current_member? || user.in_grace_period?
+        if RequirementsForRenewal.satisfied?(user: user)
+          user.renew!(date: next_membership_start_date)
+          log.info(user.membership_changed_info)
+        end
+      end
+    end
+  end
 
 
   #  This is the main method for checking and changing the membership status.
   #     TODO: for a given date
   #
-  def update_membership_status(user, notification_sender = nil, reason_update_happened = nil)
+  def update_membership_status(user, notifier = nil, reason_update_happened = nil)
     today = Date.current
 
-    ActivityLogger.open(log_filename, self.class.to_s, "#{__method__}", false) do |log|
-      log.info("update_membership_status for #{user.inspect}")
-      log.info("#{reason_update_happened}: #{notification_sender.inspect}") unless notification_sender.blank?
+    log_and_check("#{__method__}", user, [notifier], notifier, reason_update_happened) do |user, _other_args, log|
 
-      # FIXME - refactor/DRY so we don't have to call  log.record(:info, user.membership_changed_info) every time.
-      #   yield?  send the log to User? (no!)
-      if user.not_a_member? || user.former_member?
-        if RequirementsForMembership.satisfied?(user: user)
-          user.start_membership!(date: today)
-          log.info( user.membership_changed_info)
-        elsif user.membership_expired_in_grace_period?(today)
-          # This shouldn't happen, but in case it does:
-          user.start_grace_period!
-          log.info( user.membership_changed_info)
-        end
-
-      elsif user.current_member?
-
+      if user.current_member?
         if user.membership_expired_in_grace_period?(today)
           user.start_grace_period!
-          log.info( user.membership_changed_info)
+          log.info(user.membership_changed_info)
 
         elsif user.membership_past_grace_period_end?(today)
           # This shouldn't happen. But just in case the membership status has not been updated for
           # a while and so hasn't transitioned to in_grace_period, we'll do it manually now and then
           # go on and transition to a former member
           user.start_grace_period!
-          log.info( user.membership_changed_info)
+          log.info(user.membership_changed_info)
           user.make_former_member!
-          log.info( user.membership_changed_info)
+          log.info(user.membership_changed_info)
         end
-
-        if RequirementsForRenewal.satisfied?(user: user)
-          user.renew!(date: today)
-          log.info( user.membership_changed_info)
-        end
-
 
       elsif user.in_grace_period?
-
         if user.membership_past_grace_period_end?(today)
           user.make_former_member!
-          log.info( user.membership_changed_info)
-        else
-          if RequirementsForRenewal.satisfied?(user: user)
-            user.renew!(date: today)
-            log.info( user.membership_changed_info)
-          end
+          log.info(user.membership_changed_info)
         end
       end
+    end
+  end
 
+
+  def log_and_check(calling_method, user, other_args, notifier, reason_update_happened)
+    ActivityLogger.open(log_filename, self.class.to_s, calling_method, false) do |log|
+      log.info("#{calling_method} for #{user.inspect}")
+      log.info("#{reason_update_happened}: #{notifier.inspect}") unless notifier.blank?
+      yield(user, other_args, log) if block_given?
     end
   end
 
@@ -161,6 +178,7 @@ class MembershipStatusUpdater
     LOGMSG_APP_UPDATED
   end
 
+
   def logmsg_user_updated
     LOGMSG_USER_UPDATED
   end
@@ -170,13 +188,15 @@ class MembershipStatusUpdater
     LOGMSG_PAYMENT_MADE
   end
 
+  def logmsg_checklist_completed
+    LOGMSG_CHECKLIST_COMPLETED
+  end
+
   # -----------------------------------------------------------------------------------------------
 
   private
 
-
   def log_filename
     LogfileNamer.name_for(self.class.name)
-    # File.join(Rails.configuration.paths['log'].absolute_current, "#{Rails.env}_#{self.class.name}.log")
   end
 end

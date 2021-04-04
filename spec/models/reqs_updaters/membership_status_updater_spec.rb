@@ -1,6 +1,5 @@
 require 'rails_helper'
 
-require 'shared_context/users'
 
 RSpec.describe MembershipStatusUpdater, type: :model do
 
@@ -11,7 +10,7 @@ RSpec.describe MembershipStatusUpdater, type: :model do
 
   before(:each) do
     allow(MemberMailer).to receive(:membership_granted)
-                              .and_return(mock_email_msg)
+                             .and_return(mock_email_msg)
     allow(MemberMailer).to receive(:membership_renewed)
                              .and_return(mock_email_msg)
 
@@ -22,16 +21,15 @@ RSpec.describe MembershipStatusUpdater, type: :model do
     allow(mock_log).to receive(:close)
   end
 
-
   let(:payment_date_2017) { Time.zone.local(2017, 10, 1) }
   let(:payment_date_2018) { Time.zone.local(2018, 11, 21) }
 
   let(:user) { build(:user) }
   let(:user_app_approved) do
     u = create(:user)
-    create( :shf_application,
-            :accepted,
-            user: u, )
+    create(:shf_application,
+           :accepted,
+           user: u,)
     u
   end
 
@@ -45,11 +43,9 @@ RSpec.describe MembershipStatusUpdater, type: :model do
            expire_date: expire_date)
   end
 
-
   let(:paid_member) { create(:member_with_membership_app) }
 
   let(:shf_app) { create(:shf_application) }
-
 
   it 'shf_application_updated calls update_membership_status with a message that the app was updated' do
     shf_app_updated = build(:shf_application, user: build(:user))
@@ -60,17 +56,31 @@ RSpec.describe MembershipStatusUpdater, type: :model do
     subject.shf_application_updated(shf_app_updated)
   end
 
+  describe 'payment_made' do
+    it 'calls check_grant_membership_or_renew with the log msg that the payment was made' do
+      payment_for_not_expired_paid_member = build(:payment,
+                                                  user: build(:user),
+                                                  start_date: Date.current,
+                                                  expire_date: Date.current + 1.day)
 
-  it 'payment_made calls update_membership_status with a message that a payment was made' do
-    payment_for_not_expired_paid_member = build(:payment,
-                                                user: build(:user),
-                                                start_date: Date.current,
-                                                expire_date: Date.current + 1.day)
+      expect(subject).to receive(:check_grant_membership_or_renew).with(payment_for_not_expired_paid_member.user,
+                                                                        payment_for_not_expired_paid_member,
+                                                                        subject.logmsg_payment_made)
+      subject.payment_made(payment_for_not_expired_paid_member)
+    end
+  end
 
-    expect(subject).to receive(:update_membership_status).with(payment_for_not_expired_paid_member.user,
-                                                               payment_for_not_expired_paid_member,
-                                                               subject.logmsg_payment_made)
-    subject.payment_made(payment_for_not_expired_paid_member)
+
+  describe 'checklist_completed' do
+    it 'calls check_grant_membership_or_renew with the log msg that the checklist was completed' do
+      completed_checklist = build(:user_checklist, :completed)
+      checklist_user = completed_checklist.user
+
+      expect(subject).to receive(:check_grant_membership_or_renew).with(checklist_user,
+                                                                        completed_checklist,
+                                                                        subject.logmsg_checklist_completed)
+      subject.checklist_completed(completed_checklist)
+    end
   end
 
 
@@ -82,84 +92,165 @@ RSpec.describe MembershipStatusUpdater, type: :model do
   end
 
 
+  describe 'check_grant_membership_or_renew' do
+    let(:built_user) { build(:user) }
+    let(:notifier) { 'object that sent the notification to kick this off' }
+    let(:reason) { ' ' }
+
+    shared_examples 'it checks to see if user can renew' do |membership_status|
+      let(:given_user) { build(:user, membership_status: membership_status) }
+
+      it 'checks to see if all requirements for renewing are satisfied' do
+        expect(RequirementsForRenewal).to receive(:requirements_met?).with(user: given_user)
+        subject.check_grant_membership_or_renew(given_user, notifier, reason)
+      end
+
+      context 'can renew (requirements are met)' do
+        before(:each) { allow(RequirementsForRenewal).to receive(:requirements_met?).and_return(true) }
+
+        it 'tells the user to renew today' do
+          expect(given_user).to receive(:renew!).with(date: Date.current)
+          subject.check_grant_membership_or_renew(given_user, notifier, reason)
+        end
+
+        it 'logs that the user membership status was changed' do
+          allow(given_user).to receive(:membership_changed_info)
+          expect(mock_log).to receive(:info).with(given_user.membership_changed_info)
+          subject.check_grant_membership_or_renew(given_user, notifier, reason)
+        end
+      end
+
+      context 'cannot renew (requirements not met)' do
+        before(:each) { allow(RequirementsForRenewal).to receive(:requirements_met?).and_return(false) }
+
+        it 'does not renew' do
+          expect(given_user).not_to receive(:renew!)
+          subject.check_grant_membership_or_renew(given_user, notifier, reason)
+        end
+      end
+    end
+
+
+    shared_examples 'it checks to see if membership can be granted' do |membership_status|
+      let(:given_user) { build(:user, membership_status: membership_status) }
+
+      it 'checks to see if all requirements for membership are satisfied' do
+        expect(RequirementsForMembership).to receive(:requirements_met?).with(user: given_user)
+        subject.check_grant_membership_or_renew(given_user, notifier, reason)
+      end
+
+      context 'can grant membership (requirements are met)' do
+        before(:each) { allow(RequirementsForMembership).to receive(:requirements_met?).and_return(true) }
+
+        context 'there is no previous membership' do
+          before(:each) { allow(given_user).to receive(:membership_expire_date).and_return(nil) }
+
+          it 'starts the new membership today' do
+            expect(given_user).to receive(:start_membership!).with(date: Date.current)
+            subject.check_grant_membership_or_renew(given_user, notifier, reason)
+          end
+        end
+
+        context 'today is the last day of the membership' do
+          before(:each) { allow(given_user).to receive(:membership_expire_date).and_return(Date.current) }
+
+          it 'starts the new membership tomorrow' do
+            expect(given_user).to receive(:start_membership!).with(date: Date.current + 1.day)
+            subject.check_grant_membership_or_renew(given_user, notifier, reason)
+          end
+        end
+
+        context 'latest membership has not ended' do
+          before(:each) { allow(given_user).to receive(:membership_expire_date).and_return(Date.current + 2.days) }
+
+          it 'starts the new membership one day after the last day of the latest membership' do
+            expect(given_user).to receive(:start_membership!).with(date: Date.current + 3.days)
+            subject.check_grant_membership_or_renew(given_user, notifier, reason)
+          end
+        end
+
+        context 'latest membership ended before today' do
+          before(:each) { allow(given_user).to receive(:membership_expire_date).and_return(Date.current - 2.days) }
+
+          it 'starts the new membership today' do
+            expect(given_user).to receive(:start_membership!).with(date: Date.current)
+            subject.check_grant_membership_or_renew(given_user, notifier, reason)
+          end
+        end
+
+        it 'logs that the user membership status was changed' do
+          allow(given_user).to receive(:membership_changed_info)
+          expect(mock_log).to receive(:info).with(given_user.membership_changed_info)
+          subject.check_grant_membership_or_renew(given_user, notifier, reason)
+        end
+      end
+
+      context 'cannot grant membership (requirements not met)' do
+        before(:each) { allow(RequirementsForMembership).to receive(:requirements_met?).and_return(false) }
+
+        it 'does not grant membership' do
+          expect(given_user).not_to receive(:start_membership!)
+          subject.check_grant_membership_or_renew(given_user, notifier, reason)
+        end
+      end
+    end
+
+    # end shared_examples
+    # -------------------------------------------------------------------------------------------
+
+
+    context 'is a former member' do
+      it_behaves_like 'it checks to see if membership can be granted', 'former_member'
+    end
+
+    context 'not a member (and not a former member)' do
+      it_behaves_like 'it checks to see if membership can be granted', 'not_a_member'
+    end
+
+    context 'is in the renewal grace period' do
+      it_behaves_like 'it checks to see if user can renew', 'in_grace_period'
+    end
+
+    context 'is a current_member' do
+      it_behaves_like 'it checks to see if user can renew', 'current_member'
+    end
+
+    describe 'does nothing if not a: former member, not a  member, current member, or in the grace period' do
+      # the nonsense status 'blorf' is here to ensure we run this test with at least 1 status
+      other_membership_statuses = User.membership_statuses - [:not_a_member, :former_member, :current_member, :in_grace_period] + [:blorf]
+      other_membership_statuses.each do |other_status|
+        it "status = #{other_status}" do
+          given_user = build(:user, membership_status: other_status)
+          expect(given_user).not_to receive(:start_membership!)
+          expect(given_user).not_to receive(:renew!)
+          subject.check_grant_membership_or_renew(given_user, notifier, reason)
+        end
+      end
+    end
+
+
+    it 'calls log_and_check with this method name, user, args ([notifier]) and notifier' do
+      notifier = 'payment'
+      reason = 'payment made'
+      expect(subject).to receive(:log_and_check)
+                           .with('check_grant_membership_or_renew',
+                                 built_user, [notifier], notifier, reason)
+      subject.check_grant_membership_or_renew(built_user, notifier, reason)
+    end
+  end
+
 
   describe 'update_membership_status' do
 
-    # ------------------------------------------------------------------
-    # Shared examples:
-    #   all assume that given_user is defined
-
-    shared_examples 'potentially can become a member' do
-      context 'satisfies all requirements for becoming a member' do
-        before(:each) do
-          allow(RequirementsForMembership).to receive(:satisfied?)
-                                                .with(user: given_user)
-                                                .and_return(true)
-        end
-
-        it 'starts a new membership and logs that the membership status was changed' do
-          expect(given_user).to receive(:start_membership!).and_call_original
-          expect(mock_log).to receive(:info).with("update_membership_status for #{given_user.inspect}")
-
-          subject.update_membership_status(given_user)
-        end
-      end
-
-      context 'does not satisfy all the requirements for becoming a member' do
-        before(:each) do
-          allow(RequirementsForMembership).to receive(:satisfied?)
-                                                .with(user: given_user)
-                                                .and_return(false)
-        end
-
-        it 'does not start a new membership' do
-          expect(given_user).not_to receive(:start_membership!)
-          subject.update_membership_status(given_user)
-        end
-      end
-    end
-
-
-    # Assumes given_user is defined
-    shared_examples 'potentially can renew' do
-
-      context 'satisfies all requirements for renewing' do
-        before(:each) do
-          allow(RequirementsForRenewal).to receive(:satisfied?)
-                                             .with(user: given_user)
-                                             .and_return(true)
-        end
-
-        it 'renews membership and logs that the membership status was updated' do
-          expect(given_user).to receive(:renew!)
-          expect(mock_log).to receive(:info).with("update_membership_status for #{given_user.inspect}")
-
-          subject.update_membership_status(given_user)
-        end
-      end
-
-      context 'does not satisfy all requirements for renewing' do
-        before(:each) do
-          allow(RequirementsForRenewal).to receive(:satisfied?)
-                                             .with(user: given_user)
-                                             .and_return(false)
-        end
-
-        it 'does not renew membership' do
-          expect(given_user).not_to receive(:renew!)
-          subject.update_membership_status(given_user)
-        end
-      end
-    end
-    # ------------------------------------------------------------------
-
-
-    context 'is not a member' do
-      it_should_behave_like 'potentially can become a member' do
-        let(:given_user) do
-          user = build(:user)
-          user.membership_status = :not_a_member
-          user
+    context 'does nothing if user is not a current member or in the renewal grace period' do
+      # the nonsense status 'blorf' is here to ensure we run this test with at least 1 status
+      other_membership_statuses = User.membership_statuses - [ :current_member, :in_grace_period] + [:blorf]
+      other_membership_statuses.each do |other_status|
+        it "status = #{other_status}" do
+          given_user = build(:user, membership_status: other_status)
+          expect(given_user).not_to receive(:start_grace_period!)
+          expect(given_user).not_to receive(:make_former_member!)
+          subject.update_membership_status(given_user, 'some notifier', 'some reason')
         end
       end
     end
@@ -172,16 +263,7 @@ RSpec.describe MembershipStatusUpdater, type: :model do
         u
       end
 
-
-      it_should_behave_like 'potentially can renew' do
-        let(:given_user) do
-          user = build(:member_with_expiration_date, expiration_date: (Date.current + 1.day))
-          user.membership_status = :current_member
-          user
-        end
-      end
-
-      context 'is now in the renewal grace period' do
+      context 'date is in the renewal grace period' do
         before(:each) do
           allow(user).to receive(:membership_expired_in_grace_period?).and_return(true)
         end
@@ -194,16 +276,9 @@ RSpec.describe MembershipStatusUpdater, type: :model do
 
           subject.update_membership_status(user)
         end
-
-        it 'checks to see if the requirements for renewal are satisfied' do
-          expect(RequirementsForRenewal).to receive(:satisfied?).and_return(true)
-
-          subject.update_membership_status(user)
-        end
       end
 
-
-      context 'is past the last day of the renwal grace period' do
+      context 'date is past the last day of the renwal grace period' do
         before(:each) do
           allow(user).to receive(:membership_expired_in_grace_period?)
                            .and_return(false)
@@ -227,33 +302,24 @@ RSpec.describe MembershipStatusUpdater, type: :model do
 
           subject.update_membership_status(user)
         end
-
-        it 'cannot renew (will not satisfy the requirements for renewal)' do
-          allow(user).to receive(:start_grace_period!)
-          allow(user).to receive(:make_former_member!)
-
-          expect(RequirementsForRenewal).to receive(:satisfied?)
-                                              .and_return(false)
-          subject.update_membership_status(user)
-        end
       end
     end
 
 
     context 'is in the renewal grace period' do
 
-      context 'date is NOT past (>) the last day of the renewal grace period' do
-        it_should_behave_like 'potentially can renew' do
-          let(:given_user) do
-            user = build(:user, membership_status: :in_grace_period)
-            allow(user).to receive(:membership_past_grace_period_end?)
-                             .and_return(false)
-            user
-          end
+      context 'date is still in the renewal grace period' do
+        it 'does nothing' do
+          user = build(:user, membership_status: :in_grace_period)
+          allow(user).to receive(:membership_past_grace_period_end?)
+                           .and_return(false)
+          expect(user).not_to receive(:start_grace_period!)
+          expect(user).not_to receive(:make_former_member!)
+          subject.update_membership_status(user)
         end
       end
 
-      context 'date is now past (>) the last day of the renewal grace period' do
+      context 'date is past (>) the last day of the renewal grace period' do
         it 'becomes a former member' do
           user = build(:user)
           user.membership_status = :in_grace_period
@@ -267,13 +333,51 @@ RSpec.describe MembershipStatusUpdater, type: :model do
     end
 
 
-    context 'is a former member' do
-      it_should_behave_like 'potentially can become a member' do
-        let(:given_user) do
-          user = build(:user)
-          user.membership_status = :former_member
-          user
-        end
+    it 'calls log_and_check with this method name, user, args ([notifier]) and notifier' do
+      built_user = build(:user)
+      notifier = 'updated'
+      reason = 'some reason'
+      expect(subject).to receive(:log_and_check)
+                           .with('update_membership_status',
+                                 built_user, [notifier], notifier, reason)
+      subject.update_membership_status(built_user, notifier, reason)
+    end
+  end
+
+
+  describe 'log_and_check' do
+    let(:built_user) { build(:user) }
+    let(:calling_method) { 'method_doing_the_action' }
+    let(:reason_update_happened) { 'This is the reason this was called' }
+
+
+    it 'yields to the block sent with the user, other args, and the log' do
+      sender = 'Sender'
+      other_args = [1,'3']
+      expect(sender).to receive(:+).with("#{built_user}, #{other_args} #{mock_log}")
+      subject.log_and_check(calling_method,
+                            built_user, other_args,
+                            nil, reason_update_happened) do | given_user, other_given_args, log|
+        sender + ("#{given_user}, #{other_given_args} #{log}")
+      end
+    end
+
+
+    describe 'opens an Activity Logger and logs the reason this was called, by whom (the notifier)' do
+      it 'logs no message about the notifier if notifier is blank' do
+        expect(mock_log).to receive(:info).with(/#{calling_method} for #{built_user.inspect}/)
+        subject.log_and_check(calling_method,
+                              built_user, [],
+                              nil, reason_update_happened) {}
+      end
+
+      it 'logs a message if the notifier is not blank' do
+        notifier = 'This is the object that sent the notification that caused this to be called in the first placee'
+        expect(mock_log).to receive(:info).with(/#{calling_method} for #{built_user.inspect}/)
+        expect(mock_log).to receive(:info).with(/#{reason_update_happened}: #{notifier.inspect}/)
+        subject.log_and_check(calling_method,
+                              built_user, [],
+                              notifier, reason_update_happened) {}
       end
     end
   end
@@ -282,4 +386,4 @@ RSpec.describe MembershipStatusUpdater, type: :model do
   it 'send_email default is true' do
     expect(subject.send_email).to be_truthy
   end
-  end
+end

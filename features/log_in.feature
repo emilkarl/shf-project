@@ -86,7 +86,7 @@ Feature: Logging in and what page is shown after logging in successfully
     And I should see t("errors.try_login")
     And I should be on "login" page
 
-  Scenario: Logging in as admin goes to the landing page (routed for the admin)
+  Scenario: Logging in as admin goes to the all memberships (= their landing page)
     Given I am on the "landing" page
     Then I should see t("devise.sessions.new.log_in")
     When I click on t("devise.sessions.new.log_in") link
@@ -96,6 +96,8 @@ Feature: Logging in and what page is shown after logging in successfully
     And I click on t("devise.sessions.new.log_in") button
     Then I should see t("devise.sessions.signed_in")
     And I should be on the "landing" page
+    When I am on the "landing" page
+    Then I should see t("shf_applications.index.title")
 
 
   Scenario: Logging in as a member goes to the member's account page

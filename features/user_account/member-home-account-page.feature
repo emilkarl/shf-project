@@ -15,37 +15,37 @@ Feature:  Member home (account) page
 
   Background:
 
-    Given the date is set to "2018-06-06"
+    Given the date is set to "2018-01-01"
     Given the App Configuration is not mocked and is seeded
     And the Membership Ethical Guidelines Master Checklist exists
 
 
     Given the following users exist:
-      | email                              | admin | membership_number | member | first_name | last_name      |
-      | emma-member@example.com            |       | 1001              | true   | Emma       | IsAMember      |
-      | admin@shf.se                       | true  |                   |        |            |                |
+      | email                   | admin | membership_status | membership_number | member | first_name | last_name |
+      | emma-member@example.com |       | current_member    | 1001              | true   | Emma       | IsAMember |
+      | admin@shf.se            | true  |                   |                   |        |            |           |
 
     And the following users have agreed to the Membership Ethical Guidelines:
-    | email |
-    | emma-member@example.com            |
+      | email                   |
+      | emma-member@example.com |
 
     And the following regions exist:
-      | name         |
-      | Stockholm    |
+      | name      |
+      | Stockholm |
 
     And the following companies exist:
-      | name                 | company_number | email               | region       |
-      | Bowsers              | 2120000142     | bark@bowsers.com    | Stockholm |
+      | name    | company_number | email            | region    |
+      | Bowsers | 2120000142     | bark@bowsers.com | Stockholm |
 
 
     And the following business categories exist
-      | name         | description      | subcategories          |
+      | name     | description   | subcategories          |
       | Training | training      |                        |
       | Grooming | grooming dogs | light trim, custom cut |
 
 
     And the following applications exist:
-      | user_email                | contact_email              | company_number | state    | categories   |
+      | user_email              | contact_email           | company_number | state    | categories         |
       | emma-member@example.com | emma-member@bowsers.com | 2120000142     | accepted | Grooming, Training |
 
 
@@ -54,9 +54,13 @@ Feature:  Member home (account) page
       | emma-member@example.com | 2018-01-1  | 2018-12-31  | member_fee   | betald | none    |                |
       | emma-member@example.com | 2018-01-1  | 2018-12-31  | branding_fee | betald | none    | 2120000142     |
 
+    And the following memberships exist
+      | email                   | first_day | last_day   | notes |
+      | emma-member@example.com | 2018-01-1 | 2018-12-31 |       |
 
     Given I am logged in as "emma-member@example.com"
     And I am on the "user account" page for "emma-member@example.com"
+    Then I am a current member
 
   # ---------------------------------------------------------------------------------------------
 
@@ -69,7 +73,9 @@ Feature:  Member home (account) page
 
 
   Scenario: Sections for membership status, application, business categories, proof of membership, and h-mark are shown
-    Then I should see t("membership")
+    Then I should see t("users.show_for_member.membership_number")
+    And I should see t("activerecord.attributes.membership.status.current_member")
+    And I should see t("users.show_for_member.membership_number")
     And I should see t("application")
     And I should see t("activerecord.models.business_category.other")
     And I should see t("users.show_member_images_row_cols.proof_of_membership")
@@ -84,9 +90,9 @@ Feature:  Member home (account) page
     And I should see "1001"
     And I should see "Status"
     And I should see t("users.show.is_a_member")
-    And I should see t("users.show.term_paid_through")
+    And I should see t("users.show.membership_term_last_day")
     And the user is paid through "2018-12-31"
-
+#   TODO And user membership last day is "2018-12-31"
 
 
   # =======================

@@ -41,7 +41,6 @@ Feature: Applicant gets an email when membership has been granted. (They are now
 
   # ============================================================================================
 
-  #  FIXME: And I complete Membership Payment doesn't actually change the membership status during the update process, which will send the email
   @time_adjust
   Scenario: Applicant pays all fees, membership is granted; applicant gets email
     Given the date is set to "2018-01-01"

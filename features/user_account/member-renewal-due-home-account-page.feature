@@ -17,12 +17,12 @@ Feature:  Member home (account) page when renewal is due or close to it
 
 
     Given the following users exist:
-      | email                                  | admin | membership_number | member | first_name   | last_name                |
-      | member-all-reqs-met@example.com        |       | 101               | true   | Member       | All-Requirements-met     |
-      | member-no-docs-uploaded@example.com    |       | 102               | true   | Member       | NoDocsUploaded           |
-      | member-no-guidelines@example.com       |       | 103               | true   | Member       | HasNotAgreedToGuidelines |
-      | member-lapsed-all-reqs-met@example.com |       | 201               | true   | LapsedMember | All-Requirements-met     |
-      | admin@shf.se                           | true  |                   |        |              |                          |
+      | email                                  | admin | membership_number | membership_status | member | first_name   | last_name                |
+      | member-all-reqs-met@example.com        |       | 101               | current_member    | true   | Member       | All-Requirements-met     |
+      | member-no-docs-uploaded@example.com    |       | 102               | current_member    | true   | Member       | NoDocsUploaded           |
+      | member-no-guidelines@example.com       |       | 103               | current_member    | true   | Member       | HasNotAgreedToGuidelines |
+      | member-lapsed-all-reqs-met@example.com |       | 201               | in_grace_period   | true   | LapsedMember | All-Requirements-met     |
+      | admin@shf.se                           | true  |                   |                   |        |              |                          |
 
     And the following users have agreed to the Membership Ethical Guidelines:
       | email                                  |
@@ -58,7 +58,15 @@ Feature:  Member home (account) page when renewal is due or close to it
       | member-all-reqs-met@example.com        | 2018-01-1  | 2018-12-31  | branding_fee | betald | none    | 2120000142     |
       | member-no-docs-uploaded@example.com    | 2018-01-01 | 2018-12-31  | member_fee   | betald | none    |                |
       | member-no-guidelines@example.com       | 2018-01-1  | 2018-12-31  | member_fee   | betald | none    |                |
-      | member-lapsed-all-reqs-met@example.com | 2018-01-1  | 2018-12-31  | member_fee   | betald | none    |                |
+      | member-lapsed-all-reqs-met@example.com | 2017-05-01 | 2018-4-3    | member_fee   | betald | none    |                |
+
+
+    And the following memberships exist
+      | email                                  | membership_number | first_day | last_day   | notes |
+      | member-all-reqs-met@example.com        | 101               | 2018-01-1 | 2018-12-31 |       |
+      | member-no-docs-uploaded@example.com    | 102               | 2018-01-1 | 2018-12-31 |       |
+      | member-no-guidelines@example.com       | 103               | 2018-01-1 | 2018-12-31 |       |
+      | member-lapsed-all-reqs-met@example.com | 201               | 2017-05-1 | 2018-4-30  |       |
 
 
     And these files have been uploaded:

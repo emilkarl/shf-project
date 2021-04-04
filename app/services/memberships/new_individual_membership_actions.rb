@@ -43,17 +43,6 @@ module Memberships
     end
 
 
-    # If this is the first membership for the user
-    #   AND the membership belongs to at least one company in good standing (complete & licensed)
-    # then email the Admin about it (so the Admin can, for example, send out a welcome message
-    #   in social media: "Welcome NewMember who works for Company Z!")
-    #
-    def self.email_admin_if_first_membership_with_good_co(new_membership)
-      user = new_membership.user
-      AdminMailer.new_membership_granted_co_hbrand_paid(user).deliver if new_membership.first_membership? && user.has_company_in_good_standing?
-    end
-
-
     def self.log_message_success
       LOGMSG_MEMBERSHIP_GRANTED
     end

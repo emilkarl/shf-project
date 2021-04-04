@@ -3,6 +3,7 @@
     .row.mt-2
       .col
         .membership-status-title= t('users.show.membership_status')
+        .membership-status= user.membership_status
     .row.ml-2
       .col
         - if user.admin_can_edit_status?

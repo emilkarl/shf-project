@@ -73,23 +73,41 @@ class UsersController < ApplicationController
   end
 
 
-  # Manually change the membership status
-  #   Currently this just changes the date on a Payment.
-  #
-  # FIXME - What should happen when a User's actual membership status is changed (no longer just a payment date change)?
-  #   If this is manually set, will it be 'undone' when the MembershipStatusUpdater checks things and tries to logically update?
-  #   Should we have a 'lock status' flag?
+  # Manually change the membership status and/or last day and/or notes
+  # FIXME: This does too much.  Let the admin change/add a membershp note any time, separately from this.
   def edit_status
     raise 'Unsupported request' unless request.xhr?
     authorize User
 
-    payment = @user.most_recent_membership_payment
+    admin_change_note = ''
+    last_day_param = Date.new(membership_params['last_day(1i)'].to_i, membership_params['last_day(2i)'].to_i, membership_params['last_day(3i)'].to_i)
 
-    # Note: If there are not any payments (payment is nil),
-    # but the status has been changed (ex: admin changes status from 'not a member' to is a member),
-    # this will not update the information.
-    @user.update!(user_params) && (payment ?
-                                       payment.update!(payment_params) : true)
+    if @user.current_member?
+      current_membership = @user.current_membership
+      if user_params[:member] == 'true'
+        if last_day_param < Date.current
+          admin_change_note << end_membership_yesterday_and_note(@user, current_membership)
+        elsif last_day_param != current_membership.last_day
+          admin_change_note << change_membership_last_day_and_note(current_membership, last_day_param)
+        end
+
+      else
+        admin_change_note << end_membership_yesterday_and_note(@user, current_membership)
+      end
+    else
+      if user_params[:member] == 'true'
+        @user.start_membership!(date: Date.current)
+        current_membership = @user.current_membership
+        admin_change_note << " Membership started on #{Date.current}." # FIXME I18n
+        if last_day_param != current_membership.last_day
+          admin_change_note << change_membership_last_day_and_note(current_membership, last_day_param)
+        end
+      end
+    end
+    admin_change_note = "| Changed by Admin #{Time.zone.now}: #{admin_change_note} |" unless admin_change_note.blank?
+    membership_note = membership_params.fetch(:notes, '') + admin_change_note
+    current_membership.update!(notes: membership_note) if current_membership
+
 
     if @user.member?
       render partial: 'show_for_member', locals: { user: @user, current_user: @current_user, app_config: @app_configuration }
@@ -154,9 +172,15 @@ class UsersController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def user_params
-    params.require(:user).permit(:name, :email, :member, :password,
+    params.require(:user).permit(:name, :email, :member, :membership_status,
+                                 :password,
                                  :password_confirmation,
                                  :date_membership_packet_sent)
+  end
+
+
+  def membership_params
+    params.require(:membership).permit(:member_number, :first_day, :last_day, :notes)
   end
 
 
@@ -170,4 +194,21 @@ class UsersController < ApplicationController
     @user = @current_user
   end
 
+
+  def end_membership_yesterday_and_note(user, membership)
+    return unless membership
+
+    note = " Membership ended by admin on #{Time.zone.now}. Original last day was #{membership.last_day}." # FIXME i18n
+    user.update!(membership_status: :not_a_member, member: false)
+    membership.update!(last_day: Date.current - 1) # end yesterday
+    note
+  end
+
+  def change_membership_last_day_and_note(membership, new_last_day)
+    return unless membership
+
+    note =  " Membership last day changed from #{membership.last_day} to #{new_last_day}." # FIXME I18n
+    membership.update!(last_day: new_last_day)
+    note
+  end
 end

@@ -19,7 +19,8 @@
 
   .row
     .col.membership-expiration-date
-      = expire_date_label_and_value(user)
+      = membership_last_day_and_value(user.most_recent_membership,
+       value_class: expire_date_css_class(user.membership_status_incl_informational))
 
   = render partial: 'admin_only_edit_status', locals: { user: user }
 

@@ -185,7 +185,7 @@ class MembershipsManager
   #  true if the user is a member
   #     AND today is on or after the (last day - the expiring soon amount)
   def expires_soon?(user, membership = most_recent_membership(user))
-    user.current_member? && ((membership.last_day - self.class.is_expiring_soon_amount) <= Date.current)
+    user.current_member? && !!membership && ((membership.last_day - self.class.is_expiring_soon_amount) <= Date.current)
   end
 
 end

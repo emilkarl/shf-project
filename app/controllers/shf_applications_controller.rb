@@ -211,6 +211,7 @@ class ShfApplicationsController < ApplicationController
   end
 
 
+  # FIXME: is this still needed?
   def information
 
   end

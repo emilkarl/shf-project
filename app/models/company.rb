@@ -1,7 +1,14 @@
 require_relative File.join('..', 'services', 'address_exporter')
 
+# ===============================================================================================
+# @class Company
+#
+# @responsibility  A Company in the dog industry.
+#
 # TODO data consistency check:  every company should have at least 1 application
 # FIXME: Company should use Membership (CompanyMembership < Membership)
+#
+#
 class Company < ApplicationRecord
   include PaymentUtility
 
@@ -167,6 +174,7 @@ class Company < ApplicationRecord
 
   # ===============================================================================================
 
+  alias_method :current_membership, :most_recent_payment
 
   def searchable?
     branding_license_current? && current_members.any?

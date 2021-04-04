@@ -337,7 +337,7 @@ sv:
 
       membership:
         first_day: First day
-        last_day: Last day
+        last_day: &membership_last_day Last day
         member_number: *membership_number
         notes: Notes
         status:
@@ -1045,6 +1045,7 @@ sv:
       membership_fee_payment: betalning av medlemskap
       membership_fee: medlemskapsavgift
       membership_term: medlemperiod
+      membership_term_last_day: *membership_last_day
       payment_tooltip: När du betalar din medlemsavgift förlängs ditt medlemskap i ett år.
       membership_expire_date_tooltip: &membership_expire_date_tooltip Efter detta datum går perioden för ditt medlemskap ut.
       term_expire_date_tooltip: *membership_expire_date_tooltip
@@ -1222,6 +1223,7 @@ sv:
     payments_list:
       payment_date: Payment date
       status: *payment_status
+      for: för
       type: *payment_type
       start_date: *start_date
       end_date: *expire_date

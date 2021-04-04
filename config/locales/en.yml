@@ -337,7 +337,7 @@ en:
 
       membership:
         first_day: First day
-        last_day: Last day
+        last_day: &membership_last_day Last day
         member_number: *membership_number
         notes: Notes
         status:
@@ -1035,6 +1035,7 @@ en:
       membership_fee_payment: membership payment
       membership_fee: membership fee
       membership_term: membership term
+      membership_term_last_day: *membership_last_day
       payment_tooltip: Paying the membership fee will extend your membership for one year.
       membership_expire_date_tooltip: &membership_expire_date_tooltip Membership expires after this date
       term_expire_date_tooltip : *membership_expire_date_tooltip
@@ -1212,6 +1213,7 @@ en:
     payments_list:
       payment_date: Payment date
       type: *payment_type
+      for: for
       status: *payment_status
       start_date: *start_date
       end_date: *expire_date

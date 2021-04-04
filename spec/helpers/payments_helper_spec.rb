@@ -106,6 +106,25 @@ RSpec.describe PaymentsHelper, type: :helper do
     end
   end
 
+  describe 'entity_name' do
+
+    it 'full name if entity is a User' do
+      u = build(:user, first_name:'First', last_name: 'Last')
+      expect(helper.entity_name(u)).to eq('First Last')
+    end
+
+    it 'name if the entity is a Company' do
+      co = build(:company, name: 'Some Company')
+      expect(helper.entity_name(co)).to eq('Some Company')
+    end
+
+    it "t('name_missing') if entity is nil or not a User and not a Company" do
+      else_result = I18n.t('name_missing')
+      expect(helper.entity_name(nil)).to eq(else_result)
+      expect(helper.entity_name('this string')).to eq(else_result)
+    end
+  end
+
 
   describe 'entity_expire_date' do
 

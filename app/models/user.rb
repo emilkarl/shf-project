@@ -149,7 +149,7 @@ class User < ApplicationRecord
     # @url https://github.com/aasm/aasm#callbacks
 
     event :start_membership do
-      transitions from: [:not_a_member, :current_member, :former_member], to: :current_member, after:  Proc.new {|*args| start_membership_on(*args) }
+      transitions from: [:not_a_member, :current_member, :former_member], to: :current_member, after: Proc.new {|*args| start_membership_on(*args) }
     end
 
     event :renew do
@@ -157,11 +157,13 @@ class User < ApplicationRecord
     end
 
     event :start_grace_period do
-      transitions from: :current_member, to: :in_grace_period, after: Proc.new {|*args| enter_grace_period(*args) }
+      # TODO is :after_commit necessary or will :after work just fine instead?
+      transitions from: :current_member, to: :in_grace_period, after_commit: Proc.new {|*args| enter_grace_period(*args) }
     end
 
     event :make_former_member do
-      transitions from: :in_grace_period, to: :former_member, after: Proc.new {|*args| become_former_member(*args) }
+      # TODO is :after_commit necessary or will :after work just fine instead?
+      transitions from: :in_grace_period, to: :former_member, after_commit: Proc.new {|*args| become_former_member(*args) }
     end
   end
 
@@ -242,13 +244,11 @@ class User < ApplicationRecord
 
 
   def enter_grace_period(date: Date.current)
-    # TODO send email for enter_grace_period (renewal overdue!)?
     Memberships::IndividualMembershipEnterGracePeriodActions.for_user(self, first_day: date)
   end
 
 
   def become_former_member(date: Date.current)
-    # TODO send email?
     Memberships::BecomeFormerIndividualMemberActions.for_user(self, first_day: date)
   end
 
@@ -440,7 +440,7 @@ class User < ApplicationRecord
   end
 
   def in_company_numbered?(company_num)
-    member? && has_approved_app_for_company_number?(company_num)
+    current_member? && has_approved_app_for_company_number?(company_num)
   end
 
   def companies_with_approved_app

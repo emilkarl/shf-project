@@ -1,4 +1,4 @@
-Given(/^the following payments exist$/) do |table|
+Given(/^the following payments exist(?:[:])?$/) do |table|
   table.hashes.each do |payment|
     user_email = payment.delete('user_email')
     company_name = payment.delete('company_name')

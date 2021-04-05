@@ -66,6 +66,6 @@ class ArchivedMembership < ApplicationRecord
   def these_attribs_match_membership(membership, these_attribs = [])
     return false if these_attribs.blank?
 
-    these_attribs.reduce(true){|matching_so_far, attrib| matching_so_far && self[attrib] == membership[attrib] }
+    these_attribs.inject(true){|matching_so_far, attrib| matching_so_far && self[attrib] == membership[attrib] }
   end
 end

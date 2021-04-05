@@ -130,6 +130,6 @@ Feature: Admin edits membership status, dates, notes (membership info)
 #    And I should see "Changed to IS a member."
 
 
-  @selenium
-  Scenario: Admin changes not a member to a member and sets a specific last day
+#  @selenium
+#  Scenario: Admin changes not a member to a member and sets a specific last day
 

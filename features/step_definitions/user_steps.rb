@@ -190,7 +190,7 @@ Then("I should{negate} be a( current) member") do | negation |
     expect(@user.current_member?).to be_falsey
     expect(@user.not_a_member?).to be_truthy
   else
-    expect(@user.current_member?).to  be_truthy
+    expect(@user.current_member?).to be_truthy
   end
 end
 
@@ -200,7 +200,7 @@ Then("{capture_string} should{negate} be a( current) member") do | user_email, n
     expect(user.current_member?).to be_falsey
     expect(user.not_a_member?).to be_truthy
   else
-    expect(user.current_member?).to  be_truthy
+    expect(user.current_member?).to be_truthy
   end
 end
 

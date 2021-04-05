@@ -16,7 +16,7 @@ module Memberships
     LOGMSG_MEMBERSHIP_FORMER = 'Membership now a former membership'
 
 
-    def self.other_keyword_args_valid?(other_keyword_args)
+    def self.other_keyword_args_valid?(_other_keyword_args)
       true
     end
 
@@ -24,7 +24,7 @@ module Memberships
     # If we should send email:
     #   send email to the user saying they are now a former member and have to re-apply
     #
-    def self.accomplish_actions(user, send_email: SEND_EMAIL_DEFAULT, **other_keyword_args)
+    def self.accomplish_actions(user, _send_email: SEND_EMAIL_DEFAULT, **other_keyword_args)
       user.update!(member: false)
       # MemberMailer.membership_now_is_former(user).deliver if send_email
     end

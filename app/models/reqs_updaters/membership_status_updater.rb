@@ -100,13 +100,13 @@ class MembershipStatusUpdater
   # -----------------------------------------------------------------------------------
 
 
-  def check_grant_membership_or_renew(user, notifier = nil, reason_update_happened = nil)
+  def check_grant_membership_or_renew(given_user, notifier = nil, reason_update_happened = nil)
     today = Date.current
 
-    log_and_check("#{__method__}", user, [notifier], notifier, reason_update_happened) do |user, _other_args, log|
-      # next_membership_start_date =  user.membership_expire_date.nil? ? Date.current : user.membership_expire_date + 1.day
-      if  user.membership_expire_date.nil? || user.membership_expire_date < Date.current
-        next_membership_start_date = Date.current
+    log_and_check("#{__method__}", given_user, [notifier], notifier, reason_update_happened) do |user, _other_args, log|
+      # next_membership_start_date =  user.membership_expire_date.nil? ? today : user.membership_expire_date + 1.day
+      if  user.membership_expire_date.nil? || user.membership_expire_date < today
+        next_membership_start_date = today
       else
         next_membership_start_date = user.membership_expire_date + 1
       end
@@ -130,10 +130,10 @@ class MembershipStatusUpdater
   #  This is the main method for checking and changing the membership status.
   #     TODO: for a given date
   #
-  def update_membership_status(user, notifier = nil, reason_update_happened = nil)
+  def update_membership_status(given_user, notifier = nil, reason_update_happened = nil)
     today = Date.current
 
-    log_and_check("#{__method__}", user, [notifier], notifier, reason_update_happened) do |user, _other_args, log|
+    log_and_check("#{__method__}", given_user, [notifier], notifier, reason_update_happened) do |user, _other_args, log|
 
       if user.current_member?
         if user.membership_expired_in_grace_period?(today)

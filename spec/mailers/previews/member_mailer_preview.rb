@@ -113,13 +113,13 @@ class MemberMailerPreview < ActionMailer::Preview
     # Select a current member
     member_to_renew = User.current_member.sort_by(&:membership_expire_date).first
 
-    unless member_to_renew.companies.find{ |co| !co.information_complete? }
+    unless member_to_renew.companies.detect { |co| !co.information_complete? }
       incomplete_company = FactoryBot.create(:company, name: 'Incomplete (no region)')
       incomplete_company.addresses.first.update(region: nil)
       member_to_renew.shf_application.companies << incomplete_company
     end
 
-    unless member_to_renew.companies.find{ |co| co.payment_term_expired? }
+    unless member_to_renew.companies.detect { |co| co.payment_term_expired? }
       expired_company = FactoryBot.create(:company, name: 'Expired')
       # TODO when Company uses Membership, then change this to (from using payments)
       FactoryBot.create(:h_branding_fee_payment, user: member_to_renew,
@@ -128,7 +128,7 @@ class MemberMailerPreview < ActionMailer::Preview
       member_to_renew.shf_application.companies << expired_company
     end
 
-    unless member_to_renew.companies.find{ |co| co.payment_term_expired? && !co.information_complete? }
+    unless member_to_renew.companies.detect { |co| co.payment_term_expired? && !co.information_complete? }
       expired_and_incomplete_company = FactoryBot.create(:company, name: 'Expired and Incomplete Co.')
       # TODO when Company uses Membership, then change this to (from using payments)
       FactoryBot.create(:h_branding_fee_payment, user: member_to_renew,

@@ -1,7 +1,7 @@
 #users_list
   .row.justify-content-end
     .col-10
-      =membership_status_legend
+      = membership_status_legend
 
   .table-responsive
     %table.table.table-hover.table-sm
@@ -23,7 +23,7 @@
 
   .row.justify-content-end
     .col-10
-      =membership_status_legend
+      = membership_status_legend
 
   = render partial: 'application/paginate_footer',
            locals: { entities: @users,

@@ -23,7 +23,7 @@ class Membership < ApplicationRecord
   def self.covering_date(date = Date.current)
     where('first_day <= ?', date)
       .where('last_day >= ?', date)
-      .order(:last_day)
+      .order(last_day: :asc, id: :asc)
   end
 
 

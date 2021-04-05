@@ -56,7 +56,7 @@ RSpec.describe Membership, type: :model do
       end
     end
 
-    it 'sorted by :last_day, oldest is first' do
+    it 'sorted by :last_day (asc) then :id (asc), oldest last_day is first' do
       make_all_memberships
       u1membership_202109_2yrs_long = create(:membership, user: user1,
                                          member_number: 'u1membership_202109_2yrs_long',

@@ -517,7 +517,7 @@ sv:
       description: *description
 
     new:
-      title: &upload_new_file Upload a file
+      title: &upload_new_file Ladda upp
       description: *description
       submit: *submit
       index_title: *uploaded_files_index_title
@@ -559,10 +559,10 @@ sv:
       delete: "Radera %{file_name}"
 
     small_table_files_list:
-      associated_with_application: "Application"
-      date_uploaded: "Uploaded"
+      associated_with_application: *application
+      date_uploaded: Uppladdad
       description: *description
-      file_name: file name
+      file_name: filnamn
 
   shf_applications:
     new:
@@ -1093,13 +1093,13 @@ sv:
       when_can_pay: &when_can_pay När din ansökan är godkänd och du har skrivit under medlemsåtagandet (kryssat i alla rutor) kan du betala.
 
     renewal:
-      title_time_to_renew: "It's time to renew!"
-      title_renewal_overdue: You are overdue to renew.
-      renewal_overdue_warning: "Your membership has lapsed! But you can still renew without resubmitting a new application. Just follow the steps below."
-      instructions: "You need to renew your membership! Here are the steps you must complete so you can keep enjoying the benefits of SHF membership:"
+      title_time_to_renew: "Det är dags att förnya ditt medlemskap!"
+      title_renewal_overdue: Ditt betaldatum har passerat.
+      renewal_overdue_warning: "Du kan fortfarande förnya ditt medlemskap utan att ansöka på nytt genom att följa stegen nedan."
+      instructions: "Nedan följer de steg du behöver göra för att fortsätta vara medlem:"
       steps_to_renew: "Steg för att förnya ditt medlemskap:"
       pay_membership: *pay_membership
-      pay_button_disabled_info: Once you have completed the steps above, you can make your payment.
+      pay_button_disabled_info: När du har slutfört stegen ovan kan du betala ditt medlemskap.
 
     ethical_guidelines_link_or_checklist:
       agree_to_guidelines: Skriv under medlemsåtagandet
@@ -1107,10 +1107,10 @@ sv:
       membership_guidelines: Alla medlemsåtaganden
 
     uploaded_files_requirement:
-      have_been_uploaded: Files have been uploaded during your membership term
-      need_to_upload: You need to upload files to show that you have continued your professional education and still meet SHF membership requirements.
+      have_been_uploaded: Underlag har laddats upp under medlemsperioden
+      need_to_upload: Du behöver ladda upp underlag som visar att du har genomfört fortbildning under året och därmed uppfyller de krav som ställs på en medlem i Sveriges Hundföretagare.
       upload_file: *upload_new_file
-      upload_another: Upload another file
+      upload_another: *uploaded_file_other
 
     show_member_images_row_cols:
       email: *email

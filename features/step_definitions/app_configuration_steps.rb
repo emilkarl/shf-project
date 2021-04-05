@@ -64,5 +64,5 @@ And("I should see the number of days that it is too early to pay is {digits}") d
 end
 
 And("the grace period is {digits} days") do |grace_period_days|
-  AdminOnly::AppConfiguration.config_to_use.update_attribute(:membership_expired_grace_period, grace_period_days)
+  AdminOnly::AppConfiguration.config_to_use.update_attribute(:membership_expired_grace_period_duration, "P#{grace_period_days}D")
 end

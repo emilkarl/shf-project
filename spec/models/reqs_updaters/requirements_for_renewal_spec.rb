@@ -114,8 +114,8 @@ RSpec.describe RequirementsForRenewal, type: :model do
 
 
     describe '.max_days_can_still_renew' do
-      it 'gets the membership_expired_grace_period from the Application Configuration' do
-        expect(AdminOnly::AppConfiguration.config_to_use).to receive(:membership_expired_grace_period).and_return(5)
+      it 'gets the membership_expired_grace_period_duration from the Application Configuration and converts it to days' do
+        expect(AdminOnly::AppConfiguration.config_to_use).to receive(:membership_expired_grace_period_duration).and_return('P5D')
         described_class.max_days_can_still_renew
       end
     end

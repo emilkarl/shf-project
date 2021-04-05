@@ -318,24 +318,6 @@ class User < ApplicationRecord
     memberships_manager.date_after_grace_period_end?(self, this_date)
   end
 
-  # FIXME: MembershipManager membership_expired_in_grace_period? means this is no longer used
-  # def date_within_grace_period?(this_date = Date.current,
-  #                               start_date = membership_expire_date,
-  #                               grace_period = membership_expired_grace_period)
-  #   memberships_manager.date_in_grace_period?(this_date,
-  #                                             last_day: start_date,
-  #                                             grace_days: grace_period )
-  # end
-  #
-  # def membership_expired_grace_period
-  #   memberships_manager.grace_period
-  # end
-
-  # @return [ActiveSupport::Duration]
-  # def days_can_renew_early
-  #   memberships_manager.days_can_renew_early
-  # end
-
 
   # @return [Symbol] - the membership status.
   # If the membership status is current AND the given Date

@@ -109,6 +109,27 @@ When(/^I choose an application configuration "([^"]*)" file named "([^"]*)" to u
   # ^^ selenium won't find the upload button without visible: false
 end
 
+# -------------------------------------------
+# Users in a table (list)
+
+Then("I should see {digits} user(s)") do |number|
+  expect(page).to have_selector('tr.user', count: number)
+end
+
+
+Then "css class {capture_string} should{negate} be in the row for user {capture_string}" do |expected_css_class, negated, user_email|
+  td = page.find(:css, 'td', text: user_email) # find the td with text = user_email
+  tr = td.find(:xpath, './parent::tr') # get the parent tr of the td
+  expect(tr).send (negated ? :not_to : :to), have_css(".#{expected_css_class}")
+end
+
+
+Then('css class {capture_string} should{negate} appear {digits} times in the users table') do |expected_css_class, negated, num_times|
+  step %{css class "#{expected_css_class}" should#{negated} appear #{num_times} times in the table with the "users" css class}
+end
+
+# -------------------------------------------
+
 
 Then("the user is paid through {capture_string}") do | expected_expire_date_str |
   expect(@user.membership_expire_date.to_s).to eq expected_expire_date_str
@@ -188,9 +209,11 @@ Then("I should{negate} be a( current) member") do | negation |
   @user.reload
   if negation
     expect(@user.current_member?).to be_falsey
+    expect(@user.member_in_good_standing?).to be_falsey
     expect(@user.not_a_member?).to be_truthy
   else
     expect(@user.current_member?).to be_truthy
+    expect(@user.member_in_good_standing?).to be_truthy
   end
 end
 
@@ -198,9 +221,11 @@ Then("{capture_string} should{negate} be a( current) member") do | user_email, n
   user = User.find_by(email: user_email)
   if negation
     expect(user.current_member?).to be_falsey
+    expect(user.member_in_good_standing?).to be_falsey
     expect(user.not_a_member?).to be_truthy
   else
     expect(user.current_member?).to be_truthy
+    expect(user.member_in_good_standing?).to be_truthy
   end
 end
 

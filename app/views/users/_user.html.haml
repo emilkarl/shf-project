@@ -1,5 +1,5 @@
 - expire_date = user.membership_expire_date
-%tr
+%tr.user
   %td.membership_number= user.membership_number
   %td.email{ id: "user-#{user.id}" }= link_to user.email, user, title: t('.edit_user_account', name: user.full_name)
   %td.created-at

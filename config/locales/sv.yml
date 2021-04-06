@@ -1288,6 +1288,14 @@ sv:
       missing-checklist-param-error: *missing-checklist-param-error
 
 
+  memberships:
+    auto_added_notes:
+      changed_by_admin: "Changed by Admin %{changed_timestamp}"
+      started_on: "Membership started on %{first_day}."
+      ended_on: "Membership last day changed to %{new_last_day} and ended. Original last day was %{original_last_day}."
+      last_day_changed: "Membership last day changed from %{original_last_day} to %{new_last_day}."
+
+
   admin:
     index:
       export: Exportera ansökningar som CSV

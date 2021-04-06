@@ -61,8 +61,9 @@ module Memberships
     end
 
 
+    # Note that the log filename is the MembershipStatusUpdater log!
     def self.log_filename
-      LogfileNamer.name_for(self.name)
+      LogfileNamer.name_for(MembershipStatusUpdater.name)
     end
 
 

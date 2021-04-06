@@ -12,6 +12,9 @@ class UsersController < ApplicationController
   before_action :authorize_user, only: [:show]
   before_action :allow_iframe_request, only: [:proof_of_membership]
 
+  ARE_MEMBERS_CLAUSE = 'member = true'.freeze
+  ARE_NOT_MEMBERS_CLAUSE = 'member = false'.freeze
+
   #================================================================================
 
   def show
@@ -48,8 +51,13 @@ class UsersController < ApplicationController
     end
     @filter_ignore_membership = !(@filter_are_members || @filter_are_not_members)
 
-    membership_filter = 'member = true' if @filter_are_members
-    membership_filter = 'member = false' if @filter_are_not_members
+    membership_filter = if @filter_are_members
+      ARE_MEMBERS_CLAUSE
+    elsif @filter_are_not_members
+      ARE_NOT_MEMBERS_CLAUSE
+    else
+      ''
+    end
 
     @q = User.ransack(action_params)
 

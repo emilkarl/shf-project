@@ -58,7 +58,6 @@ class User < ApplicationRecord
 
   validates :first_name, :last_name, presence: true, unless: :updating_without_name_changes
   validates :membership_number, uniqueness: true, allow_blank: true
-  # validates :membership_status, inclusion: %w(not_a_member, current_member, in_grace_period, former_member)
 
   THIS_PAYMENT_TYPE = Payment::PAYMENT_TYPE_MEMBER
   MOST_RECENT_UPLOAD_METHOD = :created_at
@@ -66,7 +65,7 @@ class User < ApplicationRecord
   scope :admins, -> { where(admin: true) }
   scope :not_admins, -> { where(admin: nil).or(User.where(admin: false)) }
 
-  # FIXME: this is not accurate; DO NOT USE. (Need to carefully remove any use.)  Other checks may need to be done.
+  # FIXME: replace this with the aasm provided scope :current_member
   scope :members, -> { where(member: true) }
 
   successful_payment_with_type_and_expire_date = "payments.status = '#{Payment::SUCCESSFUL}' AND" +
@@ -92,8 +91,9 @@ class User < ApplicationRecord
 
   scope :agreed_to_membership_guidelines, -> { where(id: UserChecklist.top_level_for_current_membership_guidelines.completed.pluck(:user_id)) }
 
-  scope :current_members, -> { application_accepted.membership_payment_current }
 
+  # TODO do not like this name. Needs to communicate that the public can view these users, that these users have the status that they are able to be shown to the public
+  scope :viewable_to_the_public, -> { where(membership_status: ['current_member', 'in_grace_period']) }
 
   # ===============================================================================================
 
@@ -157,13 +157,11 @@ class User < ApplicationRecord
     end
 
     event :start_grace_period do
-      # TODO is :after_commit necessary or will :after work just fine instead?
-      transitions from: :current_member, to: :in_grace_period, after_commit: Proc.new {|*args| enter_grace_period(*args) }
+      transitions from: :current_member, to: :in_grace_period, after: Proc.new {|*args| enter_grace_period(*args) }
     end
 
     event :make_former_member do
-      # TODO is :after_commit necessary or will :after work just fine instead?
-      transitions from: :in_grace_period, to: :former_member, after_commit: Proc.new {|*args| become_former_member(*args) }
+      transitions from: :in_grace_period, to: :former_member, after: Proc.new {|*args| become_former_member(*args) }
     end
   end
 
@@ -397,7 +395,6 @@ class User < ApplicationRecord
   end
 
   def member_fee_payment_due?
-    # FIXME: should member? be used here?
     member? && !payments_current?
   end
 

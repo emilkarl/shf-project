@@ -331,7 +331,57 @@ RSpec.describe User, type: :model do
       end
     end
 
-    describe 'members' do
+    describe '.viewable_to_the_public' do
+
+      # create users with other membership_statuses
+      other_statuses = User.membership_statuses - [:current_member, :in_grace_period]
+      other_statuses.each do |other_status|
+        let!("#{other_status}_1".to_sym) { create(:user, membership_status: other_status.to_s) }
+      end
+
+
+      context 'no current_members' do
+
+        it 'only in_grace_period users are returned if in_grace_period users exist' do
+          grace_1 = create(:user, membership_status: 'in_grace_period')
+          grace_2 = create(:user, membership_status: 'in_grace_period')
+
+          expect(described_class.viewable_to_the_public.to_a).to match_array([grace_1, grace_2])
+        end
+
+
+        context 'no in_grace_period users' do
+          it 'no users returned' do
+            expect(described_class.viewable_to_the_public.to_a).to be_empty
+          end
+        end
+      end
+
+      context 'current_members exist' do
+        context 'in_grace_period users exist' do
+          it 'current_members AND in_grace_period users are returned' do
+            current_1 = create(:user, membership_status: 'current_member')
+            current_2 = create(:user, membership_status: 'current_member')
+            grace_1 = create(:user, membership_status: 'in_grace_period')
+            grace_2 = create(:user, membership_status: 'in_grace_period')
+
+            expect(described_class.viewable_to_the_public.to_a).to match_array([current_1, current_2,
+                                                                                grace_1, grace_2])
+          end
+        end
+
+        context 'no in_grace_period users' do
+          it 'only current_members returned' do
+            current_1 = create(:user, membership_status: 'current_member')
+            current_2 = create(:user, membership_status: 'current_member')
+            expect(described_class.viewable_to_the_public.to_a).to match_array([current_1, current_2])
+          end
+        end
+      end
+    end
+
+
+    describe '.members' do
 
       it 'returns those with member = true' do
         user_member1 = create(:member_with_membership_app, first_name: 'Member 1')
@@ -349,9 +399,7 @@ RSpec.describe User, type: :model do
         expect(members).not_to include admin
         expect(members).not_to include visitor
         expect(members).not_to include user_has_app_not_member
-
       end
-
     end
 
     context 'with known user info' do
@@ -421,19 +469,6 @@ RSpec.describe User, type: :model do
       end
     end
 
-    describe 'current_members' do
-
-      it 'all applications are accepted' do
-        expect(described_class).to receive(:application_accepted).and_call_original
-        described_class.current_members
-      end
-
-      it 'membership payment must be current (not expired)' do
-        expect(described_class).to receive(:membership_payment_current).and_call_original
-        described_class.current_members
-      end
-
-    end
 
     describe 'expiration dates' do
 
@@ -637,8 +672,7 @@ RSpec.describe User, type: :model do
       expect(User.next_membership_payment_dates(user.id)[0]).to eq Time.zone.today
     end
 
-    # FIXME it returns one year MINUS 1 DAY
-    it 'returns one year later for first payment expire date' do
+    it 'returns one year - 1 day later for first payment expire date' do
       expect(User.next_membership_payment_dates(user.id)[1])
         .to eq Time.zone.today + 1.year - 1.day
     end
@@ -649,8 +683,8 @@ RSpec.describe User, type: :model do
         .to eq Time.zone.today + 1.year
     end
 
-    # FIXME returns one year MINUS 1 DAY
-    it 'returns one year later for second payment expire date' do
+
+    it 'returns one year - 1 day later for second payment expire date' do
       member_payment1
       expect(User.next_membership_payment_dates(user.id)[1])
         .to eq Time.zone.today + 1.year + 1.year - 1.day

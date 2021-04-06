@@ -94,6 +94,8 @@ module UsersHelper
   # They are  useful to show in the legend and in a view.
   # @see MembershipsManager
   #
+  # TODO: sort these in a way that is helpful
+  #
   # @return [String] - return the HTML code to display the legend for the Membership Status formatting
   def membership_status_legend
     expire_background_css = 'membership-status'

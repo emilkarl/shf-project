@@ -70,7 +70,6 @@ FactoryBot.define do
     #
     #   ex:  create(:member_with_expiration_date, expiration_date: Date.new(2018, 6, 24))
     factory :member do
-      # FIXME this attribute no long means anything. use membership_status instead?
       member { true }
 
       transient do

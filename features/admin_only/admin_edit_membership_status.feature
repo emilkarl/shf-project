@@ -74,6 +74,7 @@ Feature: Admin edits membership status, dates, notes (membership info)
     Given the date is set to "2017-11-01"
     And I am on the "user details" page for "emma@mutts.com"
     Then the last day of membership for "emma@mutts.com" should be 2017-12-31
+    And "emma@mutts.com" should be a member
     When I click on t("users.user.edit_member_status")
     Then I should see t("users.user.edit_member_status")
     And I should see t("users.show.member")
@@ -86,7 +87,8 @@ Feature: Admin edits membership status, dates, notes (membership info)
     And I wait for all ajax requests to complete
     And I reload the page
     # ^^ should not have to do this - check later after upgrades. (DOM/page partial _is_ updated in real life, but not with capybara)
-    Then "emma@mutts.com" should not be a member
+    Then the last day of membership for "emma@mutts.com" should be 2017-09-01
+    And "emma@mutts.com" should not be a member
 
 
   @selenium

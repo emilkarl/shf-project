@@ -56,7 +56,6 @@ class UsersController < ApplicationController
     @users = @q.result.includes(:shf_application).where(membership_filter).page(params[:page]).per_page(items_per_page)
 
     render partial: 'users_list', locals: { q: @q, users: @users, items_count: @items_count } if request.xhr?
-
   end
 
 
@@ -74,7 +73,7 @@ class UsersController < ApplicationController
 
 
   # Manually change the membership status and/or last day and/or notes
-  # FIXME: This does too much.  Let the admin change/add a membershp note any time, separately from this.
+  # FIXME: This does too much.  Let the admin change/add a membership note any time, separately from this.
   def edit_status
     raise 'Unsupported request' unless request.xhr?
     authorize User
@@ -86,11 +85,10 @@ class UsersController < ApplicationController
       current_membership = @user.current_membership
       if user_params[:member] == 'true'
         if last_day_param < Date.current
-          admin_change_note << end_membership_yesterday_and_note(@user, current_membership)
+          admin_change_note << end_membership_and_note(@user, current_membership, last_day_param)
         elsif last_day_param != current_membership.last_day
           admin_change_note << change_membership_last_day_and_note(current_membership, last_day_param)
         end
-
       else
         admin_change_note << end_membership_yesterday_and_note(@user, current_membership)
       end
@@ -98,16 +96,15 @@ class UsersController < ApplicationController
       if user_params[:member] == 'true'
         @user.start_membership!(date: Date.current)
         current_membership = @user.current_membership
-        admin_change_note << " Membership started on #{Date.current}." # FIXME I18n
+        admin_change_note << t('memberships.auto_added_notes.started_on', first_day: Date.current )
         if last_day_param != current_membership.last_day
           admin_change_note << change_membership_last_day_and_note(current_membership, last_day_param)
         end
       end
     end
-    admin_change_note = "| Changed by Admin #{Time.zone.now}: #{admin_change_note} |" unless admin_change_note.blank?
+    admin_change_note = "| #{t('memberships.auto_added_notes.changed_by_admin', changed_timestamp: Time.zone.now)}: #{admin_change_note} |" unless admin_change_note.blank?
     membership_note = membership_params.fetch(:notes, '') + admin_change_note
     current_membership.update!(notes: membership_note) if current_membership
-
 
     if @user.member?
       render partial: 'show_for_member', locals: { user: @user, current_user: @current_user, app_config: @app_configuration }
@@ -196,19 +193,27 @@ class UsersController < ApplicationController
 
 
   def end_membership_yesterday_and_note(user, membership)
+    end_membership_and_note(user, membership, Date.current - 1.day)
+  end
+
+
+  def end_membership_and_note(user, membership, last_day)
     return unless membership
 
-    note = " Membership ended by admin on #{Time.zone.now}. Original last day was #{membership.last_day}." # FIXME i18n
+    note = t('memberships.auto_added_notes.ended_on', new_last_day: last_day, original_last_day: membership.last_day)
     user.update!(membership_status: :not_a_member, member: false)
-    membership.update!(last_day: Date.current - 1) # end yesterday
+    membership.update!(last_day: last_day)
+    MembershipStatusUpdater.instance.user_updated(membership.user)
     note
   end
+
 
   def change_membership_last_day_and_note(membership, new_last_day)
     return unless membership
 
-    note =  " Membership last day changed from #{membership.last_day} to #{new_last_day}." # FIXME I18n
+    note = t('memberships.auto_added_notes.last_day_changed',  original_last_day: membership.last_day, new_last_day: new_last_day)
     membership.update!(last_day: new_last_day)
+    MembershipStatusUpdater.instance.user_updated(membership.user)
     note
   end
 end

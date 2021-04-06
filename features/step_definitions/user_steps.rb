@@ -178,8 +178,10 @@ end
 
 # ----------------------------------------------------------------------------------------
 # Membership status
+#
 
-# FIXME: call transition/event methods instead of just setting status?
+# Note the following do _not_ call any transition events. They just set the attribute value.
+#
 And("I am( now) not a( current) member") do
   @user.membership_status = :not_a_member
 end
@@ -208,24 +210,18 @@ end
 Then("I should{negate} be a( current) member") do | negation |
   @user.reload
   if negation
-    expect(@user.current_member?).to be_falsey
-    expect(@user.member_in_good_standing?).to be_falsey
     expect(@user.not_a_member?).to be_truthy
   else
     expect(@user.current_member?).to be_truthy
-    expect(@user.member_in_good_standing?).to be_truthy
   end
 end
 
 Then("{capture_string} should{negate} be a( current) member") do | user_email, negation |
   user = User.find_by(email: user_email)
   if negation
-    expect(user.current_member?).to be_falsey
-    expect(user.member_in_good_standing?).to be_falsey
     expect(user.not_a_member?).to be_truthy
   else
     expect(user.current_member?).to be_truthy
-    expect(user.member_in_good_standing?).to be_truthy
   end
 end
 

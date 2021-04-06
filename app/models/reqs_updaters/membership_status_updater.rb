@@ -141,7 +141,7 @@ class MembershipStatusUpdater
           log.info(user.membership_changed_info)
 
         elsif user.membership_past_grace_period_end?(today)
-          # This shouldn't happen. But just in case the membership status has not been updated for
+          # This should only happen when seeding. But just in case the membership status has not been updated for
           # a while and so hasn't transitioned to in_grace_period, we'll do it manually now and then
           # go on and transition to a former member
           user.start_grace_period!

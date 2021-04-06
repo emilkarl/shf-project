@@ -20,7 +20,6 @@
 
 class RequirementsForMembership < AbstractReqsForMembership
 
-  # FIXME - be consistent everywhere about whether the requirements include payments or not
   def self.requirements_excluding_payments_met?(user, _date = Date.current)
     user.may_start_membership? &&
       user.has_approved_shf_application? &&

@@ -25,9 +25,10 @@ module Memberships
     #   send email to the user saying they are now in the renewal grace period
     #
     def self.accomplish_actions(user, _send_email: SEND_EMAIL_DEFAULT, **other_keyword_args)
-
       user.update!(member: false)
       # MemberMailer.membership_entered_grace_period(user).deliver if send_email
+
+      true
     end
 
 

@@ -27,6 +27,8 @@ module Memberships
     def self.accomplish_actions(user, _send_email: SEND_EMAIL_DEFAULT, **other_keyword_args)
       user.update!(member: false)
       # MemberMailer.membership_now_is_former(user).deliver if send_email
+
+      true
     end
 
 

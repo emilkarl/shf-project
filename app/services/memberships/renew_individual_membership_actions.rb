@@ -33,8 +33,9 @@ module Memberships
       last_day = Membership.last_day_from_first(first_day)
       Membership.create!(user: user, first_day: first_day, last_day: last_day)
       user.update!(member: true)
-
       MemberMailer.membership_renewed(user).deliver if send_email
+
+      true
     end
 
 

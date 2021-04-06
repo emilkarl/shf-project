@@ -40,6 +40,8 @@ module Memberships
 
       AdminAlerter.instance.new_membership_granted(user, deliver_email: send_email)
       MemberMailer.membership_granted(user).deliver if send_email
+
+      true # success!
     end
 
 

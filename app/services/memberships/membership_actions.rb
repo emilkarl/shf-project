@@ -45,8 +45,11 @@ module Memberships
 
 
     # Subclasses must define this.  Do all of the actions needed.
+    # @return [True | False] - did this accomplish everything successfully?
+    #   Would be better to return a Successful obj. This violates the ruby ... of ending a method with a ? if it returns a boolean
     def self.accomplish_actions(_user, _send_email: do_send_email, **_other_keyword_args)
       raise NoMethodError, "#{__method__}: Subclasses must implement this method to do whatever is needed (for their action)."
+      false  # This is here to make syntax checking happy regarding the @return comment
     end
 
 

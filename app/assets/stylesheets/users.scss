@@ -149,6 +149,15 @@ $highlight-yellow: #ffffe0;
 
 }
 
+
+
+td.expire_date span.expire-date-background,
+td.is-member span.membership-status {
+  padding-left: 3pt;
+  padding-right: 3pt;
+}
+
+
 .expire-date-background.current-member,
 .membership-status.current-member {
   background-color: $yes-background-green;

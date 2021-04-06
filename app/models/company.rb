@@ -125,11 +125,13 @@ class Company < ApplicationRecord
   end
 
 
+  # TODO: yuck
   def self.with_members
-    where(id: CompanyApplication.where(shf_application: [ShfApplication.where(user: User.current_members)]).pluck(:company_id))
+    where(id: CompanyApplication.where(shf_application: [ShfApplication.where(user: User.viewable_to_the_public)]).pluck(:company_id))
   end
 
   # Criteria limiting visibility of companies to non-admin users
+  # TODO rename this to current_with_current_members or in_good_standing_with_current_members (Company should not be responsible for knowing what is 'searchable' in the UI)
   def self.searchable
     information_complete.with_members.branding_licensed
   end
@@ -176,10 +178,12 @@ class Company < ApplicationRecord
 
   alias_method :current_membership, :most_recent_payment
 
+  # TODO rename this to current_with_current_members? or in_good_standing_with_current_members? (Company should not be responsible for knowing what is 'searchable' in the UI)
+  # FIXME does not seem to be used
   def searchable?
     branding_license_current? && current_members.any?
   end
-  alias_method :current_with_current_members, :searchable?
+  alias_method :current_with_current_members?, :searchable?
 
   def in_good_standing?
     information_complete? && branding_license_current?
@@ -208,8 +212,11 @@ class Company < ApplicationRecord
 
 
   # @return all members in the company whose membership are current (paid, not expired)
+  # FIXME: be careful when replacing this with a query/method that returns users based on membership vs. payments.
+  #   Be sure to understand how this is used. It might actually be used to get users with _payments_ that are current.
+  #   May need to create a method a method that returns all users in a company with current payments that does what this does now.
   def current_members
-    users.select(&:payments_current?) # FIXME is it ok to use membership status current_member instead?
+    users.select(&:payments_current?) # FIXME is it ok to use membership status current_member instead?  Will need a separate method to work with earliest_current_member_fee_paid
   end
 
 
@@ -330,9 +337,8 @@ class Company < ApplicationRecord
   # This is used to calculate when an H-Branding fee is due if there has not been any H-Branding fee paid yet
   # TODO: this should go in a class responsible for knowing how to calculate when H-Branding fees are due (perhaps a subclass of PaymentUtility named something like CompanyPaymentsDueCalculator )
   #
+  # This really is about the payment and not about the date of the membership(s)
   # @return nil if there are no current members else the earliest membership_start_date of all current members
-  # FIXME find all calls, replace with appropriate Membership... class?
-  #   Or does this really need to be about payments??
   def earliest_current_member_fee_paid
     current_members.empty? ? nil : current_members.map(&:membership_start_date).sort.first
   end

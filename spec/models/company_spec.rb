@@ -334,8 +334,8 @@ RSpec.describe Company, type: :model, focus: true do
 
     describe '.with_members' do
 
-      it 'calls User.current_members to get all current members (members in good standing)' do
-        expect(User).to receive(:current_members).and_return([])
+      it 'calls User.viewable_to_the_public to get all members that can be displayed to the public' do
+        expect(User).to receive(:viewable_to_the_public).and_return([])
 
         described_class.with_members
       end
@@ -344,7 +344,7 @@ RSpec.describe Company, type: :model, focus: true do
         FactoryBot.create(:user_with_membership_app)
         FactoryBot.create(:user_with_membership_app)
 
-        allow(User).to receive(:current_members).and_return([])
+        allow(User).to receive(:viewable_to_the_public).and_return([])
         expect(Company.with_members).to be_empty
       end
 
@@ -357,7 +357,7 @@ RSpec.describe Company, type: :model, focus: true do
           member2 = FactoryBot.create(:user_with_membership_app)
           co2 = member2.shf_application.companies.first
 
-          expect(User).to receive(:current_members).and_return([member1, member2])
+          expect(User).to receive(:viewable_to_the_public).and_return([member1, member2])
 
           expect(Company.with_members).to match_array([co1, co2])
         end
@@ -367,7 +367,7 @@ RSpec.describe Company, type: :model, focus: true do
           co1 = member1.shf_application.companies.first
           member2 = FactoryBot.create(:user_with_membership_app,
                                       company_number: co1.company_number)
-          allow(User).to receive(:current_members).and_return([member1, member2])
+          allow(User).to receive(:viewable_to_the_public).and_return([member1, member2])
 
           expect(Company.with_members).to contain_exactly(co1)
         end
@@ -426,7 +426,7 @@ RSpec.describe Company, type: :model, focus: true do
 
           it 'has members in good standing (current members)'do
             co1_user = co1_current.shf_applications.first.user
-            allow(User).to receive(:current_members).and_return([co1_user])
+            allow(User).to receive(:viewable_to_the_public).and_return([co1_user])
 
             expect(described_class.searchable).to contain_exactly(co1_current)
           end

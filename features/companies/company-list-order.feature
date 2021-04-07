@@ -150,9 +150,6 @@ Feature: Companies are listed in order of date last updated
       | u15@mutts.com | 2019-07-08 | 2020-07-07 |
 
 
-
-
-
     # Note: For some reason, this statement to set the date must come _last._
     Given the date is set to "2020-02-01"
  # -----------------------------------------------------------------------------------------------

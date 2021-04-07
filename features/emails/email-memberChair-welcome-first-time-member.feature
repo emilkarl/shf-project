@@ -67,18 +67,16 @@ Feature: Membership chair gets an email when a first-time-ever membership has be
   # ===========================================================================================
 
 
-#  FIXME: Leap year!
-  Scenario: New Member granted membership and associated with company already in good standing. Email is sent when membership is granted.
+  Scenario: New Member granted membership for a leap year. Email is sent when membership is granted.
     Given the date is set to "2020-01-05"
     And a clear email queue
     And I am logged in as "new-member@good-standing.se"
     And I have agreed to all of the Membership Guidelines
-    And I am on the "user account" page for "new-member@good-standing.se"
+    And I am on the "user account" page
     Then I click on t("menus.nav.members.pay_membership")
     And I complete the membership payment
     And I should see t("payments.success.success")
     And "membership@example.org" should receive an email with subject t("mailers.admin_mailer.new_membership_granted_co_hbrand_paid.subject")
-    # FIXME: 2020 is a leap year. membership term must be in years, not days. Argh.
     And my membership expiration date should be 2021-01-04
 
 

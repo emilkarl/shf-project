@@ -2,11 +2,11 @@ Feature: Visitors see only companies in good standing with complete information
 
   As a visitor I only want to see companies that are in good standing with SHF
   so that I do not work with any companies or members of those companies
-    that have not met all of the requirements for being a member,
-    including paying their fees,
+  that have not met all of the requirements for being a member,
+  including paying their fees,
 
   And I only want to see companies with all of the information needed
-    so that I can contact them,
+  so that I can contact them,
 
   Visitors and users and members should only see companies in good standing with complete information.
 
@@ -24,10 +24,10 @@ Feature: Visitors see only companies in good standing with complete information
       | ThisNameWillBeDeleted |
 
     Given the following kommuns exist:
-      | name      |
-      | Alingsås  |
-      | Bromölla  |
-      | Laxå      |
+      | name     |
+      | Alingsås |
+      | Bromölla |
+      | Laxå     |
 
     And the following business categories exist
       | name    |
@@ -36,24 +36,24 @@ Feature: Visitors see only companies in good standing with complete information
 
 
     Given the following companies exist:
-      | name         | company_number | email                  | region                | kommun   |
-      | Happy Mutts  | 5560360793     | snarky@snarkybarky.com | Stockholm             | Alingsås |
-      | Bowsers      | 2120000142     | bowwow@bowsersy.com    | Västerbotten          | Bromölla |
-      | NoRegion     | 8028973322     | hello@NoRegion.se      | ThisNameWillBeDeleted | Laxå     |
-      |              | 5906055081     | hello@noName.se        | Stockholm             | Alingsås |
-      | NoPayment    | 5562252998     | hello@nopayment.se     | Stockholm             | Alingsås |
-      | NoMember     | 9697222900     | hello@nomember.se      | Stockholm             | Alingsås |
+      | name        | company_number | email                  | region                | kommun   |
+      | Happy Mutts | 5560360793     | snarky@snarkybarky.com | Stockholm             | Alingsås |
+      | Bowsers     | 2120000142     | bowwow@bowsersy.com    | Västerbotten          | Bromölla |
+      | NoRegion    | 8028973322     | hello@NoRegion.se      | ThisNameWillBeDeleted | Laxå     |
+      |             | 5906055081     | hello@noName.se        | Stockholm             | Alingsås |
+      | NoPayment   | 5562252998     | hello@nopayment.se     | Stockholm             | Alingsås |
+      | NoMember    | 9697222900     | hello@nomember.se      | Stockholm             | Alingsås |
 
     And the following users exist:
-      | email                        | admin | member | agreed_to_membership_guidelines |
-      | emmagroomer@happymutts.com   |       | true   | true                            |
-      | annatrainer@bowsers.com      |       | true   | true                            |
-      | ole@noOldRegion.se           |       | true   | true                            |
-      | maja@onlyNoRegion.se         |       | true   | true                            |
-      | kikki@noName.se              |       | true   | true                            |
-      | lars@nopayment.se            |       | true   | true                            |
-      | larsTrainer@noRegionOrOld.se |       | true   | true                            |
-      | admin@shf.se                 | true  | false  |                                 |
+      | email                        | admin | membership_status | member | agreed_to_membership_guidelines |
+      | emmagroomer@happymutts.com   |       | current_member    | true   | true                            |
+      | annatrainer@bowsers.com      |       | current_member    | true   | true                            |
+      | ole@noOldRegion.se           |       |                   | false  | true                            |
+      | maja@onlyNoRegion.se         |       |                   | false  | true                            |
+      | kikki@noName.se              |       |                   | false  | true                            |
+      | lars@nopayment.se            |       |                   | false  | true                            |
+      | larsTrainer@noRegionOrOld.se |       |                   | false  | true                            |
+      | admin@shf.se                 | true  |                   | false  |                                 |
 
     And the following applications exist:
       | user_email                 | company_number | categories       | state    |
@@ -65,15 +65,24 @@ Feature: Visitors see only companies in good standing with complete information
       | lars@nopayment.se          | 5562252998     | Groomer, Trainer | accepted |
 
     And the following payments exist
-      | user_email                  | start_date | expire_date | payment_type | status | hips_id | company_number |
-      | emmagroomer@happymutts.com  | 2017-01-01 | 2017-12-31  | branding_fee | betald | none    | 5560360793     |
-      | emmagroomer@happymutts.com  | 2017-10-1  | 2017-12-31  | member_fee   | betald | none    |                |
-      | annatrainer@bowsers.com     | 2017-01-01 | 2017-12-31  | branding_fee | betald | none    | 2120000142     |
-      | annatrainer@bowsers.com     | 2017-10-1  | 2017-12-31  | member_fee   | betald | none    |                |
-      | admin@shf.se                | 2017-01-01 | 2017-12-31  | branding_fee | betald | none    | 9697222900     |
+      | user_email                 | start_date | expire_date | payment_type | status | hips_id | company_number |
+      | emmagroomer@happymutts.com | 2017-01-01 | 2017-12-31  | branding_fee | betald | none    | 5560360793     |
+      | emmagroomer@happymutts.com | 2017-10-1  | 2017-12-31  | member_fee   | betald | none    |                |
+      | annatrainer@bowsers.com    | 2017-01-01 | 2017-12-31  | branding_fee | betald | none    | 2120000142     |
+      | annatrainer@bowsers.com    | 2017-10-1  | 2017-12-31  | member_fee   | betald | none    |                |
+      | admin@shf.se               | 2017-01-01 | 2017-12-31  | branding_fee | betald | none    | 9697222900     |
+
+
+    And the following memberships exist:
+      | email                      | first_day  | last_day   |
+      | emmagroomer@happymutts.com | 2017-01-01 | 2017-12-31 |
+      | annatrainer@bowsers.com    | 2017-01-01 | 2017-12-31 |
+
+
 
     Given the date is set to "2017-10-01"
     And the region for company named "NoRegion" is set to nil
+  # -------------------------------------------------------------------------------------
 
 
   @visitor @time_adjust
@@ -87,6 +96,7 @@ Feature: Visitors see only companies in good standing with complete information
     And I should not see "5906055081"
     And I should not see "NoPayment"
     And I should not see "NoMember"
+
 
   @visitor @time_adjust
   Scenario: Visitor on Kategori - only searchable companies are shown

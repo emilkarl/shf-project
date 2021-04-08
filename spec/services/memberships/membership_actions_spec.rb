@@ -90,8 +90,8 @@ RSpec.describe Memberships::MembershipActions do
 
 
   describe '.log_filename' do
-    it 'has the LogfileNamer construct it with the class name' do
-      expect(LogfileNamer).to receive(:name_for).with(described_class.name)
+    it 'logs to the MembershipUpdater logfilename' do
+      expect(LogfileNamer).to receive(:name_for).with(MembershipStatusUpdater.name)
       described_class.log_filename
     end
   end

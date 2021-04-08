@@ -178,10 +178,10 @@ module SeedHelper
       guidelines_list = UserChecklistManager.find_or_create_membership_guidelines_list_for(user)
       guidelines_list.set_complete_including_children(start_date) if FFaker::Random.rand(100) < 86
 
-      # FIXME: do not send email
+      # Do not send email
       unless user.admin?
-        MembershipStatusUpdater.instance.payment_made(membership_payment)
-        MembershipStatusUpdater.instance.update_membership_status(user)
+        MembershipStatusUpdater.instance.payment_made(membership_payment, send_email: false)
+        MembershipStatusUpdater.instance.update_membership_status(user, send_email: false)
       end
 
       ma.companies[0].payments << Payment.create(payment_type: Payment::PAYMENT_TYPE_BRANDING,

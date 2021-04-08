@@ -52,43 +52,99 @@ RSpec.describe MembershipStatusUpdater, type: :model do
 
     expect(subject).to receive(:update_membership_status).with(shf_app_updated.user,
                                                                shf_app_updated,
-                                                               subject.logmsg_app_updated)
+                                                               subject.logmsg_app_updated,
+                                                               send_email: true)
     subject.shf_application_updated(shf_app_updated)
   end
 
-  describe 'payment_made' do
-    it 'calls check_grant_membership_or_renew with the log msg that the payment was made' do
-      payment_for_not_expired_paid_member = build(:payment,
-                                                  user: build(:user),
-                                                  start_date: Date.current,
-                                                  expire_date: Date.current + 1.day)
 
+  describe 'payment_made' do
+    let(:payment_for_not_expired_paid_member) { build(:payment, user: build(:user), start_date: Date.current, expire_date: Date.current + 1.day) }
+
+    it 'calls check_grant_membership_or_renew with the log msg that the payment was made' do
       expect(subject).to receive(:check_grant_membership_or_renew).with(payment_for_not_expired_paid_member.user,
                                                                         payment_for_not_expired_paid_member,
-                                                                        subject.logmsg_payment_made)
+                                                                        subject.logmsg_payment_made,
+                                                                        send_email: anything)
+      subject.payment_made(payment_for_not_expired_paid_member)
+    end
+
+    it 'can pass in send_email: <true|false>' do
+      expect(subject).to receive(:check_grant_membership_or_renew).with(payment_for_not_expired_paid_member.user,
+                                                                        payment_for_not_expired_paid_member,
+                                                                        subject.logmsg_payment_made,
+                                                                        send_email: false)
+      subject.payment_made(payment_for_not_expired_paid_member, send_email: false)
+    end
+
+    it 'send_email: default is send_email_default' do
+      expect(subject).to receive(:send_email_default).and_return(true)
+      expect(subject).to receive(:check_grant_membership_or_renew).with(payment_for_not_expired_paid_member.user,
+                                                                        payment_for_not_expired_paid_member,
+                                                                        subject.logmsg_payment_made,
+                                                                        send_email: true)
       subject.payment_made(payment_for_not_expired_paid_member)
     end
   end
 
 
   describe 'checklist_completed' do
-    it 'calls check_grant_membership_or_renew with the log msg that the checklist was completed' do
-      completed_checklist = build(:user_checklist, :completed)
-      checklist_user = completed_checklist.user
+    let(:completed_checklist) { build(:user_checklist, :completed) }
+    let(:checklist_user) { completed_checklist.user }
 
+    it 'calls check_grant_membership_or_renew with the log msg that the checklist was completed' do
       expect(subject).to receive(:check_grant_membership_or_renew).with(checklist_user,
                                                                         completed_checklist,
-                                                                        subject.logmsg_checklist_completed)
+                                                                        subject.logmsg_checklist_completed,
+                                                                        send_email: anything)
+      subject.checklist_completed(completed_checklist)
+    end
+
+    it 'can pass in send_email: <true|false>' do
+      expect(subject).to receive(:check_grant_membership_or_renew).with(checklist_user,
+                                                                        completed_checklist,
+                                                                        subject.logmsg_checklist_completed,
+                                                                        send_email: false)
+      subject.checklist_completed(completed_checklist, send_email: false)
+    end
+
+    it 'send_email: default is send_email_default' do
+      expect(subject).to receive(:send_email_default).and_return(true)
+      expect(subject).to receive(:check_grant_membership_or_renew).with(checklist_user,
+                                                                        completed_checklist,
+                                                                        subject.logmsg_checklist_completed,
+                                                                        send_email: true)
       subject.checklist_completed(completed_checklist)
     end
   end
 
 
-  it 'user_updated calls update_membership_status with a message that the user was updated' do
-    expect(subject).to receive(:update_membership_status).with(user,
-                                                               user,
-                                                               subject.logmsg_user_updated)
-    subject.user_updated(user)
+  describe 'user_updated' do
+    it 'user_updated calls update_membership_status with a message that the user was updated and send_email: option' do
+      expect(subject).to receive(:update_membership_status).with(user,
+                                                                 user,
+                                                                 subject.logmsg_user_updated,
+                                                                 send_email: anything)
+      subject.user_updated(user)
+    end
+
+    it 'can pass in send_email: <true|false>' do
+      expect(subject).to receive(:update_membership_status).with(user,
+                                                                 user,
+                                                                 subject.logmsg_user_updated,
+                                                                 send_email: false)
+      subject.user_updated(user, send_email: false)
+    end
+
+    it 'send_email: default is send_email_default' do
+      expect(subject).to receive(:send_email_default).and_return(true)
+      expect(subject).to receive(:update_membership_status).with(user,
+                                                                 user,
+                                                                 subject.logmsg_user_updated,
+                                                                 send_email: true)
+      subject.user_updated(user)
+    end
+
   end
 
 
@@ -109,7 +165,8 @@ RSpec.describe MembershipStatusUpdater, type: :model do
         before(:each) { allow(RequirementsForRenewal).to receive(:requirements_met?).and_return(true) }
 
         it 'tells the user to renew today' do
-          expect(given_user).to receive(:renew!).with(date: Date.current)
+          expect(given_user).to receive(:renew!).with(date: Date.current,
+                                                      send_email: true)
           subject.check_grant_membership_or_renew(given_user, notifier, reason)
         end
 
@@ -117,6 +174,12 @@ RSpec.describe MembershipStatusUpdater, type: :model do
           allow(given_user).to receive(:membership_changed_info)
           expect(mock_log).to receive(:info).with(given_user.membership_changed_info)
           subject.check_grant_membership_or_renew(given_user, notifier, reason)
+        end
+
+        it 'passes along the value of send_email' do
+          expect(given_user).to receive(:renew!).with(date: Date.current,
+                                                      send_email: false)
+          subject.check_grant_membership_or_renew(given_user, notifier, reason, send_email: false)
         end
       end
 
@@ -146,8 +209,15 @@ RSpec.describe MembershipStatusUpdater, type: :model do
           before(:each) { allow(given_user).to receive(:membership_expire_date).and_return(nil) }
 
           it 'starts the new membership today' do
-            expect(given_user).to receive(:start_membership!).with(date: Date.current)
+            expect(given_user).to receive(:start_membership!).with(date: Date.current,
+                                                                   send_email: true)
             subject.check_grant_membership_or_renew(given_user, notifier, reason)
+          end
+
+          it 'passes along the value of send_email' do
+            expect(given_user).to receive(:start_membership!).with(date: Date.current,
+                                                                   send_email: false)
+            subject.check_grant_membership_or_renew(given_user, notifier, reason, send_email: false)
           end
         end
 
@@ -155,8 +225,15 @@ RSpec.describe MembershipStatusUpdater, type: :model do
           before(:each) { allow(given_user).to receive(:membership_expire_date).and_return(Date.current) }
 
           it 'starts the new membership tomorrow' do
-            expect(given_user).to receive(:start_membership!).with(date: Date.current + 1.day)
+            expect(given_user).to receive(:start_membership!).with(date: Date.current + 1.day,
+                                                                   send_email: true)
             subject.check_grant_membership_or_renew(given_user, notifier, reason)
+          end
+
+          it 'passes along the value of send_email' do
+            expect(given_user).to receive(:start_membership!).with(date: Date.current + 1.day,
+                                                                   send_email: false)
+            subject.check_grant_membership_or_renew(given_user, notifier, reason, send_email: false)
           end
         end
 
@@ -164,8 +241,15 @@ RSpec.describe MembershipStatusUpdater, type: :model do
           before(:each) { allow(given_user).to receive(:membership_expire_date).and_return(Date.current + 2.days) }
 
           it 'starts the new membership one day after the last day of the latest membership' do
-            expect(given_user).to receive(:start_membership!).with(date: Date.current + 3.days)
+            expect(given_user).to receive(:start_membership!).with(date: Date.current + 3.days,
+                                                                   send_email: true)
             subject.check_grant_membership_or_renew(given_user, notifier, reason)
+          end
+
+          it 'passes along the value of send_email' do
+            expect(given_user).to receive(:start_membership!).with(date: Date.current + 3.days,
+                                                                   send_email: false)
+            subject.check_grant_membership_or_renew(given_user, notifier, reason, send_email: false)
           end
         end
 
@@ -173,8 +257,15 @@ RSpec.describe MembershipStatusUpdater, type: :model do
           before(:each) { allow(given_user).to receive(:membership_expire_date).and_return(Date.current - 2.days) }
 
           it 'starts the new membership today' do
-            expect(given_user).to receive(:start_membership!).with(date: Date.current)
+            expect(given_user).to receive(:start_membership!).with(date: Date.current,
+                                                                   send_email: true)
             subject.check_grant_membership_or_renew(given_user, notifier, reason)
+          end
+
+          it 'passes along the value of send_email' do
+            expect(given_user).to receive(:start_membership!).with(date: Date.current,
+                                                                   send_email: false)
+            subject.check_grant_membership_or_renew(given_user, notifier, reason, send_email: false)
           end
         end
 
@@ -276,6 +367,12 @@ RSpec.describe MembershipStatusUpdater, type: :model do
 
           subject.update_membership_status(user)
         end
+
+        it 'passes along the value of send_email' do
+          expect(user).to receive(:start_grace_period!).with(send_email: false)
+                            .and_call_original
+          subject.update_membership_status(user, send_email: false)
+        end
       end
 
       context 'date is past the last day of the renwal grace period' do
@@ -302,6 +399,14 @@ RSpec.describe MembershipStatusUpdater, type: :model do
 
           subject.update_membership_status(user)
         end
+
+        it 'passes along the value of send_email' do
+          expect(user).to receive(:start_grace_period!).with(send_email: false)
+                                                       .and_call_original
+          expect(user).to receive(:make_former_member!).with(send_email: false)
+                                                       .and_call_original
+          subject.update_membership_status(user, send_email: false)
+        end
       end
     end
 
@@ -320,14 +425,24 @@ RSpec.describe MembershipStatusUpdater, type: :model do
       end
 
       context 'date is past (>) the last day of the renewal grace period' do
-        it 'becomes a former member' do
+        let(:past_grace_pd_user) do
           user = build(:user)
           user.membership_status = :in_grace_period
+          user
+        end
 
-          expect(user).to receive(:membership_past_grace_period_end?)
+        it 'becomes a former member' do
+          expect(past_grace_pd_user).to receive(:membership_past_grace_period_end?)
                             .and_return(true)
-          expect(user).to receive(:make_former_member!)
-          subject.update_membership_status(user)
+          expect(past_grace_pd_user).to receive(:make_former_member!)
+          subject.update_membership_status(past_grace_pd_user)
+        end
+
+        it 'passes along the value of send_email' do
+          expect(past_grace_pd_user).to receive(:membership_past_grace_period_end?)
+                                          .and_return(true)
+          expect(past_grace_pd_user).to receive(:make_former_member!).with(send_email: false)
+          subject.update_membership_status(past_grace_pd_user, send_email: false)
         end
       end
     end
@@ -383,7 +498,7 @@ RSpec.describe MembershipStatusUpdater, type: :model do
   end
 
 
-  it 'send_email default is true' do
-    expect(subject.send_email).to be_truthy
+  it 'send_email_default is true' do
+    expect(subject.send_email_default).to be_truthy
   end
 end

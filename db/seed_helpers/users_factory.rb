@@ -121,7 +121,7 @@ module SeedHelper
         hmarkt_payment.update(expire_date: term_last_day, start_date: term_first_day)
         member.most_recent_membership&.update(first_day: term_first_day, last_day: term_last_day) if member.current_membership
         member.reload
-        MembershipStatusUpdater.instance.update_membership_status(member)
+        MembershipStatusUpdater.instance.update_membership_status(member, send_email: false)
       end
     end
 

@@ -1390,8 +1390,8 @@ RSpec.describe Company, type: :model, focus: true do
       travel_to( day_before_member_dec_3_expiry_time ) do
 
         # update membership status based on today's date
-        MembershipStatusUpdater.instance.user_updated(member_paid_dec_3)
-        MembershipStatusUpdater.instance.user_updated(member_paid_dec_5)
+        MembershipStatusUpdater.instance.user_updated(member_paid_dec_3, send_email: false)
+        MembershipStatusUpdater.instance.user_updated(member_paid_dec_5, send_email: false)
 
         expect(co_with_1_member_expires.current_members.size).to eq 2
         expect( co_with_1_member_expires.earliest_current_member_fee_paid ).to eq member_dec_3_start_time
@@ -1400,8 +1400,8 @@ RSpec.describe Company, type: :model, focus: true do
 
       travel_to( member_dec_3_expiry_time) do
         # update membership status based on today's date
-        MembershipStatusUpdater.instance.user_updated(member_paid_dec_3)
-        MembershipStatusUpdater.instance.user_updated(member_paid_dec_5)
+        MembershipStatusUpdater.instance.user_updated(member_paid_dec_3, send_email: false)
+        MembershipStatusUpdater.instance.user_updated(member_paid_dec_5, send_email: false)
 
         expect(co_with_1_member_expires.current_members.size).to eq 1
         expect( co_with_1_member_expires.earliest_current_member_fee_paid ).to eq member_dec_5_start_time

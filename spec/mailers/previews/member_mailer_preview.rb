@@ -111,7 +111,21 @@ class MemberMailerPreview < ActionMailer::Preview
 
   def membership_renewed
     # Select a current member
-    member_to_renew = User.current_member.sort_by(&:membership_expire_date).first
+    member_to_renew = User.in_grace_period.sort_by(&:membership_expire_date).first
+
+    # Create a member to renew if we didn't find any
+    unless member_to_renew
+      member_to_renew = User.current.sort_by(&:membership_expire_date).first
+
+      # if we still haven't found one, create one:
+      unless membership_to_renew
+        timestamp = Time.now.to_i
+        member_to_renew = FactoryBot.create(:member, first_name: "Just-#{timestamp}", last_name: 'Renewed',
+                                            email: "just-renewed-#{timestamp}@example.com",
+                                            expiration_date: (Date.current - 1.day),
+                                            membership_status: :in_grace_period)
+      end
+    end
 
     unless member_to_renew.companies.detect { |co| !co.information_complete? }
       incomplete_company = FactoryBot.create(:company, name: 'Incomplete (no region)')
@@ -124,7 +138,7 @@ class MemberMailerPreview < ActionMailer::Preview
       # TODO when Company uses Membership, then change this to (from using payments)
       FactoryBot.create(:h_branding_fee_payment, user: member_to_renew,
                         company: expired_company,
-                        expire_date: Date.current - 1.day )
+                        expire_date: Date.current - 1.day)
       member_to_renew.shf_application.companies << expired_company
     end
 
@@ -133,7 +147,7 @@ class MemberMailerPreview < ActionMailer::Preview
       # TODO when Company uses Membership, then change this to (from using payments)
       FactoryBot.create(:h_branding_fee_payment, user: member_to_renew,
                         company: expired_and_incomplete_company,
-                        expire_date: Date.current - 1.day )
+                        expire_date: Date.current - 1.day)
       expired_and_incomplete_company.addresses.first.update(region: nil)
       member_to_renew.shf_application.companies << expired_and_incomplete_company
     end
@@ -142,8 +156,7 @@ class MemberMailerPreview < ActionMailer::Preview
   end
 
 
-private
-
+  private
 
   # create a unique email address based on the Time right now
   def unique_email

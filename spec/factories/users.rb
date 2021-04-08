@@ -81,7 +81,7 @@ FactoryBot.define do
         contact_email { email }
       end
 
-      after(:build) do |member, evaluator|
+      after(:create) do |member, evaluator|
 
         create_list(:shf_application, 1, :accepted, user: member,
                     company_number: evaluator.company_number,

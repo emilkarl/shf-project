@@ -55,7 +55,7 @@ RSpec.shared_context 'create users' do
 
 
   let(:member_paid_up) do
-    user = build(:member_with_membership_app)
+    user = create(:member_with_membership_app)
     user.payments << create(:membership_fee_payment)
     user.save!
     user

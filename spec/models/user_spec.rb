@@ -145,14 +145,14 @@ RSpec.describe User, type: :model do
         end
 
         it 'creates an uploaded file for the current membership term (default)' do
-          member = build(:member_with_expiration_date)
+          member = create(:member_with_expiration_date)
           expect(member.uploaded_files.size > 0).to be_truthy
           expect(member.shf_application.uploaded_files_count).to eq 0  # The file was not associated with an ShfApplication
         end
 
         context 'has_uploaded_docs is false' do
           it 'does not create an uploaded file for the current membership term' do
-            member = build(:member_with_expiration_date, has_uploaded_docs: false)
+            member = create(:member_with_expiration_date, has_uploaded_docs: false)
             expect(member.uploaded_files.size > 0).to be_falsey
             expect(member.shf_application.uploaded_files_count).to eq 0  # The file was not associated with an ShfApplication
           end
@@ -1416,7 +1416,7 @@ RSpec.describe User, type: :model do
 
     context 'is a current member' do
       it 'returns the first day for the current membership' do
-        current_member = build(:member_with_membership_app)
+        current_member = create(:member)
         expect(current_member.membership_start_date).to eq Date.current
       end
     end
@@ -1430,7 +1430,7 @@ RSpec.describe User, type: :model do
   describe 'membership_expire_date' do
     context 'is a current member' do
       it 'returns the first day for the current membership' do
-        current_member = build(:member_with_membership_app)
+        current_member = create(:member)
         expect(current_member.membership_expire_date).to eq(Membership.last_day_from_first(Date.current))
       end
     end

@@ -50,7 +50,7 @@ Feature: Sort and search Companies
       | We Luv Dogs | 5569467466     | alpha@weluvdogs.com | Sweden       | Laxå      | city4          |
       | NoPayment   | 8028973322     | hello@nopayment.se  | Stockholm    | Alingsås  | city5          |
       | NoMember    | 9697222900     | hello@nomember.se   | Stockholm    | Alingsås  | city6          |
-      | New Company | 8248600598     | newco@newco.com     | Stockholm    | Alingsås  | ' space city ' |
+      | New Co.     | 8248600598     | newco@newco.com     | Stockholm    | Alingsås  | ' space city ' |
 
 
     And the following applications exist:
@@ -330,7 +330,7 @@ Feature: Sort and search Companies
     And I am on the "landing" page
     When I select "Space city" in select list t("activerecord.attributes.company.city")
     And I click on t("search")
-    Then I should see "New Company"
+    Then I should see "New Co."
     And I should not see "HappyMutts" in the list of companies
     And I should not see "We Luv Dogs" in the list of companies
     And I should not see "Dogs R Us" in the list of companies

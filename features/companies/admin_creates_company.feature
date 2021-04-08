@@ -116,8 +116,9 @@ Feature: Admin can create a company
       | companies.show.street | companies.show.post_code | companies.show.city |
       | Ålstensgatan 4        | 123 45                   | Bromma              |
     And I wait 3 seconds
-    And I select "Stockholm" in select list t("companies.operations_region")
-    And I select "Bromölla" in select list t("companies.show.kommun")
+    Then I should see t("activerecord.attributes.address.region")
+    When I select "Stockholm" in select list t("activerecord.attributes.address.region")
+    And I select "Bromölla" in select list t("activerecord.attributes.address.kommun")
     And I click on t("submit")
 
     Then I should see t("addresses.create.success_sole_address")

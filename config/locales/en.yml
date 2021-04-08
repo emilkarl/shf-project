@@ -1772,7 +1772,7 @@ en:
   mailers:
     login_here: "Click here to go to the login page."
     your_login_email_is: "Your login email is "
-
+    log_in: &log_in Log in
     how_to_pay_membership: "How to Pay Your Membership Fee:"
     pay_membership_step: "Once you are logged in, go to your account page to pay."
     here_is_acct_page: "Here is your account page: "
@@ -1991,7 +1991,7 @@ en:
 
     sessions:
       new:
-        log_in: &log_in Log In
+        log_in: *log_in
         title: *log_in
         remember_me: Remember me
         submit_button_label: *log_in

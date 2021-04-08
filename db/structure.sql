@@ -102,7 +102,7 @@ CREATE TABLE public.app_configurations (
     site_meta_image_height integer DEFAULT 0 NOT NULL,
     og_type character varying DEFAULT 'website'::character varying NOT NULL,
     twitter_card_type character varying DEFAULT 'summary'::character varying NOT NULL,
-    facebook_app_id bigint DEFAULT '12345678909876'::bigint NOT NULL,
+    facebook_app_id bigint DEFAULT '1292810030791186'::bigint NOT NULL,
     site_meta_image_file_name character varying,
     site_meta_image_content_type character varying,
     site_meta_image_file_size bigint,
@@ -110,7 +110,7 @@ CREATE TABLE public.app_configurations (
     singleton_guard integer DEFAULT 0 NOT NULL,
     payment_too_soon_days integer DEFAULT 60 NOT NULL,
     membership_guideline_list_id bigint,
-    membership_expired_grace_period_duration character varying DEFAULT 'P90D'::character varying NOT NULL,
+    membership_expired_grace_period_duration character varying DEFAULT 'P2Y'::character varying NOT NULL,
     membership_term_duration character varying DEFAULT 'P1Y'::character varying NOT NULL,
     membership_expiring_soon_days integer DEFAULT 60 NOT NULL
 );
@@ -127,7 +127,7 @@ COMMENT ON COLUMN public.app_configurations.payment_too_soon_days IS 'Warn user 
 -- Name: COLUMN app_configurations.membership_expired_grace_period_duration; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.app_configurations.membership_expired_grace_period_duration IS 'Duration after membership expiration that a member can pay without penalty. ISO 8601 Duration string format. Must be used so we can handle leap years';
+COMMENT ON COLUMN public.app_configurations.membership_expired_grace_period_duration IS 'Duration of time after membership expiration that a member can pay without penalty. ISO 8601 Duration string format. Must be used so we can handle leap years.';
 
 
 --
@@ -2097,6 +2097,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20210217002300'),
 ('20210217032402'),
 ('20210217045905'),
-('20210220032402');
+('20210220032402'),
+('20210404015347');
 
 

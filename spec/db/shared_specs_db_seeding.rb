@@ -32,7 +32,11 @@ RSpec.shared_examples 'admin, business categories, kommuns, and regions are seed
         allow(Seeders::UserChecklistsSeeder).to receive(:seed).and_return([])
         allow(SeedHelper::UsersFactory ).to receive(:seed_predefined_users).and_return(true)
 
+        # stub these methods do AppConfiguration isn't called
         allow(Membership).to receive(:term_length).and_return(10)  # so AppConfiguration is not called
+        allow(MembershipsManager).to receive(:grace_period).and_return(90)
+        allow(MembershipsManager).to receive(:days_can_renew_early).and_return(10)
+        allow(MembershipsManager).to receive(:is_expiring_soon_amount).and_return(30)
 
         SHFProject::Application.load_tasks
         SHFProject::Application.load_seed

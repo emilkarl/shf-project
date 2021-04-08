@@ -85,6 +85,7 @@ RSpec.describe 'Dev DB is seeded with users, members, apps, and companies' do
                                               ENV_ADMIN_PASSWORD_KEY   => admin_pwd }))
 
         allow(AdminOnly::AppConfiguration).to receive(:instance).and_return(MockAppConfig)
+        allow(AdminOnly::AppConfiguration).to receive(:config_to_use).and_return(MockAppConfig)
         allow(Seeders::AppConfigurationSeeder).to receive(:tell).and_return(false)
         allow(Seeders::AppConfigurationSeeder).to receive(:log_str).and_return(false)
         allow(Seeders::AppConfigurationSeeder).to receive(:seed).and_return(true)

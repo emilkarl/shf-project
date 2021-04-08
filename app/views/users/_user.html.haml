@@ -12,7 +12,7 @@
     %span{ class: ['membership-status', expire_date_css_class] }
       = user.member ? t('yes') : t('no')
 
-  %td.expire_date
+  %td.expire-date
     - if expire_date
       %span{ class: ['expire-date-background', expire_date_css_class] }
         = expire_date

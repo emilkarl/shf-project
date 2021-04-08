@@ -1343,13 +1343,37 @@ RSpec.describe User, type: :model do
   end
 
 
+  describe 'membership_status aasm events, transitions' do
+    let(:expired_member) { create(:member, expiration_date: Date.current) }
+
+    it 'date: is passed on to the event, and on to the MembershipAction(s)' do
+      expect(Memberships::IndividualMembershipEnterGracePeriodActions).to receive(:for_user)
+                                                                            .with(expired_member,
+                                                                                  first_day: Date.current + 2,
+                                                                                  send_email: true)
+      expired_member.start_grace_period!(date: Date.current + 2)
+    end
+
+    it 'can pass in send_email: and it will be passed on to the event, and on to the MembershipAction(s)' do
+      expired_member = create(:member, expiration_date: Date.current)
+
+      expect(Memberships::IndividualMembershipEnterGracePeriodActions).to receive(:for_user)
+                                                                           .with(expired_member,
+                                                                                 first_day: Date.current,
+                                                                                 send_email: false)
+      expired_member.start_grace_period!(date: Date.current, send_email: false)
+    end
+  end
+
+
   describe 'start_membership_on' do
     it 'calls Memberships::NewIndividualMembershipActions for the user and the first_day' do
       given_user = build(:user)
       given_first_day = Date.current
       expect(Memberships::NewIndividualMembershipActions).to receive(:for_user)
                                                                .with(given_user,
-                                                                     first_day: given_first_day)
+                                                                     first_day: given_first_day,
+                                                                     send_email: true)
       given_user.start_membership_on(date: given_first_day)
     end
   end
@@ -1361,7 +1385,8 @@ RSpec.describe User, type: :model do
       given_first_day = Date.current
       expect(Memberships::RenewIndividualMembershipActions).to receive(:for_user)
                                                                .with(given_user,
-                                                                     first_day: given_first_day)
+                                                                     first_day: given_first_day,
+                                                                     send_email: true)
       given_user.renew_membership_on(date: given_first_day)
     end
   end

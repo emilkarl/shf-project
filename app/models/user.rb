@@ -145,7 +145,10 @@ class User < ApplicationRecord
 
     after_all_transitions :set_membership_changed_info
 
-    # You can pass the (keyword) argument date: <Date> to methods that are called
+    # You can pass the (keyword) arguments
+    #    date: <Date>
+    #    send_email: [true | false]
+    # to methods that are called
     # @url https://github.com/aasm/aasm#callbacks
 
     event :start_membership do
@@ -231,23 +234,23 @@ class User < ApplicationRecord
   end
 
 
-  def start_membership_on(date: Date.current)
-    Memberships::NewIndividualMembershipActions.for_user(self, first_day: date)
+  def start_membership_on(date: Date.current, send_email: true)
+    Memberships::NewIndividualMembershipActions.for_user(self, first_day: date, send_email: send_email)
   end
 
 
-  def renew_membership_on(date: Date.current)
-     Memberships::RenewIndividualMembershipActions.for_user(self, first_day: date)
+  def renew_membership_on(date: Date.current, send_email: true)
+     Memberships::RenewIndividualMembershipActions.for_user(self, first_day: date, send_email: send_email)
   end
 
 
-  def enter_grace_period(date: Date.current)
-    Memberships::IndividualMembershipEnterGracePeriodActions.for_user(self, first_day: date)
+  def enter_grace_period(date: Date.current, send_email: true)
+    Memberships::IndividualMembershipEnterGracePeriodActions.for_user(self, first_day: date, send_email: send_email)
   end
 
 
-  def become_former_member(date: Date.current)
-    Memberships::BecomeFormerIndividualMemberActions.for_user(self, first_day: date)
+  def become_former_member(date: Date.current, send_email: true)
+    Memberships::BecomeFormerIndividualMemberActions.for_user(self, first_day: date, send_email: send_email)
   end
 
 

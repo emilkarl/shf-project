@@ -66,6 +66,7 @@ end
 
 def update_current_members_statuses
   User.current_member.each do |user|
+    # FIXME should emails be sent?
     MembershipStatusUpdater.instance.update_membership_status(user) unless user.admin?
   end
 end

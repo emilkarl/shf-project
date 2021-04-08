@@ -7,7 +7,7 @@
 -#   company - the company (object); used for displaying the name and the url
 -#
 %li.step-1.login
-  = "Log in."
+  = "#{ t('mailers.log_in') }."
   = render 'mailers_shared/login_here_with_email', email: email
 %li.step-2.pay-hmarkt
   = I18n.t('mailers.pay_hmarkt_step')

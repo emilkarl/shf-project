@@ -6,7 +6,7 @@
     .col.intro
       - if user.membership_expired_in_grace_period?
         .alert.alert-danger
-          %h3.section-title.overdue=t('.title_renewal_overdue')
+          %h3.section-title.overdue= t('.title_renewal_overdue')
           .instructions
             %p= t('.renewal_overdue_warning')
       - else

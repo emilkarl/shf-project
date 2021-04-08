@@ -4,7 +4,7 @@
 -#   email - the email address for logging in
 -#
 %li.step-1.login
-  = "Log in."
+  = "#{ t('mailers.log_in') }."
   = render 'mailers_shared/login_here_with_email', email: email
 %li.step-2.edit-companies
   = I18n.t('mailers.how_to_edit_companies.go_to_my_cos_menu')

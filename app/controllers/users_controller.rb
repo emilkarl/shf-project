@@ -52,12 +52,12 @@ class UsersController < ApplicationController
     @filter_ignore_membership = !(@filter_are_members || @filter_are_not_members)
 
     membership_filter = if @filter_are_members
-      ARE_MEMBERS_CLAUSE
-    elsif @filter_are_not_members
-      ARE_NOT_MEMBERS_CLAUSE
-    else
-      ''
-    end
+                          ARE_MEMBERS_CLAUSE
+                        elsif @filter_are_not_members
+                          ARE_NOT_MEMBERS_CLAUSE
+                        else
+                          ''
+                        end
 
     @q = User.ransack(action_params)
 

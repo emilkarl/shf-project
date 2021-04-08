@@ -85,7 +85,7 @@ Feature: Admin can view all users and delete them. Visitors, applicants, members
     And I should see "0" for class "sign-in-count" in the row for user "anna@sadmutts.com"
     And I should see "" for class "applications-open" in the row for user "anna@sadmutts.com"
     And I should see t("yes") for class "is-member" in the row for user "anna@sadmutts.com"
-    And I should see "2017-12-31" for class "expire_date" in the row for user "anna@sadmutts.com"
+    And I should see "2017-12-31" for class "expire-date" in the row for user "anna@sadmutts.com"
 
   Scenario: Member cannot view all users
     Given I am logged in as "anna@sadmutts.com"

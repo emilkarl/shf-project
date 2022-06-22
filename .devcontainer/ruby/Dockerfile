@@ -9,9 +9,9 @@ RUN apt update \
     && apt install -y libssl-dev libreadline-dev zlib1g-dev autoconf bison build-essential libyaml-dev libreadline-dev libncurses5-dev libffi-dev libgdbm-dev
 
 # Install ruby
-RUN wget http://ftp.ruby-lang.org/pub/ruby/2.6/ruby-2.6.6.tar.gz \
-    && tar -xzvf ruby-2.6.6.tar.gz \
-    && cd ruby-2.6.6/ \
+RUN wget http://ftp.ruby-lang.org/pub/ruby/2.7/ruby-2.7.6.tar.gz \
+    && tar -xzvf ruby-2.7.6.tar.gz \
+    && cd ruby-2.7.6/ \
     && ./configure \
     && make install
 
@@ -77,7 +77,8 @@ RUN bundle install
 # Install latest wkhtmltox to get around this issue: https://github.com/pallymore/wkhtmltopdf-binary-edge/issues/15
 USER root
 RUN apt install -y wkhtmltopdf \
-    && cp /usr/bin/wkhtmltoimage /home/$USERNAME/.gem/ruby/2.6.0/gems/wkhtmltoimage-binary-0.12.5/libexec/wkhtmltoimage-amd64
+    && cp /usr/bin/wkhtmltoimage /home/$USERNAME/.gem/ruby/2.7.0/gems/wkhtmltoimage-binary-0.12.5/libexec/wkhtmltoimage-amd64 \
+    && cp /usr/bin/wkhtmltopdf /home/$USERNAME/.gem/ruby/2.7.0/gems/wkhtmltopdf-binary-0.12.6.5/bin/wkhtmltopdf_debian_10_i386
 
 # Create empty db if it doesn't exist
 USER $USERNAME

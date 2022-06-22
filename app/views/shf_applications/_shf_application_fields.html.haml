@@ -1,16 +1,21 @@
 
-.app-section
+.app-section#business-categories
   - unless association_empty?(all_business_categories)
-    %h2= t('shf_applications.new.application_dog_category')
-    %p= t('shf_applications.new.clue_selected_categories')
+    %h2= t('.business_categories.section_title')
+    %p.instructions= t('.business_categories.instructions')
+    %p.instructions= t('.business_categories.instructions2')
+
     .checkbox.col-xs-offset-1
       = f.collection_check_boxes :business_category_ids, all_business_categories, :id, :name do |b|
         = b.check_box(class: 'text-nicelabel', position_class: 'text_checkbox') + b.label
 
 .app-section#supporting-files
-  %h2= t('shf_applications.new.upload_files_section')
+  %h2= t('.supporting_files.section_title')
   .answers
-    %p= t('shf_applications.new.upload_files_instructions')
+    %p.instructions= t('.supporting_files.instructions')
+    %p.email-membership-with-qs
+      = t('.supporting_files.email_membership_with_qs')
+      = mail_to(ENV['SHF_MEMBERSHIP_EMAIL'])
 
     .files
       .container.mt-3
@@ -43,25 +48,29 @@
           .col-md-6
             = render 'uploaded_files_list', shf_application: @shf_application
     %br
-    %p
-      %span.file-delivery-selection
-        = t('shf_applications.new.file_delivery_selection')
-      %br
 
-      - radio_buttons_collection, footnotes = file_delivery_radio_buttons_collection
+    .file-delivery-choices
+      %h3.file-delivery-selection= t('shf_applications.new.file_delivery_selection')
 
-      = f.collection_radio_buttons(:file_delivery_method_id,
-                                   radio_buttons_collection,
-                                   :first, :second, {}) do |rb|
-        = rb.label(class: 'form-check form-check-inline') do
-          %small= rb.radio_button + ' ' + rb.text + ' '
-      %small.file-delivery-footnotes
-        = footnotes
+      - radio_buttons_collection = file_delivery_radio_buttons_collection
+
+      .delivery-choice
+        = f.collection_radio_buttons(:file_delivery_method_id,
+                                     radio_buttons_collection,
+                                     :first, :second, {}) do |rb|
+          = rb.label(class: 'form-check form-check-inline') do
+            = rb.radio_button + ' ' + rb.text + ' '
+
+        %p.file-delivery-footnotes
+          = ('*' + mail_to(ENV['SHF_MEMBERSHIP_EMAIL'], nil, subject: t('shf_applications.new.email_files_subject'))).html_safe
+          = ('&nbsp; &nbsp; **' + t('shf_applications.new.where_to_mail_files')).html_safe
 
     %p.upload-more-note.instructions= t('shf_applications.new.upload_more_files') if controller.action_name == 'new'
 
 .app-section
   %h2= t('shf_applications.new.section_title_about_you')
+  .is-required= render 'application/required_fields'
+
   .answers
 
     = f.label :company_number, t('shf_applications.show.company_number'), class: 'required'

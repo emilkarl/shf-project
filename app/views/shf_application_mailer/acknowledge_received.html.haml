@@ -6,10 +6,8 @@
   %p= t('message_text', scope: i18n_scope)
 
   %hr
-  %p= t('your_submitted_info', scope: i18n_scope)
-  .shf-application-info
-    %p
-      = shf_app_to_html(@shf_application)
+  = render 'your_submitted_info', i18n_scope: i18n_scope, shf_app: @shf_app
   %hr
 
   = render 'mailers_shared/newapp_login_upload_files_instruction', email: @recipient_email
+  = render 'additional_questions_for_categories', categories: @shf_app.business_categories, i18n_scope: i18n_scope

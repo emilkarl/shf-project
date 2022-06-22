@@ -4,9 +4,7 @@ And(/^the following business categories exist$/) do |table|
     subcategories = business_category.delete('subcategories')
 
     cat = FactoryBot.create(:business_category, business_category)
-
     if subcategories
-
       subcategories.split(/\s*,\s*/).each do |subcategory_name|
         FactoryBot.create(:business_category, name: subcategory_name, parent_id: cat.id)
       end
@@ -23,7 +21,7 @@ end
 And(/^I select "([^"]*)" Category/) do |element|
   # You must use a driver that supports javascript if using this step.
 
-  # 5/27/2018 - we are using "collection_check_boxes" helper in the appication
+  # 5/27/2018 - we are using "collection_check_boxes" helper in the application
   # form.  This sets a hidden field that ensures that business_categories (for
   # the membership application) is updated even if no categories are checked in
   # the form (see "Gotcha" in documentation for that method).
@@ -50,7 +48,7 @@ And(/^I select "([^"]*)" Category/) do |element|
   # TODO is it really necessary to run a java script to do this?  Why not use ele.check ?
   #
   ele = find :field, element, visible: :any
-  page.evaluate_script("$(#{ele[:id]}).prop('checked', true)")
+  page.evaluate_script("$(#{ele[:id]}).prop('checked', true)") # ex: $(shf_application_business_category_ids_1).prop('checked', true)
 end
 
 And(/^I unselect "([^"]*)" Category/) do |element|

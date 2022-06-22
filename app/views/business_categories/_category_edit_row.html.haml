@@ -26,27 +26,36 @@
           %tr
             %td
               .form-group
-                = f.label :name, t('activerecord.attributes.business_category.name') , class: 'required'
+                = f.label :name, t('.name') , class: 'required'
                 = f.text_field :name, class: 'form-control'
-            %td
+          %tr
+            %td{ colspan: 4 }
               .form-group
-                = f.label :description, t('activerecord.attributes.business_category.description')
+                = f.label :description, t('.description')
                 = f.text_field :description, class: 'form-control'
-
             %td
               = hidden_field_tag :parent_cat_id, parent_cat_id
+          %tr
+            %td{ colspan: 4 }
+              :ruby
+                # @todo validate URL format
+                # @todo tooltip that explains that this is exactly what the applicants will see, so be sure it's accurate
+              .form-group
+                = f.label :apply_qs_url, t('.apply_qs_url')
+                = f.text_field :apply_qs_url, class: 'form-control'
 
-            %td.border-right.border-dark
-              .float-right
-                = f.submit t('save'), class: 'btn btn-success btn-sm'
-                %br
-                %br
+          %tr
+            %td
+              .text-center
+                - btn_classes = 'btn btn-sm'
+                = f.submit t('save'), class: "#{btn_classes} btn-success"
+
                 - if record_type == 'existing_category'
                   = link_to t('cancel'),
                             get_display_row_business_category_path(business_category),
                             remote: true,
-                            class: 'edit-category-cancel-button btn btn-danger btn-sm mt-1',
+                            class:  "#{btn_classes} edit-category-cancel-button btn-danger",
                             id: "cancel-category-edit-#{business_category.id}"
                 - else
                   = link_to t('cancel'), {}, href: '#',
-                            class: 'new-category-cancel-button btn btn-danger btn-sm mb-1'
+                            class:  "#{btn_classes} new-category-cancel-button btn-danger"

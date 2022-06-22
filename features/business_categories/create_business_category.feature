@@ -16,29 +16,36 @@ Feature: Admin creates business categories; access
 
     And I am logged in as "admin@shf.com"
 
+  # =================================================================================================
+
+  @selenium @admin
   Scenario Outline: Admin creates a new Business Category
     Given I am on the "business categories" page
     And I click on t("business_categories.new.title")
     When I fill in the translated form with data:
-      | activerecord.attributes.business_category.name | activerecord.attributes.business_category.description |
-      | <category_name>                        | <category_description>                        |
+      | business_categories.category_new_row.name | business_categories.category_new_row.description | business_categories.category_new_row.apply_qs_url |
+      | <category_name>                           | <category_description>                           | <link>                                            |
     And I click on t("business_categories.form.save")
-    And I should see t("business_categories.create.success")
-    And I should see "<category_name>"
+
+    Then I should see "<category_name>"
+    And I should see "<category_description>"
+    And I should see "<link>"
 
     Scenarios:
-      | category_name    | category_description                                                                                |
-      | dog grooming     | washing, brushing, cutting, and trimming hair and nails on dogs                                     |
-      | agility training | training dogs to complete agility courses, from beginners to expert competition level               |
-      | dog psychology   | addresses behavioural issues of dogs, including the emotional, cognitive, and psycho-social aspects |
-      | carting/drafting |                                                                                                     |
+      | category_name    | category_description                                                                                | link                       |
+      | dog grooming     | washing, brushing, cutting, and trimming hair and nails on dogs                                     |                            |
+      | agility training | training dogs to complete agility courses, from beginners to expert competition level               | http://example.com/agility |
+      | dog psychology   | addresses behavioural issues of dogs, including the emotional, cognitive, and psycho-social aspects |                            |
+      | carting/drafting |                                                                                                     | http://example.com         |
 
+
+  @selenium @admin
   Scenario Outline: Create a new category - when things go wrong
     Given I am on the "business categories" page
     And I click on t("business_categories.new.title")
     When I fill in the translated form with data:
-      | activerecord.attributes.business_category.name | activerecord.attributes.business_category.description |
-      | <category_name>                        | <category_description>                        |
+      | business_categories.category_new_row.name | business_categories.category_new_row.description |
+      | <category_name>                           | <category_description>                           |
     When I click on t("business_categories.form.save")
     Then I should see <error>
 
@@ -47,16 +54,22 @@ Feature: Admin creates business categories; access
       |               |                      | t("errors.messages.blank") |
       |               | some description     | t("errors.messages.blank") |
 
-  Scenario: Indicate required field
+
+  @selenium @admin
+  Scenario: Category name is a required field
     Given I am on the "business categories" page
     And I click on t("business_categories.new.title")
-    Then the field t("activerecord.attributes.business_category.name") should have a required field indicator
+    Then the field t("business_categories.category_new_row.name") should have a required field indicator
 
+
+  @user
   Scenario: Listing Business Categories restricted for Non-admins
     Given I am logged in as "applicant@random.com"
     And I am on the "business categories" page
     Then I should see a message telling me I am not allowed to see that page
 
+
+  @visitor
   Scenario: Listing Business Categories restricted for visitors
     Given I am Logged out
     And I am on the "business categories" page

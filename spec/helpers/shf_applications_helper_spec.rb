@@ -2,6 +2,25 @@ require 'rails_helper'
 
 RSpec.describe ShfApplicationsHelper, type: :helper do
 
+  let(:category1) { build(:business_category, name: 'category1') }
+  let(:category2) { build(:business_category, name: 'category2') }
+  let(:category3) { build(:business_category, name: 'category3') }
+  let(:app_3_cats) { create(:shf_application, num_categories: 0,
+                             business_categories: [category1, category2, category3]) }
+
+  let(:file_delivery_upload_now) { build(:file_delivery_upload_now) }
+  let(:file_delivery_upload_later) { build(:file_delivery_upload_later) }
+  let(:file_delivery_email) { build(:file_delivery_email) }
+  let(:file_delivery_mail) { build(:file_delivery_mail) }
+  let(:file_delivery_all_files_uploaded) { build(:file_delivery_files_uploaded) }
+
+  before(:each) do
+    allow(AdminOnly::FileDeliveryMethod).to receive(:order)
+                                              .with('default_option DESC')
+                                              .and_return([file_delivery_upload_now, file_delivery_upload_later, file_delivery_email, file_delivery_mail, file_delivery_all_files_uploaded])
+  end
+
+
   describe '#states_selection_list gets the localized version of each state name each time it is requested' do
     let(:application) { build(:shf_application) }
 
@@ -154,7 +173,6 @@ RSpec.describe ShfApplicationsHelper, type: :helper do
 
   end
 
-
   describe "#reasons_collection appends an 'other' reason with name from the locale file" do
 
     it 'other reason is at the end of the list' do
@@ -210,21 +228,71 @@ RSpec.describe ShfApplicationsHelper, type: :helper do
         member_app.custom_reason_text = nil
         expect(helper.selected_reason_value(member_app, -999)).to eq member_app.member_app_waiting_reasons_id
       end
-
     end
-
   end
 
   describe '#list_app_categories' do
-    let(:category1) { create(:business_category, name: 'category1') }
-    let(:category2) { create(:business_category, name: 'category2') }
-    let(:category3) { create(:business_category, name: 'category3') }
-    let(:application) { create(:shf_application, num_categories: 0,
-                               business_categories: [category1, category2, category3]) }
-
     it 'returns list of categories for an application' do
-      expect(list_app_categories(application))
-        .to eq('category1, category2, category3')
+      expect(list_app_categories(app_3_cats)).to eq('category1, category2, category3')
+    end
+  end
+
+  describe 'instructions_for_additional_category_qs' do
+    it 'gets the links for all of the shf application categories' do
+      expect(helper).to receive(:links_for_more_category_questions).with(app_3_cats.business_categories)
+      helper.instructions_for_additional_category_qs(app_3_cats.business_categories, 'sv.shf_applications.create')
+    end
+  end
+
+  describe 'links_for_more_category_questions' do
+    it 'creates a link_for_more_category_questions for each business category' do
+      expect(helper).to receive(:link_for_more_category_questions).exactly(3).times
+      helper.links_for_more_category_questions([category1, category2, category3])
+    end
+
+    it 'default ul class is category-links' do
+      expect(helper.links_for_more_category_questions([]).include?('<ul class=\'category-links\'')).to be_truthy
+      expect(helper.links_for_more_category_questions([], ul_class: 'blorfo flurby').include?('<ul class=\'blorfo flurby\'')).to be_truthy
+    end
+
+    it 'default li class is category-link' do
+      expect(helper.links_for_more_category_questions([category1]).include?('<li class=\'category-link\'')).to be_truthy
+      expect(helper.links_for_more_category_questions([category1], li_class: 'flurbish blorfum').include?('<li class=\'flurbish blorfum\'')).to be_truthy
+    end
+
+    it 'creates a ul with each category as an li element' do
+      expect(helper.links_for_more_category_questions([category2, category1])).to match(/<ul class='[^']+'(.*)<li(.*)<li(.*)<\/ul(.*)/)
+    end
+
+    it 'empty ul element if no business categories' do
+      expect(helper.links_for_more_category_questions([]).include?('<li')).to be_falsey
+    end
+  end
+
+  describe 'link_for_more_category_questions' do
+    let(:result) { helper.link_for_more_category_questions(category1) }
+
+    it 'default li class is category_link' do
+      expect(helper.link_for_more_category_questions(category1).include?('<li class=\'category-link\'')).to be_truthy
+      expect(helper.link_for_more_category_questions(category1, li_class: 'flurbish blorfum').include?('<li class=\'flurbish blorfum\'')).to be_truthy
+    end
+
+    it 'creates an li element with the category name and link and external link icon' do
+      expect(result).to match(/<li class='[^']+'(.*)<\/li(.*)/)
+    end
+
+    it 'uses the external link icon' do
+      # include the ShfIconsHelper so we can stub the methods
+      described_class.module_eval do
+        include ShfIconsHelper
+      end
+
+      allow(helper).to receive(:external_link_icon).and_return('external link icon')
+      expect(helper.link_for_more_category_questions(category1).include?('external link icon')).to be_truthy
+    end
+
+    it 'link will open in a new window (target = _blank)' do
+      expect(result.include?('target=\'_blank\'')).to be_truthy
     end
   end
 
@@ -232,68 +300,43 @@ RSpec.describe ShfApplicationsHelper, type: :helper do
 
     let(:collection_sv)  do
       I18n.locale = :sv
-      file_delivery_radio_buttons_collection.first
+      file_delivery_radio_buttons_collection
     end
 
     let(:collection_en)  do
       I18n.locale = :en
-      file_delivery_radio_buttons_collection.first
+      file_delivery_radio_buttons_collection
     end
 
-    let(:footnotes_sv)  do
+
+    it 'gets the options from AdminOnly::FileDeliveryMethod' do
       I18n.locale = :sv
-      file_delivery_radio_buttons_collection.second
+      expect(file_delivery_radio_buttons_collection.count).to eq 5
     end
 
-    let(:footnotes_en)  do
-      I18n.locale = :en
-      file_delivery_radio_buttons_collection.second
-    end
-
-    let!(:upload_now) { create(:file_delivery_upload_now) }
-    let!(:upload_later) { create(:file_delivery_upload_later) }
-    let!(:email) { create(:file_delivery_email) }
-    let!(:mail) { create(:file_delivery_mail) }
-    let!(:files_uploaded) { create(:file_delivery_files_uploaded) }
-
-    it 'includes all options in DB' do
-      expect(collection_sv.count).to eq 5
-    end
-
-    it 'returns option descriptions (with footnotes indicators) - swedish' do
+    it 'returns option descriptions - swedish' do
+      I18n.locale = :sv
       expect(collection_sv).to contain_exactly(
-        [upload_now.id, upload_now.description_sv],
-        [upload_later.id, upload_later.description_sv],
-        [email.id, email.description_sv + '*'],
-        [mail.id, mail.description_sv + '**'],
-        [files_uploaded.id, files_uploaded.description_sv]
+        [file_delivery_upload_now.id, file_delivery_upload_now.description_sv],
+        [file_delivery_upload_later.id, file_delivery_upload_later.description_sv],
+        [file_delivery_email.id, file_delivery_email.description_sv + '*'],
+        [file_delivery_mail.id, file_delivery_mail.description_sv + '**'],
+        [file_delivery_all_files_uploaded.id, file_delivery_all_files_uploaded.description_sv]
       )
     end
 
-    it 'returns option descriptions (with footnotes indicators) - english' do
+    it 'returns option descriptions - english' do
       expect(collection_en).to contain_exactly(
-        [upload_now.id, upload_now.description_en],
-        [upload_later.id, upload_later.description_en],
-        [email.id, email.description_en + '*'],
-        [mail.id, mail.description_en + '**'],
-        [files_uploaded.id, files_uploaded.description_en]
+        [file_delivery_upload_now.id, file_delivery_upload_now.description_en],
+        [file_delivery_upload_later.id, file_delivery_upload_later.description_en],
+        [file_delivery_email.id, file_delivery_email.description_en + '*'],
+        [file_delivery_mail.id, file_delivery_mail.description_en + '**'],
+        [file_delivery_all_files_uploaded.id, file_delivery_all_files_uploaded.description_en]
       )
-    end
-
-    it 'returns option footnotes - swedish' do
-      I18n.locale = :sv
-      expect(footnotes_sv).to match(/\*.*#{ENV['SHF_MEMBERSHIP_EMAIL']}/)
-      expect(footnotes_sv).to match(/#{t('shf_applications.new.where_to_mail_files')}/)
-    end
-
-    it 'returns option footnotes - english' do
-      I18n.locale = :en
-      expect(footnotes_sv).to match(/\*.*#{ENV['SHF_MEMBERSHIP_EMAIL']}/)
-      expect(footnotes_sv).to match(/#{t('shf_applications.new.where_to_mail_files')}/)
     end
 
     it 'orders default option (upload) as first in list of buttons' do
-      expect(collection_en.first).to eq [upload_now.id, upload_now.description_en]
+      expect(collection_en.first).to eq [file_delivery_upload_now.id, file_delivery_upload_now.description_en]
     end
   end
 
@@ -313,7 +356,7 @@ RSpec.describe ShfApplicationsHelper, type: :helper do
       AdminOnly::FileDeliveryMethod::METHOD_NAMES.values.each do |fdm_name|
 
         app = create(:shf_application,
-                     file_delivery_method: create("file_delivery_#{fdm_name}".to_sym))
+                     file_delivery_method: build("file_delivery_#{fdm_name}".to_sym))
 
         fdm = app.file_delivery_method
         fdm_msg = file_delivery_method_status(app)
@@ -325,10 +368,11 @@ RSpec.describe ShfApplicationsHelper, type: :helper do
     end
   end
 
+
   describe 'business categories string for views' do
 
-    let(:cat) do
-      cat = create(:business_category)
+    let(:top_category) do
+      cat = create(:business_category, name: 'Top Category')
       cat.children.create(name: 'cat1_subcat1')
       cat.children.create(name: 'cat1_subcat2')
       cat.children.create(name: 'cat1_subcat3')
@@ -338,15 +382,15 @@ RSpec.describe ShfApplicationsHelper, type: :helper do
     let(:app) do
       app = build(:shf_application, num_categories: 0)
       app.save(validate: false)
-      app.business_categories << cat
-      app.business_categories << cat.children
+      app.business_categories << top_category
+      app.business_categories << top_category.children
       app
     end
 
     describe '#subcategories_list_in_parens' do
 
       it 'returns string of subcategories names in parens with "including:" preface' do
-        subcategories = app.business_subcategories(cat)
+        subcategories = app.business_subcategories(top_category)
         expect(subcategories_list_in_parens(subcategories)).to eq " (#{t('including')}: cat1_subcat1, cat1_subcat2, cat1_subcat3)"
       end
     end
@@ -355,9 +399,26 @@ RSpec.describe ShfApplicationsHelper, type: :helper do
 
       it 'returns string with category and subcategory names' do
         expect(business_categories_str(app))
-          .to eq "Business Category (#{t('including')}: cat1_subcat1, cat1_subcat2, cat1_subcat3)"
+          .to eq "Top Category (#{t('including')}: cat1_subcat1, cat1_subcat2, cat1_subcat3)"
       end
     end
+
+    # describe 'company_business_categories_str' do
+    #   let(:co_with_3_current_cats) do
+    #
+    #   end
+    #
+    #   it 'builds a string with the current business categories' do
+    #     pending
+    #   end
+    #
+    #   it 'puts sub categories in a parenthesis' do
+    #     expect(helper).to receive(:subcategories_list_in_parens)
+    #                         .with('')
+    #                         .and_return('(sub cat here)')
+    #     helper.company_business_categories_str(app.companies.first)
+    #   end
+    # end
   end
 
 

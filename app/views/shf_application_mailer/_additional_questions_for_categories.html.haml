@@ -1,0 +1,11 @@
+:ruby
+  # This view expects these locals:
+  #  categories [Array<BusinessCategory>] list of categories that we need to show
+  #  i18n_scope [String] the scope to use for I18n.t calls
+
+.additional-questions-for-categories
+  .instructions
+    %p= t('more_questions_instructions', scope: i18n_scope)
+    %ul.category-links
+      - categories.each do |category|
+        %li.category-link= link_to("#{category.name} #{category.apply_qs_url}", category.apply_qs_url)

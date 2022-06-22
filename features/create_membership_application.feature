@@ -352,7 +352,7 @@ Feature: Create a new membership application
     And I click the icon with CSS class "add-entity-button" for the row with "Groomer"
     And I should see t("business_categories.index.add_subcategory")
     When I fill in the translated form with data:
-      | activerecord.attributes.business_category.name | activerecord.attributes.business_category.description |
+      | business_categories.category_edit_row.name | business_categories.category_edit_row.description |
       | overall grooming                               | full service grooming                                 |
 
     When I click on t("save")

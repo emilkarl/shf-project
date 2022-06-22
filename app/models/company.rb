@@ -312,7 +312,7 @@ class Company < ApplicationRecord
     return current_categories(include_subcategories).map(&:name).uniq.sort unless include_subcategories
 
     names = []
-    cats.each do |category|
+    current_categories.each do |category|
       names << category.name
       names += category.children.order(:name).pluck(:name)
     end

@@ -25,9 +25,9 @@ Feature: Admin edits business categories
     And I am on the "business categories" page
     When I click the icon with CSS class "edit" for the row with "dog grooming"
     Then I should see t("business_categories.index.edit_category")
-    And I fill in t("activerecord.attributes.business_category.name") with "doggy grooming"
+    When I fill in t("business_categories.category_edit_row.name") with "doggy grooming"
     And I click on t("save")
-    And I should see "doggy grooming"
+    Then I should see "doggy grooming"
 
   @selenium
   Scenario: Admin makes a mistake when editing a business category = sad path
@@ -35,10 +35,10 @@ Feature: Admin edits business categories
     And I am on the "business categories" page
     Then I should see "dog crooning"
     And I should see "dog grooming"
-    When I click the icon with CSS class "edit" for the row with "dog crooning"
 
+    When I click the icon with CSS class "edit" for the row with "dog crooning"
     Then I should see t("business_categories.index.edit_category")
-    And I fill in t("activerecord.attributes.business_category.name") with ""
+    When I fill in t("business_categories.category_edit_row.name") with ""
     And I click on t("save")
     Then I should see error t("activerecord.attributes.business_category.name") t("errors.messages.blank")
 

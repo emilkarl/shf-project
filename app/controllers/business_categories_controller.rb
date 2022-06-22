@@ -14,16 +14,12 @@ class BusinessCategoriesController < ApplicationController
 
 
   def show
-
     @companies = @business_category.companies.includes(:addresses).order(:name)
-
     @companies = @companies.searchable unless current_user.admin?
-
   end
 
 
   def new
-
     authorize BusinessCategory
     @business_category = BusinessCategory.new
 
@@ -56,7 +52,6 @@ class BusinessCategoriesController < ApplicationController
     @business_category.parent_id = params[:parent_cat_id] if context == 'subcategory'
 
     saved = @business_category.save
-
     respond_to do |format|
       format.html do
         if saved
@@ -193,7 +188,7 @@ class BusinessCategoriesController < ApplicationController
 
   # Never trust parameters from the scary internet, only allow the white list through.
   def business_category_params
-    params.require(:business_category).permit(:name, :description)
+    params.require(:business_category).permit(:name, :description, :apply_qs_url)
   end
 
 

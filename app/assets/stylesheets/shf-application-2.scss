@@ -11,6 +11,40 @@
   font-size: 16px;
 }
 
+
+.shfapplication {
+
+  .file-delivery-choices {
+
+    .file-delivery-selection {
+      //font-size: 1.2em;
+      //font-weight: bold;
+      //line-height: 2em;
+    }
+
+    .delivery-choice {
+      margin-left: 1em;
+
+      .form-check.form-check-inline {
+        margin-right: 2em;
+        margin-top: 0;
+
+        input {
+          margin-right: 0.25em;
+        }
+      }
+
+      .file-delivery-footnotes {
+        font-size: smaller;
+        line-height: 3em;
+        margin-left: 2em;
+      }
+    }
+
+  }
+}
+
+
 .edit_shf_application {
 
   .section-instructions {

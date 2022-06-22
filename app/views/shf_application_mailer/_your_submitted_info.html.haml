@@ -1,0 +1,8 @@
+:ruby
+  # This partial expects these locals:
+  #   i18n_scope [String] - the scope to use to look up translations
+  #   shf_app [ShfApplication] - the Shf Application to show the details for
+%p= t('your_submitted_info', scope: i18n_scope)
+.shf-application-info
+  %p= shf_app_to_html(shf_app)
+

@@ -3,6 +3,6 @@
     .alert.alert-dismissable.center{ class: "alert-#{flash_class(key)}", role: 'alert' }
       %button.close{ type: 'button', 'data-dismiss' => 'alert' }
         %span &times;
-      = render_flash_message(value)
+      = h render_flash_message(value)
 
   - flash.clear

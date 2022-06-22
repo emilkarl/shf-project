@@ -83,6 +83,6 @@ function enable_submit_button () {
 
 function remove_change_callback_for_radio_buttons (radio_buttons) {
   radio_buttons.each(function () {
-    $(this).off('change');
+    // $(this).off('change');
   });
 }

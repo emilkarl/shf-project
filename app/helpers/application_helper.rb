@@ -32,7 +32,7 @@ module ApplicationHelper
     if flash[type].instance_of? String
       flash[type] = [flash[type]]
     end
-    flash[type] << text
+    flash[type] << text.html_safe
   end
 
 
@@ -41,7 +41,7 @@ module ApplicationHelper
       flash_value
     else
       flash_value[0] = flash_value[0].html_safe
-      safe_join(flash_value, '<br/>'.html_safe)
+      safe_join(flash_value.map(&:html_safe), '<br/>'.html_safe)
     end
   end
 

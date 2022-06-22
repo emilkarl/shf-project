@@ -4,9 +4,10 @@
 %thead
   %tr
     %th.name.col-width-25pc
-      = parent_category ? t('activerecord.models.business_category.one') : ''
+      = parent_category ? t('.name') : ''
     %th.description.col-width-40pc
-      = parent_category ? t('activerecord.attributes.business_category.description') : ''
+      = parent_category ? t('.description') : ''
+    %th.apply-qs-url= parent_category ? t('.apply_qs_url') : ''
     %th.col-width-20pc
     %th.col-width-5pc
     %th.col-width-5pc

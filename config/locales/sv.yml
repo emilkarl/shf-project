@@ -297,6 +297,7 @@ sv:
         description: *description
         subcategory: &subcategory Underkategori
         subcategories: Underkategorier
+        apply_qs_url: &category_addtl_qs_link Länk till formulär
 
       shf_document:
         title: &title Titel
@@ -616,11 +617,7 @@ sv:
       contact_email: *contact_email
 
       can_be_same_email: Kan vara samma som du loggar in med, men behöver inte vara det.
-      application_dog_category: &application_dog_category "Ansöker som:"
-      clue_selected_categories: &clue_selected_categories "Blå fält = valda. Relevant medlemskategori behöver fyllas i för att vi ska kunna hantera din ansökan."
 
-      upload_files_section:  Underlag för att styrka min ansökan
-      upload_files_instructions: 'Dokumenten är mycket viktiga för att vi ska kunna bedöma din ansökan. Vi använder dem för att verifiera dina kunskaper och utbildningar. Detta säkerställer att vår medlemsstandard är fortsatt hög, vilket i förlängningen innebär att allmänheten vet att Sveriges hundföretagare är professionella och att lita på.'
       upload_files: 'Ladda upp filer från datorn (VIKTIGT)'
       upload_allowed_file_types: *upload_allowed_types
       upload_more_files: Du kan ladda upp fler filer genom att redigera din ansökan efter att du skickat in den.
@@ -645,6 +642,8 @@ sv:
       success_with_app_files_missing: "!! Din ansökan har sparats, men den saknar nödvändiga filer !!"
       upload_file_or_select_method: &upload_files Var god ladda upp filer eller välj en annan leveransmetod
       remember_to_deliver_files: &chosen_method Kom ihåg att leverera filer via den valda leveransmetoden
+      success_more_questions_instructions: &category_more_qs_instructions "Har du inte bifogat formulär från din utbildare behöver du nu fylla i ett Google formulär for varje kategori, där du intygar att du har behörighet för allt inom den kategorin. Din ansökan är inte klar förrän du skickat in relevant(a) formulär."
+      success_category_link: &category_link "%{category}: %{link}"
 
     edit:
       title: Redigera ansökan om medlemskap
@@ -659,6 +658,8 @@ sv:
       success_with_app_files_missing: "!! Din ansökan laddades upp men den saknar filer !!"
       upload_file_or_select_method: *upload_files
       remember_to_deliver_files: *chosen_method
+      success_more_questions_instructions: *category_more_qs_instructions
+      success_category_link: *category_link
 
     show:
       title: Ansökan från %{user_full_name}
@@ -745,8 +746,16 @@ sv:
       company_name: *name
 
     shf_application_fields:
-      company_numbers_tooltip: Du kan ange flera företagsnummer, åtskilda av
-                               ett kommatecken eller tomma mellanslag
+      company_numbers_tooltip: Du kan ange flera företagsnummer, åtskilda av ett kommatecken eller tomma mellanslag
+      business_categories:
+        section_title: &business_categories_title "Ansöker som:"
+        instructions:  &clue_selected_categories "Blå fält = valda. Relevant medlemskategori behöver fyllas i för att vi ska kunna hantera din ansökan."
+        instructions2: Du behöver bifoga underlag som visar att du är behörig för den/de kategori(er) du väljer. Instruktioner nedan.
+      supporting_files:
+        section_title: Underlag för att styrka min ansökan
+        instructions: "Ladda upp underlag som visar att du har genomfört all relevant utbildning. Ett vanligt underlag är signerade examensbevis. Du kan ta ett foto på ditt examensbevis eller skanna in det i din dator."
+        email_membership_with_qs: "Om du upplever problem, skriv en rad till: "
+
 
     start_review:
       success: Granskningen har påbörjats.
@@ -1008,7 +1017,6 @@ sv:
               Redigera företaget för att aktivera visning av händelser.)
 
   business_categories:
-
     index:
       title: &business_category Företagstyp
       name: *business_category_name
@@ -1029,7 +1037,9 @@ sv:
 
     new:
       title: Ny företagstyp (kategori)
+      name: *business_category_name
       description: *description
+      apply_qs_url: *category_addtl_qs_link
       no_one_applied_category: *category_no_one_applied
 
 
@@ -1049,14 +1059,32 @@ sv:
 
     form:
       save: *save
+      name: *business_category
+      description: *description
+      apply_qs_url: *category_addtl_qs_link
 
     form_collection_checkboxes:
-      title: *application_dog_category
+      title: *business_categories_title
       clue_selected_categories: *clue_selected_categories
 
     new_business_category: Skapa ny företagstyp (kategori)
     new_business_subcategory: Ny underkategori
     all_business_categories: Alla kategorier
+
+    cat_table_head:
+      name: *business_category
+      description: *description
+      apply_qs_url: *category_addtl_qs_link
+
+    category_new_row:
+      name: *business_category
+      description: *description
+      apply_qs_url: *category_addtl_qs_link
+
+    category_edit_row:
+      name: *business_category
+      description: *description
+      apply_qs_url: *category_addtl_qs_link
 
   users:
     edit_user_account: &edit_user_account Redigera kontot för %{name}
@@ -2010,13 +2038,15 @@ sv:
 
       acknowledge_received:
         subject: Din ansökan till Sveriges Hundföretagare är mottagen
-        message_text: "Din ansökan är mottagen. Vi hanterar den så fort vi kan. Säkerställ att du laddat upp eller mailar in allt relevant underlag."
-        your_submitted_info: "Här är vad du har laddat upp:"
+        message_text: &app_been_recieved "Din ansökan är mottagen. Vi hanterar den så fort vi kan. Säkerställ att du laddat upp eller mailar in allt relevant underlag."
+        your_submitted_info: &your_submitted_info "Här är vad du har laddat upp:"
         review_after_recevied_files: *review_after_recevied_files
         upload_choice_intro: "Ditt val för att tillhandahålla underlag: "
         need_to_upload: "Du måste ladda upp dina filer. Här är hur:"
         can_upload_more: "Du kan ladda upp fler filer. Här är hur:"
         error_sending: &shf_email_error  "Det gick inte att skicka e-post till dig på {% email} om din ansökan."
+        more_questions_instructions: *category_more_qs_instructions
+        category_link: *category_link
 
       app_approved:
         subject: Din ansökan till Sveriges Hundföretagare är godkänd.
@@ -2028,6 +2058,14 @@ sv:
           h_branding_not_paid: "När detta är gjort behöver du göra färdigt din företagssida och betala din H-märkesavgift. Mer information om hur du gör det kommer i ett mail efter att du betalt din medlemsavgift."
           thanks:  "Tack för att du vill vara medlem och bidrar till ett kvalitetssäkrat hundsverige."
           error_sending: *shf_email_error
+
+      additional_qs_for_biz_cats:
+        subject: Ytterligare frågor för nya Sveriges Hundföretagare kategorier
+        message_text:
+          youve_add_categories: Tack för att du uppdaterat din ansökan. Du har ansökt om ny(a) kategori(er).
+          more_questions_instructions: *category_more_qs_instructions
+          your_submitted_info: *your_submitted_info
+        error_sending: *shf_email_error
 
 
     member_mailer:

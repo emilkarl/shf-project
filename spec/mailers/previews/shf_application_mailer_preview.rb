@@ -52,6 +52,12 @@ class ShfApplicationMailerPreview < ActionMailer::Preview
     ShfApplicationMailer.acknowledge_received(app_with_uploads)
   end
 
+  def additional_qs_for_biz_cats
+    shf_app = random_shf_app(:new)
+    ShfApplicationMailer.additional_qs_for_biz_cats(shf_app, [shf_app.business_categories.first])
+  end
+
+
   private
 
   def get_new_app

@@ -35,7 +35,7 @@
 }
 
 #company-pay-modal p, #company-pay-modal pre {
-margin-bottom:0;
+  margin-bottom: 0;
 }
 
 
@@ -174,8 +174,8 @@ a.btn.disabled, {
 }
 
 .company-story img {
-max-width:100%;
-height:auto!important;
+  height: auto !important;
+  max-width: 100%;
 }
 
 .company_search {
@@ -227,7 +227,7 @@ nav.navbar .dropdown-menu li a {
 }
 
 .form-check-label {
-margin: 5px 0 0 0;
+  margin: 5px 0 0;
 }
 
 .files-to-upload-title {
@@ -313,6 +313,21 @@ margin: 5px 0 0 0;
   font-weight: 900;
 }
 
+.addtl-category-qs {
+
+  .category-link {
+    a {
+      border-bottom: 0;
+      text-decoration: none;
+    }
+
+    i {
+      font-size: 60%;
+      vertical-align: super;
+    }
+  }
+}
+
 .no-padding {
   margin: 0 !important;
   padding: 0 !important;
@@ -369,12 +384,12 @@ margin: 5px 0 0 0;
 }
 
 .table {
-margin-top:20px;
+  margin-top: 20px;
 }
 
 
 .table th {
-  border-top:none;
+  border-top: 0;
   padding: .15rem .75rem;
 }
 
@@ -523,12 +538,14 @@ h6 {
 }
 
 label {
-margin-bottom: 0;
-margin-top: .5rem;
+  margin-bottom: 0;
+  margin-top: 0.5rem;
 }
 
 
-.address label {margin: 0;}
+.address label {
+  margin: 0;
+}
 
 nav.navbar {
   background-color: $white;

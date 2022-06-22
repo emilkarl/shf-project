@@ -293,12 +293,12 @@ en:
         dinkurs_key: &dinkurs_company_key Dinkurs Company key
         dinkurs_company_id: Dinkurs company key
 
-
       business_category:
         name: &business_category_name  Name
         description: *description
         subcategory: &subcategory Subcategory
         subcategories: Subcategories
+        apply_qs_url: &category_addtl_qs_link  Link for additional questions
 
       shf_document:
         title: &title Title
@@ -609,11 +609,7 @@ en:
       contact_email: *contact_email
 
       can_be_same_email: Can be the same that you logged in with, but need not be.
-      application_dog_category: &application_dog_category "Services You Provide"
-      clue_selected_categories: &clue_selected_categories "Blue box = selected categories"
 
-      upload_files_section: Documents to support your application (certifications, etc.)
-      upload_files_instructions: 'The documents are very important for us to assess your application. We use them to authenticate your skills and education. This ensures that our membership standards remain high, which in turn means that the public know that the Swedish dog business is professional and reliable.'
       upload_files: 'Upload files from your computer:'
       upload_allowed_file_types: *upload_allowed_types
       upload_more_files: 'You can upload more files. After you submit your application, you may still edit the application and upload more files.'
@@ -640,6 +636,8 @@ en:
       success_with_app_files_missing: YOUR APPLICATION WAS CREATED, BUT REQUIRED FILES ARE MISSING
       upload_file_or_select_method: &upload_files Please upload files or select another delivery method
       remember_to_deliver_files: &chosen_method Please remember to deliver files via the chosen delivery method
+      success_more_questions_instructions: &category_more_qs_instructions "You will now have to fill out a Google form for each category, in which you guarantee that you have gone through all the required subjects and elements required for approval. Your application is not complete until you have filled out your form(-s)."
+      success_category_link: &category_link "%{category}:  %{link}"
 
     edit:
       title: Edit Membership Application
@@ -654,6 +652,8 @@ en:
       success_with_app_files_missing: YOUR APPLICATION WAS UPDATED, BUT REQUIRED FILES ARE MISSING
       upload_file_or_select_method: *upload_files
       remember_to_deliver_files: *chosen_method
+      success_more_questions_instructions: *category_more_qs_instructions
+      success_category_link: *category_link
 
     show:
       title: Application from %{user_full_name}
@@ -738,8 +738,15 @@ en:
       company_name: *name
 
     shf_application_fields:
-      company_numbers_tooltip: You can enter multiple company numbers, separated by
-        a comma or blank spaces
+      company_numbers_tooltip: You can enter multiple company numbers, separated by a comma or blank spaces
+      business_categories:
+        section_title: &business_categories_title "Services You Provide"
+        instructions: &clue_selected_categories "Blue field = selected. Relevant member category needs to be filled in for us to be able to handle your application."
+        instructions2: You will need to submit documentation the proves you are qualified in each category you select. Instructions are in the next section.
+      supporting_files:
+        section_title: Documents to support your application (certifications, etc.)
+        instructions: "Please upload evidence which proves that your have successfully completed all the education that you mentioned in the category-forms. A common type of evidence is signed diplomas. You can take a picture of your diploma or scan it into your computer. "
+        email_membership_with_qs: "If you’re having trouble with this, please send an email to "
 
     start_review:
       success: The review has been started.
@@ -999,7 +1006,6 @@ en:
     show_not: (Showing Dinkurs events on this page has been disabled.  Edit the company to enable that.)
 
   business_categories:
-
     index:
       title: Company Categories
       name: *business_category_name
@@ -1020,7 +1026,9 @@ en:
 
     new:
       title: New business category
+      name: *business_category_name
       description: *description
+      apply_qs_url: *category_addtl_qs_link
       no_one_applied_category: *category_no_one_applied
 
     create:
@@ -1038,15 +1046,34 @@ en:
       success: Category deleted.
 
     form:
+      name: *business_category
+      description: *description
+      apply_qs_url: *category_addtl_qs_link
       save: *save
 
     form_collection_checkboxes:
-      title: *application_dog_category
+      title: *business_categories_title
       clue_selected_categories: *clue_selected_categories
 
     new_business_category: New business category
     new_business_subcategory: New subcategory
     all_business_categories: All categories
+
+    cat_table_head:
+      name: *business_category
+      description: *description
+      apply_qs_url: *category_addtl_qs_link
+
+    category_new_row:
+      name: *business_category
+      description: *description
+      apply_qs_url: *category_addtl_qs_link
+
+    category_edit_row:
+      name: *business_category
+      description: *description
+      apply_qs_url: *category_addtl_qs_link
+
 
   users:
     edit_user_account: &edit_user_account "Edit the account for %{name}"
@@ -2006,13 +2033,15 @@ en:
 
       acknowledge_received:
         subject: Your application to Sveriges Hundföretagare has been received
-        message_text: "Your application has been received.  We are all working hard, so it might take a while before we get to it. So do not worry if it takes a while before you hear from us."
-        your_submitted_info: "As a reminder, here is what you submitted:"
+        message_text: &app_been_recieved "Your application has been received.  We are all working hard, so it might take a while before we get to it. So do not worry if it takes a while before you hear from us."
+        your_submitted_info: &your_submitted_info "As a reminder, here is what you submitted:"
         review_after_recevied_files: *review_after_recevied_files
         upload_choice_intro: "Your choice for providing files: "
         need_to_upload: "You need to upload your files. Here's how:"
         can_upload_more: "You can upload more files. Here's how:"
         error_sending: &shf_email_error "There was a problem sending email to you at {%email} about your application."
+        more_questions_instructions: *category_more_qs_instructions
+        category_link: *category_link
 
       app_approved:
         subject: Your application to Sveriges Hundföretagare is approved
@@ -2025,6 +2054,13 @@ en:
           thanks: "Thank you for wanting to be a member and contributing to a Sweden with an ethical dog industry."
           error_sending: *shf_email_error
 
+      additional_qs_for_biz_cats:
+        subject: Additional questions for new Sveriges Hundföretagare business categories
+        message_text:
+          youve_add_categories: Thanks for updating your application. You've added new business categories.
+          more_questions_instructions: *category_more_qs_instructions
+          your_submitted_info: *your_submitted_info
+        error_sending: *shf_email_error
 
     member_mailer:
       member_account_link: "%{account_link} (You may need to login first before the link works. Your login is %{login_email}.)"

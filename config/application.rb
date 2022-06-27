@@ -46,6 +46,8 @@ module SHFProject
 
     config.version = AppVersion.get_version
 
+    config.colorize_logging = false
+
     ###
     #
     # Mail

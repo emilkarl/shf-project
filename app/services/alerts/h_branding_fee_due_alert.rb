@@ -18,7 +18,7 @@ module Alerts
     # of dates.
     def send_alert_this_day?(timing, config, company)
 
-      if Reqs::RequirementsForHBrandingFeeDue.requirements_met?(company: company)
+      if Reqs::RequirementsForHBrandingFeeDue.satisfied?(entity: company)
 
         due = if (latest_payment_expiry = company.branding_expire_date)
                 latest_payment_expiry

@@ -34,7 +34,7 @@ module Alerts
             allow(co_license_current).to receive(:earliest_current_member_fee_paid_time).and_return(most_recent_member_payment_start)
             allow(described_class).to receive(:days_today_is_away_from).and_return(1)
 
-            expect(Reqs::RequirementsForHBrandingFeeDue).to receive(:requirements_met?).with(company: co_license_current).and_return(true)
+            expect(Reqs::RequirementsForHBrandingFeeDue).to receive(:requirements_met?).with(entity: co_license_current).and_return(true)
             expect(subject.send_alert_this_day?(timing, config, co_license_current)).to be_truthy
           end
 
@@ -44,7 +44,7 @@ module Alerts
             expect(co_license_current).not_to receive(:earliest_current_member_fee_paid_time)
             expect(described_class).not_to receive(:days_today_is_away_from)
 
-            expect(Reqs::RequirementsForHBrandingFeeDue).to receive(:requirements_met?).with(company: co_license_current).and_return(false)
+            expect(Reqs::RequirementsForHBrandingFeeDue).to receive(:requirements_met?).with(entity: co_license_current).and_return(false)
             expect(subject.send_alert_this_day?(timing, config, co_license_current)).to be_falsey
           end
 
@@ -165,10 +165,10 @@ module Alerts
                                      .and_return(earliest_member_fee_paid)
 
                 expect(Reqs::RequirementsForHBrandingFeeDue).to receive(:requirements_met?)
-                                                                  .with(company: mock_co1)
+                                                                  .with(entity: mock_co1)
                                                                   .and_return(true)
                 expect(Reqs::RequirementsForHBrandingFeeDue).to receive(:requirements_met?)
-                                                                  .with(company: mock_co2)
+                                                                  .with(entity: mock_co2)
                                                                   .and_return(true)
 
                 expect(subject).to receive(:send_email)
@@ -198,11 +198,11 @@ module Alerts
                                                                           mock_co2])
 
                 expect(Reqs::RequirementsForHBrandingFeeDue).to receive(:requirements_met?)
-                                                                  .with(company: mock_co1)
+                                                                  .with(entity: mock_co1)
                                                                   .and_return(true)
 
                 expect(Reqs::RequirementsForHBrandingFeeDue).to receive(:requirements_met?)
-                                                                  .with(company: mock_co2)
+                                                                  .with(entity: mock_co2)
                                                                   .and_return(true)
 
                 expect(subject).not_to receive(:send_email)

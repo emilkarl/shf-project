@@ -22,7 +22,7 @@ module Alerts
 
     # add the entity iff it is a member unpaid for 6 months
     def add_item_to_list?(user)
-      Reqs::RequirementsForMemberUnpaidMoreThanXMonths.requirements_met?({ entity: user, num_months: NUM_MONTHS })
+      Reqs::RequirementsForMemberUnpaidMoreThanXMonths.satisfied?({ entity: user, num_months: NUM_MONTHS })
     end
 
     # Only send to the membership email.  Make a temporary admin user for this (not saved to the db)

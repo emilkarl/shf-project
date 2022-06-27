@@ -99,9 +99,7 @@ module Alerts
     #  TODO - is the log really needed?  does the @alert_logger already have it?
     #
     def log_mail_response(_log, mail_response, *entities)
-
-      mail_response.errors.empty? ? @alert_logger.log_success(*entities)
-        : @alert_logger.log_failure(*entities)
+      mail_response.errors.empty? ? @alert_logger.log_success(*entities) : @alert_logger.log_failure(*entities)
     end
 
     # Method to improve readability. returns true if day_number is in config[:days]
@@ -184,10 +182,10 @@ module Alerts
     # If so, we can abstract that to here and have subclasses just provide the
     # method for return_false_condition and for determining the day_to_check
     #
-    # @param timing [Timing] - the relative timing of the alerts
-    # @param config [Object] - configuration information used to determine if an alert should be sent
-    # @param entity [Object] - the entity (e.g. user or company) we are checking and,
-    #                          if appropriate, will send the alert to
+    # @param _timing [Timing] - the relative timing of the alerts
+    # @param _config [Object] - configuration information used to determine if an alert should be sent
+    # @param _entity [Object] - the entity (e.g. user or company) we are checking and,
+    #                          if appropriate, will send the alert
     #
     def send_alert_this_day?(_timing, _config, _entity)
       raise NoMethodError, "Subclass must define the #{__method__} method and return true or false", caller

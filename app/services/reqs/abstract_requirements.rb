@@ -10,7 +10,9 @@ module Reqs
   #       have been met for some class. It verifies that the arguments include _entity:_ and optionally _date:_
   #       It responds to '.satisfied?' with true (all requirements are met/satisified)
   #       or false (they are not met/satisfied)
-
+  #
+  #       Other classes/objects should call .satisfied?  and _not_ .requirements_met?
+  #         because .satisfied? will perform checks (arguments) that will catch problems.
   #
   #       Each subclass MUST define the following method:
   #        'self.requirements_met?(_args)'  does the actual checking to see

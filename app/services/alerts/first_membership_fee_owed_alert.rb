@@ -19,7 +19,7 @@ module Alerts
 
     def send_alert_this_day?(timing, config, user)
 
-      if Reqs::RequirementsForFirstMembershipFeeOwed.requirements_met?({ entity: user })
+      if Reqs::RequirementsForFirstMembershipFeeOwed.satisfied?({ entity: user })
 
         day_to_check = self.class.days_today_is_away_from(user.shf_application.when_approved, timing)
         send_on_day_number?(day_to_check, config)

@@ -17,7 +17,7 @@ module Alerts
     #
     def send_alert_this_day?(timing, config, company)
 
-      if Reqs::CoInfoNotCompleteReqs.requirements_met?({ company: company }) &&
+      if Reqs::CoInfoNotCompleteReqs.satisfied?({ entity: company }) &&
         !company.current_members.empty?
 
         earliest_date = company.earliest_current_member_fee_paid_time

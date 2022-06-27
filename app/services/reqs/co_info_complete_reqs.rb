@@ -35,7 +35,7 @@ module Reqs
     #   Because we're just checking 2 specific pieces of information,
     #   this is simple and explicit.
     def self.missing_info(args)
-      raise(ArgumentError, "arguments do not include the expected keys") unless has_expected_arguments?(args)
+      raise(ArgumentError, 'arguments do not include the expected keys') unless has_expected_arguments?(args)
       company = args[:entity]
 
       missing_errors = []

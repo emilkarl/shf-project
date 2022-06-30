@@ -24,7 +24,7 @@ describe Dinkurs::EventsParser do
     context 'bad or unknown format returnred by Dinkurs' do
 
       it 'raises error' do
-        expect{described_class.parse({event: 'just a string'}, 1)}.to raise_error(Dinkurs::Errors::InvalidFormat, 'Could not get event info from: [:event, "just a string"]')
+        expect{described_class.parse({event: 'just a string'}, 1)}.to raise_error(Dinkurs::Errors::BadEventInfo, 'Parsing error: Could not get event info from: [:event, "just a string"]')
       end
     end
   end

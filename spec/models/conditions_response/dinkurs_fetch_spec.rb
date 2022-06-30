@@ -12,7 +12,7 @@ RSpec.describe DinkursFetch, type: :model do
   let(:today) { Time.now.strftime '%Y-%m-%d' }
 
   let(:company_with_dinkurs_id) do
-    co = build(:company, dinkurs_company_id: ENV['DINKURS_COMPANY_TEST_ID'])
+    co = build(:company, dinkurs_company_id: ENV['SHF_DINKURS_COMPANY_TEST_ID'])
     allow(co).to receive(:id).and_return(42)
     allow(co).to receive(:fetch_dinkurs_events)
     allow(co).to receive(:reload)

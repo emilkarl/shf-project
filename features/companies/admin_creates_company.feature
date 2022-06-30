@@ -110,7 +110,7 @@ Feature: Admin can create a company
     And I fill in the translated form with data:
       | companies.company_name | companies.show.company_number | companies.show.email | companies.website_include_http |
       | Happy Mutts            | 5569467466                    | kicki@gladajyckar.se | http://www.gladajyckar.se      |
-    And I fill in t("companies.show.dinkurs_key") with "ENV['DINKURS_COMPANY_TEST_ID']"
+    And I fill in t("companies.show.dinkurs_key") with "ENV['SHF_DINKURS_COMPANY_TEST_ID']"
     And I check the checkbox with id "company_show_dinkurs_events"
     And I click on t("submit")
     Then I should see t("companies.create.success")

@@ -3,8 +3,6 @@
 module Dinkurs
   include Dinkurs::Errors
 
-  INVALID_KEY_MSG = 'Non existent company key'
-
   # Get Dinkurs events for a company, starting with a given date
   # and create an Event for each Dinkurs event fetched
   #
@@ -18,17 +16,21 @@ module Dinkurs
 
       now_or_future_events = events_hashes.reject { |event_hash| event_hash[:location].blank? || event_hash[:start_date] < events_start_date }
       now_or_future_events.each { |event_hash| Event.create(event_hash) }
+
+    rescue Dinkurs::Errors::InvalidCompanyKey, Dinkurs::Errors::CannotConvertToHash => dinkurs_error
+      raise dinkurs_error
+    rescue => error
+      raise Dinkurs::Errors::UnknownError, "#{error.class} #{error} - #{co_event_details(company, events_hashes)}"
     end
 
     # Turn each event from the Dinkurs REST request into a Hash of attributes for an Event
     # so we can easily create a new Event with the Hash.
     #
-    # @return [Hash]
-    private_class_method def self.dinkurs_events_hashes(company)
-      co_details = "company.id: #{company.id} dinkurs_company_id: #{company.dinkurs_company_id}"
+    # @return [Hash, nil]
+    def self.dinkurs_events_hashes(company)
       events_data = dinkurs_events(company.dinkurs_company_id)
 
-      raise Dinkurs::Errors::InvalidKey, co_details if events_data['company'] == INVALID_KEY_MSG
+      raise Dinkurs::Errors::InvalidCompanyKey, co_event_details(company, events_data) if events_data['company'] == Errors::INVALID_KEY_MSG
 
       events_data = events_data.dig('events', 'event')
       events_data = [events_data] if events_data.is_a? Hash
@@ -36,14 +38,22 @@ module Dinkurs
       #    an array if there are multiple events, otherwise a Hash
       Dinkurs::EventsParser.parse(events_data, company.id)
 
-    rescue Dinkurs::Errors::InvalidKey, Dinkurs::Errors::InvalidFormat => dinkurs_err
-      raise dinkurs_err, "#{co_details} #{dinkurs_err.message}"
-    rescue
-      raise Dinkurs::Errors::InvalidFormat, "#{co_details}  Could not get event info from: #{events_data.inspect}"
+    rescue Dinkurs::Errors::BadEventInfo, Dinkurs::Errors::InvalidCompanyKey => dinkurs_error
+      raise dinkurs_error
+    rescue => error
+      raise Dinkurs::Errors::CannotConvertToHash, "#{error.class} #{error} - #{co_event_details(company, events_data)}"
     end
 
-    private_class_method def self.dinkurs_events(dinkurs_company_id)
+    def self.dinkurs_events(dinkurs_company_id)
       Dinkurs::RestRequest.company_events_hash(dinkurs_company_id)
     end
+
+    # Standardize a string for showing helpful data in an error message
+    # @return [String] - company id and dinkurs id and the events_data inspect string
+    private_class_method def self.co_event_details(company, events_data = nil)
+      co_details = "company.id: #{company.id} dinkurs_company_id: #{company.dinkurs_company_id}"
+      "#{co_details} : events_data: #{events_data.inspect}"
+    end
+
   end
 end

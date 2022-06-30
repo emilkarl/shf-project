@@ -464,7 +464,7 @@ RSpec.describe Company, type: :model do
         complete_co1
         complete_co2
         co_no_viz_addresses
-        company_3_addrs.update_attribute(:dinkurs_company_id, ENV['DINKURS_COMPANY_TEST_ID'])
+        company_3_addrs.update_attribute(:dinkurs_company_id, ENV['SHF_DINKURS_COMPANY_TEST_ID'])
         expect(Company.with_dinkurs_id).not_to be_empty
         expect(Company.with_dinkurs_id).to contain_exactly(company_3_addrs)
       end
@@ -668,7 +668,7 @@ RSpec.describe Company, type: :model do
       end
 
       it 'returns events for valid dinkurs_company_id' do
-        company_3_addrs.dinkurs_company_id = ENV['DINKURS_COMPANY_TEST_ID']
+        company_3_addrs.dinkurs_company_id = ENV['SHF_DINKURS_COMPANY_TEST_ID']
         expect(company_3_addrs.events.count).to eq 0
         expect(company_3_addrs.fetch_dinkurs_events).to_not be_nil
         expect(company_3_addrs.events.count).to_not eq 0
@@ -682,7 +682,7 @@ RSpec.describe Company, type: :model do
       end
 
       it 'returns true if events are fetched' do
-        company_3_addrs.dinkurs_company_id = ENV['DINKURS_COMPANY_TEST_ID']
+        company_3_addrs.dinkurs_company_id = ENV['SHF_DINKURS_COMPANY_TEST_ID']
         co = build(:company)
         allow(co).to receive(:fetch_dinkurs_events).and_return({})
         expect(co.valid_key_and_fetch_dinkurs_events?).to eq true
@@ -692,7 +692,7 @@ RSpec.describe Company, type: :model do
         company_3_addrs.dinkurs_company_id = 'xyz'
         err = I18n.t('activerecord.errors.models.company.attributes.dinkurs_company_id.invalid_key')
 
-        allow(Dinkurs::CompanyEvents).to receive(:create_from_dinkurs).and_raise(Dinkurs::Errors::InvalidKey)
+        allow(Dinkurs::CompanyEvents).to receive(:create_from_dinkurs).and_raise(Dinkurs::Errors::InvalidCompanyKey)
         result = company_3_addrs.valid_key_and_fetch_dinkurs_events?
 
         expect(result).to eq false
@@ -703,7 +703,7 @@ RSpec.describe Company, type: :model do
         company_3_addrs.dinkurs_company_id = 'xyz'
         err = I18n.t('activerecord.errors.models.company.attributes.dinkurs_company_id.invalid_format')
 
-        allow(Dinkurs::CompanyEvents).to receive(:create_from_dinkurs).and_raise(Dinkurs::Errors::InvalidFormat)
+        allow(Dinkurs::CompanyEvents).to receive(:create_from_dinkurs).and_raise(Dinkurs::Errors::CannotConvertToHash)
         result = company_3_addrs.valid_key_and_fetch_dinkurs_events?
 
         expect(result).to eq false

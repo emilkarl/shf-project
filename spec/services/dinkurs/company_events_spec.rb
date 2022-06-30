@@ -6,7 +6,7 @@ describe Dinkurs::CompanyEvents,
          vcr: { cassette_name: 'dinkurs/company_events',
                 allow_playback_repeats: true } do
 
-  let(:dinkurs_co_id) { ENV['DINKURS_COMPANY_TEST_ID'] }
+  let(:dinkurs_co_id) { ENV['SHF_DINKURS_COMPANY_TEST_ID'] }
   let(:company) { build :company, id: 1, dinkurs_company_id: dinkurs_co_id }
 
   let(:parsed_company_event_hash) { { 'events' => { 'event' => {}, 'company': 'ok' } } }
@@ -101,30 +101,40 @@ describe Dinkurs::CompanyEvents,
 
         it 'creates an event if last_modified_in_dinkurs date is equal to the given date' do
           expect(Event).to receive(:create).exactly(3).times
-          june_21 =  Time.utc(2018, 6, 21)
+          june_21 = Time.utc(2018, 6, 21)
           described_class.create_from_dinkurs(company, june_21)
         end
       end
     end
 
-    context 'bad event format received from Dinkurs' do
-      it 'includes company id and company dinkurs id in error message' do
-        allow(Dinkurs::RestRequest).to receive(:company_events_hash).and_return('some string')
-        expect { described_class.create_from_dinkurs(company) }.to raise_error(Dinkurs::Errors::InvalidFormat, /company\.id: 1 dinkurs_company_id: #{dinkurs_co_id}/)
-      end
+    context 'errors when converting Dinkurs response into Events' do
 
-      it 'raises InvalidFormat error and displays the source information' do
+      context 'could not convert the Dinkurs REST response into a Hash' do
+
         # This happened on 11 August 2020:
         #   Failure! Failure! undefined method `dig' for #<String:0x0000000008be2140> 2020-08-12 02:01:41 UTC
         #   SHF: DinkursFetch | Aug 11th
-
-        allow(Dinkurs::RestRequest).to receive(:company_events_hash).and_return('some string')
-        expect { described_class.create_from_dinkurs(company) }.to raise_error(Dinkurs::Errors::InvalidFormat, /Could not get event info from: "some string"/)
+        it 'raises CannotConvertToHash with original error message, company info, and the events data response' do
+          allow(Dinkurs::RestRequest).to receive(:company_events_hash).and_return('some string')
+          expect { described_class.create_from_dinkurs(company) }.to raise_error(Dinkurs::Errors::CannotConvertToHash,
+                                                                                 /undefined method .dig. for "some string":String - company\.id: 1 dinkurs_company_id: fake-dinkurs-company-id : events_data: "some string" : Cannot convert Dinkurs response to a Hash/)
+        end
       end
 
-      it 'company info added to msg of any error raised by anything during the call and continues up (is not stopped or changed)' do
-        allow(Dinkurs::RestRequest).to receive(:company_events_hash).and_raise(Dinkurs::Errors::InvalidFormat, 'bad error message')
-        expect { described_class.create_from_dinkurs(company) }.to raise_error(Dinkurs::Errors::InvalidFormat, /company\.id: 1 dinkurs_company_id: #{dinkurs_co_id} bad error message/)
+      context 'Dinkurs responds with invalid Dinkurs key message' do
+        it 'raises InvalidCompanyKey with original error message, company info, and the events data response' do
+          allow(described_class).to receive(:dinkurs_events).and_return({ 'company' => Dinkurs::Errors::INVALID_KEY_MSG })
+          expect { described_class.create_from_dinkurs(company) }.to raise_error(Dinkurs::Errors::InvalidCompanyKey,
+                                                                                 /company\.id: 1 dinkurs_company_id: fake-dinkurs-company-id : events_data: {.company.=>.Non existent company key.} : Dinkurs replied with events_data\['company'\] == Non existent company key/)
+        end
+      end
+
+      context 'any other error raises UnknownError' do
+        it 'raises UnknownError with the original error class and message, company info, and events data' do
+          allow(described_class).to receive(:dinkurs_events_hashes).and_raise(NoMethodError, 'some error message')
+          expect { described_class.create_from_dinkurs(company) }.to raise_error(Dinkurs::Errors::UnknownError,
+                                                                                 /NoMethodError some error message - company\.id: 1 dinkurs_company_id: fake-dinkurs-company-id : events_data: nil : Unknown Dinkurs Error/)
+        end
       end
     end
   end

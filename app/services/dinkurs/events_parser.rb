@@ -26,7 +26,7 @@ module Dinkurs
         company_id: company_id }
 
     rescue
-      raise Dinkurs::Errors::InvalidFormat, "Could not get event info from: #{event.inspect}"
+      raise Dinkurs::Errors::BadEventInfo, event.inspect
     end
   end
 end

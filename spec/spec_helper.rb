@@ -23,7 +23,7 @@ VCR.configure do |c|
   c.hook_into :webmock
   c.configure_rspec_metadata!
   c.default_cassette_options = { record: :none, record_on_error: false}
-  c.filter_sensitive_data('<company_key>') { ENV['DINKURS_COMPANY_TEST_ID'] }
+  c.filter_sensitive_data('<company_key>') { ENV['SHF_DINKURS_COMPANY_TEST_ID'] }
 end
 
 

@@ -6,53 +6,52 @@ require 'shared_examples/shared_conditions'
 
 RSpec.describe DinkursFetch, type: :model do
 
-  let(:mock_log) { instance_double("ActivityLogger") }
+  let(:mock_log) { instance_double("ActivityLogger", {info: ''}) }
 
   let(:condition) { build(:condition, timing: Backup::TIMING_EVERY_DAY) }
   let(:today) { Time.now.strftime '%Y-%m-%d' }
 
   let(:company_with_dinkurs_id) do
-    create(:company, dinkurs_company_id: ENV['DINKURS_COMPANY_TEST_ID'])
+    co = build(:company, dinkurs_company_id: ENV['DINKURS_COMPANY_TEST_ID'])
+    allow(co).to receive(:id).and_return(42)
+    allow(co).to receive(:fetch_dinkurs_events)
+    allow(co).to receive(:reload)
+    co
   end
 
-  let(:company_without_dinkurs_id) { create(:company) }
+  let(:company_without_dinkurs_id) do
+    co = build(:company)
+    allow(co).to receive(:id).and_return(9)
+    allow(co).to receive(:reload)
+    co
+  end
 
   describe '.condition_response' do
+
     it_behaves_like 'it validates timings in .condition_response', [:every_day] do
       let(:tested_condition) { condition }
     end
 
-    context 'Fetch Dinkurs events', vcr: { cassette_name: 'dinkurs/company_events' } do
+    it 'gets all Companies with dinkurs ids' do
+      expect(Company).to receive(:with_dinkurs_id).and_return([])
+      described_class.condition_response(condition, mock_log)
+    end
 
-      around(:each) do |example|
-        Timecop.freeze(Time.zone.local(2018, 6, 1))
-        example.run
-        Timecop.return
-      end
+    it 'has each company fetch their Dinkurs events' do
+      allow(Company).to receive(:with_dinkurs_id).and_return([company_with_dinkurs_id, company_without_dinkurs_id])
+      expect(company_with_dinkurs_id).to receive(:fetch_dinkurs_events)
+      expect(company_without_dinkurs_id).to receive(:fetch_dinkurs_events)
 
-      it 'Fetches events for companies with dinkurs_id' do
-        allow(mock_log).to receive(:record)
+      described_class.condition_response(condition, mock_log)
+    end
 
-        expect{ described_class.condition_response(condition, mock_log) }
-          .to change { company_with_dinkurs_id.events.count }.by(3)
-      end
+    it 'writes the company events count to the log' do
+      allow(Company).to receive(:with_dinkurs_id).and_return([company_with_dinkurs_id])
 
-      it 'Writes to log file with events count' do
-        company_with_dinkurs_id
+      expect(mock_log).to receive(:info).with('Fetching Dinkurs events for company id=42  SomeCompany')
+      expect(mock_log).to receive(:info).with(/\s\sCompany 42: \d+ events\./)
 
-        expect(mock_log).to receive(:record).with('info', "Company #{company_with_dinkurs_id.id}: 3 events.")
-
-        described_class.condition_response(condition, mock_log)
-      end
-
-      it 'Does not write to log file for company without dinkurs_id' do
-        company_without_dinkurs_id
-
-        expect(mock_log).not_to receive(:record)
-
-        described_class.condition_response(condition, mock_log)
-      end
-
+      described_class.condition_response(condition, mock_log)
     end
   end
 end

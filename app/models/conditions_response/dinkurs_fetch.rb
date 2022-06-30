@@ -7,13 +7,10 @@ class DinkursFetch < ConditionResponder
     confirm_correct_timing(get_timing(condition), TIMING_EVERY_DAY, log)
 
     Company.with_dinkurs_id.each do |company|
-
+      log.info("Fetching Dinkurs events for company id=#{company.id}  #{company.name}")
       company.fetch_dinkurs_events
       company.reload
-      log.record('info', "Company #{company.id}: #{company.events.count} events.")
-
+      log.info("  Company #{company.id}: #{company.events.count} events.")
     end
-
   end
-
 end

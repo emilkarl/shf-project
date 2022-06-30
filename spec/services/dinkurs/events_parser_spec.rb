@@ -6,25 +6,27 @@ describe Dinkurs::EventsParser do
   let(:events_array) { build :dinkurs_events }
   let(:parsed_events) { build :events_hashes }
 
-  subject(:events_parser) { described_class.new(events_array, 1) }
+  # subject(:events_parser) { described_class.new(events_array, 1) }
 
-  it 'return array of items' do
-    expect(events_parser.call).to be_a_kind_of(Array)
-  end
+  describe '.parse' do
+    it 'returns array of items' do
+      expect(described_class.parse(events_array, 1)).to be_a_kind_of(Array)
+    end
 
-  it 'return same number of items as in events_array' do
-    expect(events_parser.call.count).to eq(events_array.count)
-  end
+    it 'return same number of items as in events_array' do
+      expect(described_class.parse(events_array, 1).count).to eq(events_array.count)
+    end
 
-  it 'properly parse data to array of hashes with needed attributes' do
-    expect(events_parser.call).to match_array(parsed_events)
-  end
+    it 'parses the event data into an array of hashes with needed attributes' do
+      expect(described_class.parse(events_array, 1)).to match_array(parsed_events)
+    end
 
-  context 'bad or unknown format returnred by Dinkurs' do
+    context 'bad or unknown format returnred by Dinkurs' do
 
-    it 'raises error' do
-      parser = described_class.new({event: 'just a string'}, 1)
-      expect{parser.call}.to raise_error(Dinkurs::Errors::InvalidFormat, 'Could not get event info from: [:event, "just a string"]')
+      it 'raises error' do
+        expect{described_class.parse({event: 'just a string'}, 1)}.to raise_error(Dinkurs::Errors::InvalidFormat, 'Could not get event info from: [:event, "just a string"]')
+      end
     end
   end
+
 end

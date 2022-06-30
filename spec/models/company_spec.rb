@@ -21,7 +21,7 @@ RSpec.describe Company, type: :model do
 
     # stub this so we don't have to create the MasterChecklist for the Member Guidelines checklist
     # if a ShfApplication is accepted.
-    simple_guideline = create(:user_checklist, :completed, master_checklist: build(:membership_guidelines_master_checklist))
+    simple_guideline = build(:user_checklist, :completed, master_checklist: build(:membership_guidelines_master_checklist))
     allow(AdminOnly::UserChecklistFactory).to receive(:create_member_guidelines_checklist_for).and_return(simple_guideline)
   end
 
@@ -35,16 +35,14 @@ RSpec.describe Company, type: :model do
   let(:dec_12_2018) { Date.new(2018, 12, 1) }
   let(:jan1_2019) { Date.new(2019, 1, 1) }
 
-  let(:company_emp_cats) { create(:company) }
-
-  let(:cat1) { create(:business_category, name: 'cat1') }
-  let(:cat2) { create(:business_category, name: 'cat2') }
-  let(:cat3) { create(:business_category, name: 'cat3') }
-  let(:cat4) { create(:business_category, name: 'cat4') }
-  let(:cat5) { create(:business_category, name: 'cat5') }
-  let(:cat6) { create(:business_category, name: 'cat6') }
-  let(:cat7) { create(:business_category, name: 'cat7') }
-  let(:cat8) { create(:business_category, name: 'cat8') }
+  let(:cat1) { build(:business_category, name: 'cat1') }
+  let(:cat2) { build(:business_category, name: 'cat2') }
+  let(:cat3) { build(:business_category, name: 'cat3') }
+  let(:cat4) { build(:business_category, name: 'cat4') }
+  let(:cat5) { build(:business_category, name: 'cat5') }
+  let(:cat6) { build(:business_category, name: 'cat6') }
+  let(:cat7) { build(:business_category, name: 'cat7') }
+  let(:cat8) { build(:business_category, name: 'cat8') }
 
   let(:current_member_1) { create(:member, membership_status: :current_member) }
   let(:company_1_org_nr) { current_member_1.companies.first.company_number }
@@ -74,19 +72,6 @@ RSpec.describe Company, type: :model do
     it 'has a valid factory' do
       expect(create(:company)).to be_valid
     end
-  end
-
-  describe 'DB Table' do
-    it { is_expected.to have_db_column :id }
-    it { is_expected.to have_db_column :name }
-    it { is_expected.to have_db_column :company_number }
-    it { is_expected.to have_db_column :phone_number }
-    it { is_expected.to have_db_column :email }
-    it { is_expected.to have_db_column :website }
-    it { is_expected.to have_db_column :description }
-    it { is_expected.to have_db_column :dinkurs_company_id }
-    it { is_expected.to have_db_column :show_dinkurs_events }
-    it { is_expected.to have_db_column :short_h_brand_url }
   end
 
   describe 'Validations' do
@@ -648,7 +633,7 @@ RSpec.describe Company, type: :model do
   end
 
 
-  describe '(dinkurs) events update management' do
+  describe 'Dinkurs events update management' do
 
     around(:each) do |example|
       travel_to(Time.zone.local(2018, 6, 1)) do
@@ -662,10 +647,10 @@ RSpec.describe Company, type: :model do
 
     context '#fetch_dinkurs_events', :vcr do
       it 'returns nil if no dinkurs_company_id' do
-        expect(company_3_addrs.fetch_dinkurs_events).to be_nil
+        expect(build(:company).fetch_dinkurs_events).to be_nil
       end
 
-      it 'removes previous events and returns nil if no dinkurs_company_id' do
+      it 'deletes previous events and returns nil if no dinkurs_company_id' do
         event1
         event2
         expect(company_3_addrs.events.count).to eq 2
@@ -673,7 +658,7 @@ RSpec.describe Company, type: :model do
         expect(company_3_addrs.events.count).to eq 0
       end
 
-      it 'removes previous events and returns nil if invalid dinkurs_company_id' do
+      it 'deletes previous events and returns nil if invalid dinkurs_company_id' do
         company_3_addrs.dinkurs_company_id = 'nonesuch'
         event1
         event2
@@ -692,21 +677,22 @@ RSpec.describe Company, type: :model do
 
     context '#valid_key_and_fetch_dinkurs_events?', :vcr do
       it 'returns true if dinkurs key is unchanged and never fetches events' do
-        expect(Dinkurs::EventsCreator).not_to receive(:new)
+        expect(Dinkurs::CompanyEvents).not_to receive(:create_from_dinkurs)
         expect(company_3_addrs.valid_key_and_fetch_dinkurs_events?).to eq true
       end
 
       it 'returns true if events are fetched' do
         company_3_addrs.dinkurs_company_id = ENV['DINKURS_COMPANY_TEST_ID']
-        allow_any_instance_of(Dinkurs::EventsCreator).to receive(:call).and_return({})
-        expect(company_3_addrs.valid_key_and_fetch_dinkurs_events?).to eq true
+        co = build(:company)
+        allow(co).to receive(:fetch_dinkurs_events).and_return({})
+        expect(co.valid_key_and_fetch_dinkurs_events?).to eq true
       end
 
       it 'adds model error and returns false if invalid dinkurs key' do
         company_3_addrs.dinkurs_company_id = 'xyz'
         err = I18n.t('activerecord.errors.models.company.attributes.dinkurs_company_id.invalid_key')
 
-        allow_any_instance_of(Dinkurs::EventsCreator).to receive(:call).and_raise(Dinkurs::Errors::InvalidKey)
+        allow(Dinkurs::CompanyEvents).to receive(:create_from_dinkurs).and_raise(Dinkurs::Errors::InvalidKey)
         result = company_3_addrs.valid_key_and_fetch_dinkurs_events?
 
         expect(result).to eq false
@@ -717,7 +703,7 @@ RSpec.describe Company, type: :model do
         company_3_addrs.dinkurs_company_id = 'xyz'
         err = I18n.t('activerecord.errors.models.company.attributes.dinkurs_company_id.invalid_format')
 
-        allow_any_instance_of(Dinkurs::EventsCreator).to receive(:call).and_raise(Dinkurs::Errors::InvalidFormat)
+        allow(Dinkurs::CompanyEvents).to receive(:create_from_dinkurs).and_raise(Dinkurs::Errors::InvalidFormat)
         result = company_3_addrs.valid_key_and_fetch_dinkurs_events?
 
         expect(result).to eq false

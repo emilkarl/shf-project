@@ -4,24 +4,18 @@ module Dinkurs
   class EventsParser
     include Dinkurs::Errors
 
-    def initialize(dinkurs_events, company_id)
-      @dinkurs_events = dinkurs_events
-      @company_id = company_id
-    end
+    def self.parse(dinkurs_events, company_id)
+      # @dinkurs_events = dinkurs_events
+      # @company_id = company_id
 
-    def call
       return nil unless dinkurs_events
 
       dinkurs_events.map do |event|
-        prepare_event_hash(event)
+        make_event_hash(event, company_id)
       end
     end
 
-    private
-
-    attr_reader :dinkurs_events, :company_id
-
-    def prepare_event_hash(event)
+    private_class_method def self.make_event_hash(event, company_id)
       { dinkurs_id: event['event_id'].first,
         name: event.dig('event_name', '__content__'),
         location: event.dig('event_place', '__content__'),

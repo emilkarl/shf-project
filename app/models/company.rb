@@ -295,7 +295,7 @@ class Company < ApplicationRecord
                  else
                    DbViews::CompanyAndCategory.where(company_id: id).map(&:business_category)
                  end
-    include_subcategories ? categories : categories.select { |category| category.ancestry.blank? }
+    include_subcategories ? categories.compact : categories.compact.select { |category| category&.ancestry.blank? }
   end
 
   # Ex with production data (2022-05-13):
